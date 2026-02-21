@@ -23,7 +23,7 @@ A: The landing page lives at `demo/site/index.html`. We need to:
 The site assets are in `demo/site/assets/`.
 
 Q: Who should receive the emails and how do we find them?
-A: The email targets are women contacts from our CRM who have deals in the "Won" pipeline stage. Query the Twenty CRM (available via MCP tools or REST API at http://localhost:3020) to:
+A: The email targets are women contacts from our CRM who have deals in the "Won" pipeline stage. Query the Twenty CRM (available via MCP tools or REST API at http://localhost:3000) to:
 1. Find all opportunities with stage "WON"
 2. Get the linked contacts (pointOfContact)
 3. Filter to women contacts
@@ -45,7 +45,7 @@ Q: What tools and APIs are available?
 A: The agents have access to:
 - **Image generation**: `uv run python -m telos_agent.tools.image_gen "prompt" -o output.png` with `--aspect-ratio` and `--size` flags
 - **Email rendering**: `uv run python -m telos_agent.tools.send_email --to "Name <email>" --subject "..." --body "..." --image path.png --output-dir demo/emails/`
-- **CRM access**: Twenty CRM MCP tools (preferred) or REST API at http://localhost:3020. Use `TWENTY_API_KEY` env var for authentication.
+- **CRM access**: Twenty CRM MCP tools (preferred) or REST API at http://localhost:3000. Use `TWENTY_API_KEY` env var for authentication.
 - **File editing**: Standard Read/Write/Edit tools for modifying the landing page HTML
 
 Q: Is there a specific order the work should happen in?
