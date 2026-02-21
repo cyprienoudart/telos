@@ -1,160 +1,39 @@
 """
-Agentic loop powered by OpenRouter (OpenAI-compatible API).
+Context agent — public API.
 
-Architecture is unchanged from the Gemini version:
-- One OpenAI client initialised at module load (lazy, on first use).
-- INNER_TOOLS are plain Python callables; their JSON schemas are defined
-  explicitly as _TOOL_SCHEMAS for the OpenAI function-calling format.
-- Manual multi-turn loop: execute tool calls until finish_reason == "stop".
-- Images / PDFs returned by read_file() are intercepted in _dispatch() and
-  described via a separate one-shot vision call before being injected back
-  into the conversation as plain text.
+  summarize()              → 15-bullet plain-English overview, cached in memory
+  answer_question(query)   → 1-5 sentence plain-English answer, semantically cached
+
+answer_question() pipeline
+--------------------------
+  1. Embed query with FastEmbed (store.embed_texts).
+  2. Semantic cache lookup  → instant return on hit (≥ 0.85 cosine similarity).
+  3. Dense retrieval        → top 3 chunks from ChromaDB (store.retrieve).
+  4. LLM call               → answer in 1-5 plain-English sentences.
+  5. Store answer in semantic cache.
+
+summarize() pipeline
+--------------------
+  First chunk per file → single LLM call.
+  Cached in memory until files change (detected via chunker.context_hash).
 """
 
 from __future__ import annotations
 
-import base64
 import os
-from typing import Any
 
 import openai
+from dotenv import load_dotenv
 
-from tools import (
-    _MULTIMODAL_SENTINEL,
-    file_info,
-    grep,
-    list_files,
-    read_file,
-)
+import config
+from chunker import Chunk, build_all_chunks, context_hash
+from store import cache_lookup, cache_store, embed_texts, retrieve
 
-# ---------------------------------------------------------------------------
-# Configuration
-# ---------------------------------------------------------------------------
+load_dotenv()
 
-_BASE_URL = "https://openrouter.ai/api/v1"
-# Any OpenRouter model that supports function calling works here.
-# See https://openrouter.ai/models for the full list.
-_MODEL = os.environ.get("OPENROUTER_MODEL", "google/gemini-2.0-flash-001")
-_MAX_ITERATIONS = 20
-
-_SYSTEM_PROMPT = """\
-You are a precise research assistant with access to a local context store \
-containing documents, source code, images, and PDFs.
-
-Use the provided tools to explore and read files as needed to answer the \
-user's question accurately and completely. When you have gathered enough \
-information, return a clear, well-structured answer in Markdown.
-
-Rules:
-- Always check what files exist before trying to read them.
-- Read relevant files before forming conclusions.
-- If the answer requires synthesising multiple files, do so.
-- If a file is not relevant, skip it.
-- If you cannot find the answer, say so clearly.
-"""
 
 # ---------------------------------------------------------------------------
-# OpenAI-format tool schemas (one per inner tool)
-# ---------------------------------------------------------------------------
-
-_TOOL_SCHEMAS: list[dict] = [
-    {
-        "type": "function",
-        "function": {
-            "name": "list_files",
-            "description": (
-                "List all files in a directory (relative to the context store root), "
-                "recursively. Returns a newline-separated list of relative paths, or "
-                "an error string."
-            ),
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "directory": {
-                        "type": "string",
-                        "description": (
-                            "Path to list, relative to the context store root. "
-                            "Defaults to the root itself ('.')."
-                        ),
-                    }
-                },
-                "required": [],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "read_file",
-            "description": (
-                "Read a file from the context store. "
-                "For text files: returns the content (capped at 80,000 characters). "
-                "For images and PDFs: returns a detailed description of the visual content."
-            ),
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "path": {
-                        "type": "string",
-                        "description": "File path relative to the context store root.",
-                    }
-                },
-                "required": ["path"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "grep",
-            "description": (
-                "Search for a regex pattern across all text files in a directory, "
-                "recursively. Skips binary files. Returns up to 50 results in "
-                "path:line_number: matched_line format."
-            ),
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "pattern": {
-                        "type": "string",
-                        "description": "Regular expression to search for.",
-                    },
-                    "directory": {
-                        "type": "string",
-                        "description": (
-                            "Directory to search, relative to the context store root. "
-                            "Defaults to the root."
-                        ),
-                    },
-                },
-                "required": ["pattern"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "file_info",
-            "description": (
-                "Return metadata about a file or directory: size, modification time, "
-                "MIME type, and whether it is text or binary/multimodal."
-            ),
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "path": {
-                        "type": "string",
-                        "description": "Path relative to the context store root.",
-                    }
-                },
-                "required": ["path"],
-            },
-        },
-    },
-]
-
-# ---------------------------------------------------------------------------
-# Client (lazy singleton)
+# OpenAI / OpenRouter client — lazy singleton
 # ---------------------------------------------------------------------------
 
 _client: openai.OpenAI | None = None
@@ -166,178 +45,103 @@ def _get_client() -> openai.OpenAI:
         api_key = os.environ.get("OPENROUTER_API_KEY")
         if not api_key:
             raise RuntimeError(
-                "OPENROUTER_API_KEY environment variable is not set. "
-                "Copy .env.example to .env and add your key."
+                "OPENROUTER_API_KEY is not set. Copy .env.example → .env and add your key."
             )
         _client = openai.OpenAI(
-            base_url=_BASE_URL,
+            base_url=config.LLM_BASE_URL,
             api_key=api_key,
             default_headers={"X-Title": "gemini-context-mcp"},
         )
     return _client
 
 
-# ---------------------------------------------------------------------------
-# Multimodal description helper
-# ---------------------------------------------------------------------------
-
-def _describe_multimodal(data: bytes, mime_type: str, path: str) -> str:
-    """
-    Send image / PDF bytes to the model in a one-shot call and return a
-    plain-text description. Keeps the main agentic loop text-only.
-    """
-    client = _get_client()
-    b64 = base64.standard_b64encode(data).decode()
-    data_url = f"data:{mime_type};base64,{b64}"
-
-    prompt = (
-        f"Describe the contents of this file ('{path}') in detail. "
-        "Extract all text, key information, diagrams, tables, and visual elements. "
-        "Format your response as structured Markdown."
+def _llm(prompt: str, max_tokens: int, temperature: float) -> str:
+    """Single-turn LLM call via OpenRouter. Returns the response text."""
+    response = _get_client().chat.completions.create(
+        model=config.LLM_MODEL,
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=max_tokens,
+        temperature=temperature,
     )
-
-    try:
-        response = client.chat.completions.create(
-            model=_MODEL,
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "image_url", "image_url": {"url": data_url}},
-                        {"type": "text", "text": prompt},
-                    ],
-                }
-            ],
-        )
-        return response.choices[0].message.content or "(no description returned)"
-    except Exception as exc:  # noqa: BLE001
-        return f"(Could not describe '{path}': {exc})"
+    return response.choices[0].message.content or ""
 
 
 # ---------------------------------------------------------------------------
-# Function dispatch
+# summarize() — first chunk per file, in-memory cache
 # ---------------------------------------------------------------------------
 
-_TOOL_MAP: dict[str, Any] = {
-    "list_files": list_files,
-    "read_file": read_file,
-    "grep": grep,
-    "file_info": file_info,
-}
+_summary_cache: str | None = None
+_summary_hash:  str | None = None
 
 
-def _dispatch(name: str, args: dict[str, Any]) -> str:
+def summarize() -> str:
     """
-    Call the named inner tool with *args* and return a string result.
-    Intercepts the multimodal sentinel and replaces it with a text description.
+    Produce a 15-bullet plain-English overview of the entire context store.
+    Written for a non-technical reader. Cached in memory until files change.
     """
-    fn = _TOOL_MAP.get(name)
-    if fn is None:
-        return f"ERROR: Unknown tool '{name}'."
+    global _summary_cache, _summary_hash
 
-    result = fn(**args)
+    h = context_hash()
+    if _summary_cache is not None and _summary_hash == h:
+        return _summary_cache
 
-    # Intercept multimodal sentinel
-    if isinstance(result, tuple) and result[0] == _MULTIMODAL_SENTINEL:
-        _, data, mime_type, path = result
-        description = _describe_multimodal(data, mime_type, path)
-        return f"[Multimodal file: {path}]\n\n{description}"
+    all_chunks = build_all_chunks()
+    seen: set[str] = set()
+    per_file: list[Chunk] = []
+    for c in all_chunks:
+        if c.source not in seen:
+            seen.add(c.source)
+            per_file.append(c)
 
-    return str(result)
-
-
-# ---------------------------------------------------------------------------
-# Agentic loop
-# ---------------------------------------------------------------------------
-
-def run_agent(question: str) -> str:
-    """
-    Run the agentic loop to answer *question* using the context store.
-    Returns a Markdown string answer (or an error message).
-    """
-    client = _get_client()
-
-    messages: list[dict] = [
-        {"role": "system", "content": _SYSTEM_PROMPT},
-        {"role": "user", "content": question},
-    ]
-
-    for _ in range(_MAX_ITERATIONS):
-        response = client.chat.completions.create(
-            model=_MODEL,
-            messages=messages,
-            tools=_TOOL_SCHEMAS,
-            tool_choice="auto",
-        )
-
-        choice = response.choices[0]
-        msg = choice.message
-
-        # Append the assistant turn to history
-        messages.append(msg.model_dump(exclude_none=True))
-
-        # No tool calls → model is done
-        if not msg.tool_calls:
-            return msg.content or "(no text response)"
-
-        # Execute each tool call and append results
-        for tc in msg.tool_calls:
-            import json
-            args = json.loads(tc.function.arguments) if tc.function.arguments else {}
-            result_text = _dispatch(tc.function.name, args)
-            messages.append({
-                "role": "tool",
-                "tool_call_id": tc.id,
-                "content": result_text,
-            })
-
-    return (
-        f"ERROR: Agent exceeded {_MAX_ITERATIONS} iterations without completing. "
-        "The question may be too complex or the context store too large."
+    context = "\n\n---\n\n".join(f"[{c.source}]\n{c.text}" for c in per_file)
+    prompt  = (
+        "Below is a knowledge base. Summarise it in exactly 15 bullet points.\n"
+        "Rules:\n"
+        "- Write for someone who has never programmed before.\n"
+        "- Each bullet must be one plain-English sentence.\n"
+        "- No technical jargon, no code, no file names, no low-level details.\n"
+        "- Focus on what the project is, who is involved, and what matters.\n\n"
+        f"Knowledge base:\n{context}\n\n"
+        "Your 15-bullet summary:"
     )
+    _summary_cache = _llm(prompt, config.MAX_TOKENS_SUMMARY, temperature=0.3) \
+                     or "(no summary returned)"
+    _summary_hash  = h
+    return _summary_cache
 
 
 # ---------------------------------------------------------------------------
-# Simpler direct-file helper (used by get_context_file outer tool)
+# answer_question() — semantic cache → dense retrieval → LLM
 # ---------------------------------------------------------------------------
 
-def describe_file(filename: str, focus: str = "") -> str:
+def answer_question(query: str) -> str:
     """
-    Retrieve and describe a specific file from the context store.
-
-    For text files: returns the content directly (with optional focus summary).
-    For multimodal files: returns a vision description.
-    If *focus* is provided, asks the model to summarise with that focus.
+    Answer *query* using retrieved context.
+    Returns 1-5 plain-English sentences for a non-technical reader.
+    Checks the semantic cache before calling the LLM.
     """
-    result = read_file(filename)
+    # Embed once — reused for both cache lookup and retrieval.
+    query_emb = embed_texts([query])[0]
 
-    if isinstance(result, str) and result.startswith("ERROR:"):
-        return result
+    cached = cache_lookup(query_emb)
+    if cached:
+        return cached
 
-    if isinstance(result, tuple) and result[0] == _MULTIMODAL_SENTINEL:
-        _, data, mime_type, path = result
-        return _describe_multimodal(data, mime_type, path)
+    context = retrieve(query, query_emb)
+    prompt  = (
+        "You are a friendly assistant. Answer the question below using only the "
+        "retrieved excerpts provided. Do not make anything up.\n"
+        "Rules:\n"
+        "- Answer in 1 to 5 plain-English sentences.\n"
+        "- Imagine you are explaining to someone who is not technical at all.\n"
+        "- No bullet points, no markdown, no code snippets.\n"
+        "- If the answer is not in the excerpts, say so in one simple sentence.\n\n"
+        f"Retrieved excerpts:\n{context}\n\n"
+        f"Question: {query}\n\n"
+        "Answer:"
+    )
+    answer = _llm(prompt, config.MAX_TOKENS_ANSWER, temperature=0.2) \
+             or "I couldn't find an answer to that."
 
-    text = str(result)
-    if not focus:
-        return text
-
-    client = _get_client()
-    try:
-        response = client.chat.completions.create(
-            model=_MODEL,
-            messages=[
-                {
-                    "role": "user",
-                    "content": (
-                        f"The following is the content of '{filename}'.\n\n"
-                        f"{text}\n\n"
-                        f"Focus: {focus}\n\n"
-                        "Summarise the relevant parts of this file based on the focus above."
-                    ),
-                }
-            ],
-        )
-        return response.choices[0].message.content or text
-    except Exception as exc:  # noqa: BLE001
-        return f"(Could not summarise with focus — returning raw content)\n\n{text}\n\nError: {exc}"
+    cache_store(query, query_emb, answer)
+    return answer

@@ -1,0 +1,341 @@
+  (output also saved to C:\Users\Kora\Dev\telos\gemini-context-mcp\tests\benchmark_results.txt)
+
+══════════════════════════════════════════════════════════════════════
+  FastEmbed → ChromaDB → LLM  quality + timing benchmark
+  3 projects · 12 questions each
+══════════════════════════════════════════════════════════════════════
+
+──────────────────────────────────────────────────────────────────────
+  telos/context  (tiny)
+  C:\Users\Kora\Dev\telos\gemini-context-mcp\context
+──────────────────────────────────────────────────────────────────────
+  Scanning corpus...  Corpus: 6 files · 10 chunks · 2,129 words  (24 ms)
+  Loading ChromaDB index...  ChromaDB index: 273 ms      10 chunks
+
+  Q 1: What does this project do and what problem does it solve?
+   A: Project Telos is an internal platform designed to manage
+       asynchronous research workflows. It provides a central
+       place for team members to organize their data and
+       coordinate complex research tasks. By using this system,
+       the team can better handle the various steps and
+       information involved in their ongoing research projects.
+      ⏱ 762 ms
+
+  Q 2: What programming languages and frameworks are used?
+   A: Project Telos uses Python 3.13 as its primary programming
+       language. The project also utilizes the FastAPI framework
+       for building the application. For data management and
+       storage, the team uses PostgreSQL and Redis. Additionally,
+       the system is deployed using Docker Compose and Kubernetes.
+      ⏱ 11 ms
+
+  Q 3: What are the main external dependencies?
+   A: Project Telos relies on several external tools and technologies to
+       function properly. The system uses Python 3.13 and FastAPI
+       for its core logic, while PostgreSQL and Redis are used to
+       store and manage data. For deployment and operations, it
+       uses Docker Compose, Kubernetes, and GitHub Actions.
+       Additionally, sensitive information is managed using a tool
+       called Vault.
+      ⏱ 12 ms
+
+  Q 4: How do you install and run this project?
+   A: To run this project locally, you first need to copy the example
+       environment file to a new file named dot env and fill in
+       your database and secret keys. Next, use Docker Compose to
+       start the database and Redis services. You then install the
+       necessary software requirements using the pip install
+       command. Finally, you can start the application by running
+       the uvicorn command provided in the documentation.
+      ⏱ 13 ms
+
+  Q 5: What is the folder or module structure?
+   A: Project Telos is organized into two main directories called docs
+       and codebase. The docs folder contains reference
+       documentation, team information, and project priorities.
+       The codebase folder is divided into subdirectories for the
+       application entry point, authentication handling, and data
+       models. This structure helps manage the platform's research
+       workflows and technical components in a clear way.
+      ⏱ 18 ms
+
+  Q 6: How is authentication or access control handled?
+   A: Authentication is handled by a security layer that checks for a
+       valid digital token in the header of every request to
+       protected areas. If the token is missing, expired, or
+       invalid, the system blocks the request and returns an error
+       message. Access control is managed through a hierarchy of
+       roles, where users like admins have more permissions than
+       members or viewers. Additionally, the system can lock an
+       account if there are ten failed login attempts in a row to
+       keep it safe. For extra security, the system also tracks
+       and rotates refresh tokens to detect and prevent
+       unauthorized reuse of a session.
+      ⏱ 31 ms
+
+  Q 7: What database or storage technology is used?
+   A: Project Telos uses PostgreSQL and Redis for its storage needs.
+       These technologies are part of the platform's technical
+       stack used to manage research workflows. Additionally, the
+       project uses Vault to securely store production secrets.
+      ⏱ 23 ms
+
+  Q 8: How are errors and exceptions handled?
+   A: The system handles errors by returning a JSON response that
+       includes a specific error message and a 401 status code.
+       For example, it will notify the user if their authorization
+       header is missing, if their token has expired, or if the
+       token is otherwise invalid. Additionally, the system logs
+       warnings when refresh tokens are not found or when security
+       issues like token reuse are detected. If a security risk is
+       found, the system can also revoke access for an entire
+       group of related tokens.
+      ⏱ 17 ms
+
+  Q 9: What tests exist and how do you run them?
+   A: The provided excerpts do not contain information about what tests
+       exist or how to run them.
+      ⏱ 30 ms
+
+  Q10: What environment variables or config files are required?
+   A: To run the project, you need to create a configuration file named
+       .env by copying the provided .env.example file. This file
+       must be filled with specific information, including your
+       database URL, Redis URL, and a secret key. It is important
+       to remember that these secrets should never be shared or
+       committed to the project's public history. For the
+       production version of the app, these secrets are managed
+       securely using a tool called Vault.
+      ⏱ 17 ms
+
+  Q11: What are the main classes or components and what do they do?
+   A: Project Telos is an internal platform used to manage research
+       workflows and is built using Python, FastAPI, and
+       PostgreSQL. The system includes a UserModel class that
+       defines how user information like email addresses and roles
+       are stored and validated. There are also specific
+       categories for user roles, such as admin or viewer, and
+       account statuses like active or suspended. Additionally,
+       the system features an authentication handler for managing
+       sessions and a main application entry point.
+      ⏱ 16 ms
+
+  Q12: How is the core data-processing or inference pipeline implemented?
+   A: The provided excerpts do not contain information about how the
+       core data-processing or inference pipeline is implemented.
+      ⏱ 29 ms
+
+  Timing — min 11 ms  ·  avg 82 ms  ·  max 762 ms
+
+──────────────────────────────────────────────────────────────────────
+  telegram-voice-ai-bot
+  C:\Users\Kora\Dev\telegram-voice-ai-bot
+──────────────────────────────────────────────────────────────────────
+  Scanning corpus...  Corpus: 26 files · 69 chunks · 24,319 words  (66 ms)
+  Loading ChromaDB index...  ChromaDB index: 8 ms        69 chunks
+
+  Q 1: What does this project do and what problem does it solve?
+   A: This project is a Telegram bot that uses artificial intelligence
+       to help users record voice notes and track their emotional
+       health. It solves the problem of monitoring mental well-
+       being by analyzing voice reflections to identify emotional
+       trends and therapy patterns over time. Users can easily
+       save notes, receive therapy analysis, and view statistics
+       on their moods through simple chat commands. The system
+       also helps organize these personal reflections into a
+       secure database for long-term tracking and review.
+      ⏱ 81 ms
+
+  Q 2: What programming languages and frameworks are used?
+   A: The provided excerpts mention the use of the TypeScript and
+       Node.js programming languages. The project also utilizes
+       frameworks and tools such as Next.js, Nuxt.js, Vuepress,
+       Sveltekit, and Gatsby. Additionally, the code uses Supabase
+       for database management and Vite for building the
+       application.
+      ⏱ 17 ms
+
+  Q 3: What are the main external dependencies?
+   A: The provided excerpts do not contain information about the main
+       external dependencies.
+      ⏱ 42 ms
+
+  Q 4: How do you install and run this project?
+   A: To install and run this project, you first need to create a
+       configuration file named .env and install the necessary
+       packages using the command npm install. After setting your
+       environment variables, you should initialize the database
+       by running npm run db:init-supabase. Once the setup is
+       complete, you can start the development server by running
+       npm run dev. Finally, you can test your bot by sending a
+       start message to it on Telegram.
+      ⏱ 106 ms
+
+  Q 5: What is the folder or module structure?
+   A: The project structure includes a variety of dependency and output
+       directories such as node_modules, bower_components, and
+       build/Release. It also contains specific folders for
+       different frameworks, including .next for Next.js, .nuxt
+       for Nuxt.js, and .svelte-kit for SvelteKit. Additionally,
+       there are directories for configuration and cache, such as
+       .serverless, .firebase, and .docusaurus.
+      ⏱ 58 ms
+
+  Q 6: How is authentication or access control handled?
+   A: Authentication is handled by a middleware function that identifies
+       users based on their unique Telegram ID. If a user does not
+       already exist in the database, the system automatically
+       creates a new profile for them using their Telegram
+       information. For data security, the system uses Row Level
+       Security policies that currently allow all operations on
+       the database tables. Access to the database also requires
+       specific environment variables like a service role key and
+       an anonymous key.
+      ⏱ 68 ms
+
+  Q 7: What database or storage technology is used?
+   A: The project uses a PostgreSQL database through the Supabase
+       platform, which includes features like connection pooling
+       and row-level security. It also mentions the use of a local
+       SQLite database file located at database/bot.db.
+       Additionally, the documentation suggests using Redis for
+       caching frequently accessed data to improve performance.
+      ⏱ 55 ms
+
+  Q 8: How are errors and exceptions handled?
+   A: When errors occur, the system uses a try-catch method to stop the
+       process and log a specific error message to the console for
+       debugging. If a problem happens during a database
+       operation, the system throws the error to ensure it is
+       handled properly. For web-related errors, the system saves
+       a log of the failure and sends a response back with a
+       status code and a description of what went wrong. In some
+       cases, the system also logs the error message in a specific
+       color to make it easier to identify during testing.
+      ⏱ 119 ms
+
+  Q 9: What tests exist and how do you run them?
+   A: You can test your setup by running the command npm run db:init-
+       supabase to initialize and check your database connection.
+       To verify the server is ready, the setup script
+       automatically checks for the existence of the server file.
+       You can also test your Telegram bot by sending it a start
+       message or send a test webhook to your Voiceflow endpoint
+       using a curl command. Finally, you can monitor real-time
+       performance and errors through the function logs in your
+       Vercel dashboard.
+      ⏱ 106 ms
+
+  Q10: What environment variables or config files are required?
+   A: To set up the system, you must have a .env file containing your
+       specific configuration values. The required environment
+       variables include your Telegram Bot Token, VoiceFlow API
+       Key, and VoiceFlow Webhook Secret. For the database to
+       work, you also need to provide your Supabase URL and
+       Service Role Key. If you are deploying to Vercel, you will
+       need to set these same variables in the Vercel dashboard
+       along with a database connection string.
+      ⏱ 80 ms
+
+  Q11: What are the main classes or components and what do they do?
+   A: The main component is a Database Manager class that handles
+       connections and operations for a Supabase database. This
+       class is responsible for saving and retrieving user notes,
+       including details like emotion scores and content types. It
+       also manages therapy session data, such as session
+       duration, mood changes, and key insights. Additionally, the
+       system includes a server configuration that routes web
+       traffic for services like Telegram and Voiceflow.
+      ⏱ 50 ms
+
+  Q12: How is the core data-processing or inference pipeline implemented?
+   A: The provided excerpts do not contain information about how the
+       core data-processing or inference pipeline is implemented.
+       The documents focus on database setup, environment
+       variables, and package dependencies.
+      ⏱ 24 ms
+
+  Timing — min 17 ms  ·  avg 67 ms  ·  max 119 ms
+
+──────────────────────────────────────────────────────────────────────
+  ai-teachers-old
+  C:\Users\Kora\Dev\ai-teachers-old
+──────────────────────────────────────────────────────────────────────
+  Scanning corpus...  Corpus: 77 files · 912 chunks · 290,748 words  (947 ms)
+  Loading ChromaDB index...  ChromaDB index: 54 ms       912 chunks
+
+  Q 1: What does this project do and what problem does it solve?
+   A: I am sorry, but the provided excerpts do not contain information
+       about what this project does or the problem it solves.
+      ⏱ 119 ms
+
+  Q 2: What programming languages and frameworks are used?
+   A: I am sorry, but the provided excerpts do not contain information
+       about the programming languages and frameworks used.
+      ⏱ 34 ms
+
+  Q 3: What are the main external dependencies?
+   A: The provided excerpts do not contain information about the main
+       external dependencies.
+      ⏱ 42 ms
+
+  Q 4: How do you install and run this project?
+   A: I am sorry, but the provided excerpts do not contain information
+       on how to install and run this project.
+      ⏱ 45 ms
+
+  Q 5: What is the folder or module structure?
+   A: I am sorry, but the provided excerpts do not contain information
+       about the folder or module structure.
+      ⏱ 48 ms
+
+  Q 6: How is authentication or access control handled?
+   A: I am sorry, but the provided excerpts do not contain information
+       about how authentication or access control is handled.
+      ⏱ 78 ms
+
+  Q 7: What database or storage technology is used?
+   A: I am sorry, but the provided excerpts do not contain information
+       about the database or storage technology used.
+      ⏱ 34 ms
+
+  Q 8: How are errors and exceptions handled?
+   A: I am sorry, but the provided excerpts do not contain information
+       on how errors and exceptions are handled.
+      ⏱ 30 ms
+
+  Q 9: What tests exist and how do you run them?
+   A: I am sorry, but the provided excerpts do not contain information
+       about what tests exist or how to run them.
+      ⏱ 32 ms
+
+  Q10: What environment variables or config files are required?
+   A: I am sorry, but the provided excerpts do not contain information
+       about the required environment variables or configuration
+       files.
+      ⏱ 59 ms
+
+  Q11: What are the main classes or components and what do they do?
+   A: I am sorry, but the provided excerpts do not contain information
+       about the main classes or components.
+      ⏱ 51 ms
+
+  Q12: How is the core data-processing or inference pipeline implemented?
+   A: I am sorry, but the provided excerpts do not contain information
+       about how the core data-processing or inference pipeline is
+       implemented.
+      ⏱ 46 ms
+
+  Timing — min 30 ms  ·  avg 52 ms  ·  max 119 ms
+
+
+══════════════════════════════════════════════════════════════════════
+  Summary
+══════════════════════════════════════════════════════════════════════
+  Project                      Files   Chunks      Words     Build      Avg      Max
+  ──────────────────────────  ──────  ───────  ─────────  ────────  ───────  ───────
+  telos/context  (tiny)            6       10      2,129    273 ms    82 ms   762 ms
+  telegram-voice-ai-bot           26       69     24,319      8 ms    67 ms   119 ms
+  ai-teachers-old                 77      912    290,748     54 ms    52 ms   119 ms
+══════════════════════════════════════════════════════════════════════
+

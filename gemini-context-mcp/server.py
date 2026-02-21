@@ -1,18 +1,17 @@
 """
-Gemini Context MCP Server
+Gemini Context MCP Server — two tools exposed to Claude.
 
-Exposes three tools to MCP clients (e.g. Claude Desktop):
+Tools
+-----
+  summarize()              → 15-bullet plain-English overview (cached)
+  answer_question(query)   → 1-5 sentence plain-English answer
 
-  query_context(question)            → Gemini agentic answer
-  list_context()                     → recursive file tree (no Gemini)
-  get_context_file(filename, focus)  → direct file content / description
-
-Run with:
+Run:
     python server.py
-    # → INFO: Uvicorn running on http://127.0.0.1:8000
+    # → http://127.0.0.1:8000/sse
 
-Then connect Claude Desktop (or MCP Inspector) to:
-    http://localhost:8000/sse
+Claude Desktop config:
+    { "mcpServers": { "gemini-context": { "url": "http://localhost:8000/sse" } } }
 """
 
 from __future__ import annotations
@@ -22,13 +21,12 @@ import os
 from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
 
-load_dotenv()  # load .env before importing agent (needs GEMINI_API_KEY)
+load_dotenv()
 
-import agent  # noqa: E402
-import tools  # noqa: E402
+import agent  # noqa: E402  (needs load_dotenv first)
 
 # ---------------------------------------------------------------------------
-# FastMCP application
+# FastMCP app
 # ---------------------------------------------------------------------------
 
 _host = os.environ.get("MCP_HOST", "127.0.0.1")
@@ -36,69 +34,45 @@ _port = int(os.environ.get("MCP_PORT", "8000"))
 
 mcp = FastMCP("gemini-context", host=_host, port=_port)
 
+
 # ---------------------------------------------------------------------------
-# Tool 1: query_context
+# Tool 1 — summarize
 # ---------------------------------------------------------------------------
 
 @mcp.tool()
-def query_context(question: str) -> str:
+def summarize() -> str:
     """
-    Ask a natural-language question about the local context store.
+    Summarise the entire knowledge base in 15 plain-English bullet points.
 
-    A Gemini agent will autonomously explore the context store (documents,
-    source code, images, PDFs) using an internal tool loop and return a
-    detailed Markdown answer.
+    Written for a non-technical reader: no code, no jargon, no low-level
+    details. Result is cached — repeated calls are instant unless the files
+    have changed.
+    """
+    try:
+        return agent.summarize()
+    except Exception as exc:  # noqa: BLE001
+        return f"ERROR: {exc}"
+
+
+# ---------------------------------------------------------------------------
+# Tool 2 — answer_question
+# ---------------------------------------------------------------------------
+
+@mcp.tool()
+def answer_question(query: str) -> str:
+    """
+    Answer a question about the knowledge base in 1-5 plain-English sentences.
+
+    Written for a non-technical reader. If the answer is not in the knowledge
+    base, says so simply. Do not use for questions unrelated to the project.
 
     Args:
-        question: The question to answer using the context store.
+        query: The question to answer.
     """
     try:
-        return agent.run_agent(question)
+        return agent.answer_question(query)
     except Exception as exc:  # noqa: BLE001
-        return f"ERROR: Agent failed — {exc}"
-
-
-# ---------------------------------------------------------------------------
-# Tool 2: list_context
-# ---------------------------------------------------------------------------
-
-@mcp.tool()
-def list_context() -> str:
-    """
-    List all files in the context store as a recursive tree.
-
-    This tool does not call Gemini — it is fast, free, and deterministic.
-    Use it to understand what is available before asking more specific questions.
-    """
-    try:
-        file_list = tools.list_files(".")
-        root = os.environ.get("CONTEXT_DIR", "./context")
-        return f"Context store: {root}\n\n{file_list}"
-    except Exception as exc:  # noqa: BLE001
-        return f"ERROR: Could not list context store — {exc}"
-
-
-# ---------------------------------------------------------------------------
-# Tool 3: get_context_file
-# ---------------------------------------------------------------------------
-
-@mcp.tool()
-def get_context_file(filename: str, focus: str = "") -> str:
-    """
-    Retrieve and return the content of a specific file from the context store.
-
-    For text files the raw content is returned (capped at 80,000 characters).
-    For images and PDFs, Gemini describes the visual content in Markdown.
-    If *focus* is provided, Gemini summarises the file with that focus in mind.
-
-    Args:
-        filename: Path to the file, relative to the context store root.
-        focus: Optional topic to focus on when summarising the file.
-    """
-    try:
-        return agent.describe_file(filename, focus)
-    except Exception as exc:  # noqa: BLE001
-        return f"ERROR: Could not retrieve file '{filename}' — {exc}"
+        return f"ERROR: {exc}"
 
 
 # ---------------------------------------------------------------------------

@@ -1,16 +1,15 @@
 """
-Integration test for the full gemini-context-mcp stack.
+Integration test for the gemini-context-mcp stack.
 
-Tests all three outer MCP tools by importing them directly from server.py —
-no running server needed. Covers the complete path:
+Tests both public tools by importing from server.py directly — no running
+server needed. Covers the complete path:
 
-    server tool → agent loop → tools.py → OpenRouter API → response
+    server tool → agent → context loader → OpenRouter → response
 
-Requires OPENROUTER_API_KEY in .env (or environment).
+Requires OPENROUTER_API_KEY in .env.
 Run from gemini-context-mcp/:
 
     python tests/test_integration.py
-    # or with PYTHONIOENCODING=utf-8 on Windows terminals
 """
 
 from __future__ import annotations
@@ -19,7 +18,6 @@ import sys
 import time
 from pathlib import Path
 
-# Ensure project root is on the path when run directly
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from dotenv import load_dotenv
@@ -47,121 +45,139 @@ def section(title: str) -> None:
     print(f"{'─' * 60}")
 
 
-# ── import server tools (no server process needed) ─────────────────────────────
+# ── import server tools ────────────────────────────────────────────────────────
 
-from server import get_context_file, list_context, query_context
-
-
-# ── Test 1: list_context (no API call) ────────────────────────────────────────
-
-section("1 · list_context  (filesystem only — no API)")
-
-t0 = time.perf_counter()
-listing = list_context()
-elapsed = time.perf_counter() - t0
-
-print(f"\n  Output ({elapsed*1000:.0f} ms):\n")
-for line in listing.splitlines():
-    print(f"    {line}")
-
-print()
-check("returns a non-empty string",        isinstance(listing, str) and len(listing) > 0)
-check("does not start with ERROR",         not listing.startswith("ERROR"))
-check("contains docs/ files",              "docs/" in listing)
-check("contains codebase/ files",          "codebase/" in listing)
-check("contains whiteboard.jpg",           "whiteboard.jpg" in listing)
-check("no .venv or __pycache__ entries",   ".venv" not in listing and "__pycache__" not in listing)
+from server import answer_question, summarize
 
 
-# ── Test 2: get_context_file — text file ──────────────────────────────────────
+# ── Test 1: summarize() ───────────────────────────────────────────────────────
 
-section("2 · get_context_file  (text: docs/team.md)")
+section("1 · summarize()  — 15-bullet overview")
 
 t0 = time.perf_counter()
-team = get_context_file("docs/team.md")
-elapsed = time.perf_counter() - t0
+summary = summarize()
+t1 = time.perf_counter()
+elapsed1 = t1 - t0
 
-print(f"\n  Output ({elapsed*1000:.0f} ms, first 300 chars):\n")
-print(f"    {team[:300].replace(chr(10), chr(10) + '    ')}")
-print()
-
-check("returns a string",                  isinstance(team, str))
-check("does not start with ERROR",         not team.startswith("ERROR"))
-check("contains team content",             any(kw in team for kw in ["Tech Lead", "Engineer", "Maya", "Lucas"]))
-
-
-# ── Test 3: get_context_file — image (vision pipeline) ────────────────────────
-
-section("3 · get_context_file  (image: docs/whiteboard.jpg)")
-
-t0 = time.perf_counter()
-vision = get_context_file("docs/whiteboard.jpg")
-elapsed = time.perf_counter() - t0
-
-print(f"\n  Output ({elapsed*1000:.0f} ms, first 400 chars):\n")
-print(f"    {vision[:400].replace(chr(10), chr(10) + '    ')}")
-print()
-
-check("returns a string",                  isinstance(vision, str))
-check("does not start with ERROR",         not vision.startswith("ERROR"))
-check("non-trivial length (>100 chars)",   len(vision) > 100)
-check("describes architecture or agents",  any(kw in vision.lower() for kw in
-                                               ["agent", "orchestrat", "claude", "gemini", "diagram", "architecture"]))
-
-
-# ── Test 4: get_context_file — focus parameter ────────────────────────────────
-
-section("4 · get_context_file  (text with focus: priorities.md → P0 bugs)")
-
-t0 = time.perf_counter()
-focused = get_context_file("docs/priorities.md", focus="P0 critical bugs only")
-elapsed = time.perf_counter() - t0
-
-print(f"\n  Output ({elapsed*1000:.0f} ms, first 400 chars):\n")
-print(f"    {focused[:400].replace(chr(10), chr(10) + '    ')}")
-print()
-
-check("returns a string",                  isinstance(focused, str))
-check("does not start with ERROR",         not focused.startswith("ERROR"))
-check("mentions AUTH-112 or INFRA-89",     "AUTH-112" in focused or "INFRA-89" in focused)
-
-
-# ── Test 5: query_context — full agentic loop ─────────────────────────────────
-
-section("5 · query_context  (full agentic loop)")
-
-QUESTION = "Who is the tech lead and what are the two P0 bugs currently open?"
-
-print(f"\n  Question: {QUESTION}\n")
-t0 = time.perf_counter()
-answer = query_context(QUESTION)
-elapsed = time.perf_counter() - t0
-
-print(f"  Answer ({elapsed:.1f} s):\n")
-for line in answer.splitlines():
+print(f"\n  Output ({elapsed1:.1f} s):\n")
+for line in summary.splitlines():
     print(f"    {line}")
 print()
 
-check("returns a string",                  isinstance(answer, str))
-check("does not start with ERROR",         not answer.startswith("ERROR"))
-check("names the tech lead (Maya Chen)",   "Maya" in answer or "Chen" in answer)
-check("mentions AUTH-112",                 "AUTH-112" in answer)
-check("mentions INFRA-89",                 "INFRA-89" in answer)
+bullets = [l.strip() for l in summary.splitlines() if l.strip().startswith(("-", "•", "*", "–")) or
+           (len(l.strip()) > 2 and l.strip()[0].isdigit() and l.strip()[1] in ".):")]
+
+check("returns a string",                isinstance(summary, str))
+check("does not start with ERROR",       not summary.startswith("ERROR"))
+check("non-trivial length (>200 chars)", len(summary) > 200)
+check("~15 bullet points found",         len(bullets) >= 12,
+      f"found {len(bullets)} bullets — expected ~15")
+check("under 10 seconds",               elapsed1 < 10,
+      f"took {elapsed1:.1f} s")
 
 
-# ── Test 6: error handling ─────────────────────────────────────────────────────
+# ── Test 2: summarize() cache — second call must be instant ──────────────────
 
-section("6 · error handling  (bad paths, never raises)")
+section("2 · summarize()  — cache (second call)")
 
-for label, fn, args in [
-    ("list_context on missing tool",   get_context_file, ("does_not_exist.txt",)),
-    ("path traversal attempt",         get_context_file, ("../../etc/passwd",)),
-]:
-    try:
-        result = fn(*args)
-        check(label, result.startswith("ERROR:"), f"expected ERROR:, got: {result[:80]}")
-    except Exception as exc:
-        check(label, False, f"raised {type(exc).__name__}: {exc}")
+t0 = time.perf_counter()
+summary2 = summarize()
+elapsed2 = time.perf_counter() - t0
+
+print(f"\n  Second call: {elapsed2*1000:.0f} ms  (first was {elapsed1:.1f} s)\n")
+
+check("returns identical result",  summary2 == summary)
+check("cache hit is instant (<100 ms)", elapsed2 < 0.1,
+      f"took {elapsed2*1000:.0f} ms — cache may not be working")
+
+
+# ── Test 3: answer_question() — factual query ─────────────────────────────────
+
+section("3 · answer_question()  — factual query")
+
+q1 = "Who is the tech lead of the project?"
+print(f"\n  Question: {q1}")
+
+t0 = time.perf_counter()
+a1 = answer_question(q1)
+elapsed3 = time.perf_counter() - t0
+
+print(f"  Answer ({elapsed3:.1f} s): {a1}\n")
+
+check("returns a string",              isinstance(a1, str))
+check("does not start with ERROR",     not a1.startswith("ERROR"))
+check("mentions Maya Chen",            "Maya" in a1 or "Chen" in a1,
+      f"got: {a1[:120]}")
+check("under 10 seconds",             elapsed3 < 10,
+      f"took {elapsed3:.1f} s")
+check("plain prose (no markdown headers)", "##" not in a1 and "```" not in a1)
+
+
+# ── Test 4: answer_question() — bug / priority query ─────────────────────────
+
+section("4 · answer_question()  — priority / bug query")
+
+q2 = "What are the most urgent problems the team is working on right now?"
+print(f"\n  Question: {q2}")
+
+t0 = time.perf_counter()
+a2 = answer_question(q2)
+elapsed4 = time.perf_counter() - t0
+
+print(f"  Answer ({elapsed4:.1f} s): {a2}\n")
+
+check("returns a string",          isinstance(a2, str))
+check("does not start with ERROR", not a2.startswith("ERROR"))
+check("non-trivial length",        len(a2) > 50)
+check("mentions a known issue",    any(kw in a2 for kw in
+                                       ["token", "database", "pool", "auth", "refresh", "connection"]),
+      f"got: {a2[:120]}")
+check("under 10 seconds",         elapsed4 < 10, f"took {elapsed4:.1f} s")
+
+
+# ── Test 5: answer_question() — question not in context ──────────────────────
+
+section("5 · answer_question()  — out-of-scope question")
+
+q3 = "What is the weather in Paris today?"
+print(f"\n  Question: {q3}")
+
+t0 = time.perf_counter()
+a3 = answer_question(q3)
+elapsed5 = time.perf_counter() - t0
+
+print(f"  Answer ({elapsed5:.1f} s): {a3}\n")
+
+check("returns a string",          isinstance(a3, str))
+check("does not start with ERROR", not a3.startswith("ERROR"))
+check("admits it doesn't know",    any(kw in a3.lower() for kw in
+                                       ["not", "don't", "cannot", "no information", "knowledge base"]),
+      f"got: {a3}")
+
+
+# ── Test 6: callable directly from Python (no MCP) ───────────────────────────
+
+section("6 · direct Python import  (no MCP layer)")
+
+import agent as _agent
+
+t0 = time.perf_counter()
+direct_summary = _agent.summarize()
+elapsed6 = time.perf_counter() - t0
+
+t0 = time.perf_counter()
+direct_answer = _agent.answer_question("Who is on the on-call rotation this week?")
+elapsed7 = time.perf_counter() - t0
+
+print(f"\n  agent.summarize()       → {elapsed6*1000:.0f} ms (cached)")
+print(f"  agent.answer_question() → {elapsed7:.1f} s")
+print(f"  answer: {direct_answer[:200]}\n")
+
+check("agent.summarize() returns string",       isinstance(direct_summary, str))
+check("agent.answer_question() returns string", isinstance(direct_answer, str))
+check("answer mentions a team member",          any(n in direct_answer for n in
+                                                    ["Lucas", "Priya", "Tomás", "Sam", "Maya"]),
+      f"got: {direct_answer[:120]}")
 
 
 # ── Summary ────────────────────────────────────────────────────────────────────
@@ -173,8 +189,7 @@ failed = total - passed
 print(f"\n{'═' * 60}")
 print(f"  Results: {passed}/{total} passed", end="")
 if failed:
-    print(f"  ({failed} FAILED)")
-    print()
+    print(f"  ({failed} FAILED)\n")
     for name, ok, detail in _results:
         if not ok:
             print(f"  {_FAIL} {name}")
