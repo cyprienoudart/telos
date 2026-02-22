@@ -1,5 +1,5 @@
 """
-All tuneable constants for gemini-context-mcp.
+All tuneable constants for the Gemini context MCP server.
 Override any value via the corresponding environment variable.
 """
 

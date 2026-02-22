@@ -1,11 +1,11 @@
 """
 Benchmark the FastEmbed → ChromaDB → LLM pipeline across projects of different sizes.
 
-For each project, runs 12 generic questions through the full answer_question()
+For each project, runs 14 generic questions through the full answer_question()
 pipeline and prints every answer so you can assess quality alongside timing.
 
 Usage:
-    python tests/benchmark.py
+    python tests/gemini_benchmark.py
 """
 
 from __future__ import annotations
@@ -17,15 +17,15 @@ import time
 from pathlib import Path
 from statistics import mean
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Ensure the package root is on sys.path for standalone invocation.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(Path(__file__).parent.parent / ".env")
 
-import agent   # noqa: E402 — needs load_dotenv first
-import config  # noqa: E402
-import store   # noqa: E402
-import chunker # noqa: E402
+from telos_agent.mcp.gemini import pipeline, settings
+from telos_agent.mcp.gemini import store
+from telos_agent.mcp.gemini import chunker
 
 # ---------------------------------------------------------------------------
 # Tee stdout → file
@@ -143,7 +143,7 @@ for label, project_path in PROJECTS:
         print(f"  [SKIP] path does not exist")
         continue
 
-    config.set_base_dir(project_path)
+    settings.set_base_dir(project_path)
 
     # ── Corpus stats ────────────────────────────────────────────────────────
     print("  Scanning corpus...", end="", flush=True)
@@ -166,7 +166,7 @@ for label, project_path in PROJECTS:
     for i, q in enumerate(QUESTIONS):
         print(f"  Q{i+1:>2}: {q}")
         t0 = time.perf_counter()
-        answer = agent.answer_question(q)
+        answer = pipeline.answer_question(q)
         elapsed = time.perf_counter() - t0
         llm_times.append(elapsed)
         print(f"   A: {_wrap(answer)}")

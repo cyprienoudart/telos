@@ -17,4 +17,3 @@ docs/
 **/.ruff_cache/
 
 # ── Secrets / env files ───────────────────────────────────────────────────────
-gemini-context-mcp/.env

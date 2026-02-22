@@ -1,4 +1,4 @@
-"""Unit tests for store.py — embedding, cache hit/miss logic.
+"""Unit tests for telos_agent.mcp.gemini.store — embedding, cache hit/miss logic.
 
 ChromaDB has a pydantic v1 incompatibility with Python 3.14+, so we mock
 the chromadb module entirely and test the logic in isolation.
@@ -8,12 +8,9 @@ from __future__ import annotations
 
 import importlib
 import sys
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-import config
+from telos_agent.mcp.gemini import settings
 
 
 # ---------------------------------------------------------------------------
@@ -34,7 +31,7 @@ _setup_chromadb_mock()
 class TestEmbedTexts:
     def test_returns_list_of_lists(self):
         import numpy as np
-        import store
+        from telos_agent.mcp.gemini import store
         importlib.reload(store)
 
         mock_model = MagicMock()
@@ -50,7 +47,7 @@ class TestEmbedTexts:
         store._embed_model = None  # reset
 
     def test_embed_empty_list(self):
-        import store
+        from telos_agent.mcp.gemini import store
         importlib.reload(store)
 
         mock_model = MagicMock()
@@ -65,12 +62,12 @@ class TestCacheLookupLogic:
     """Test cache threshold logic without a real ChromaDB instance."""
 
     def setup_method(self):
-        """Reset config to defaults before each test."""
-        importlib.reload(config)
+        """Reset settings to defaults before each test."""
+        importlib.reload(settings)
 
     def test_cache_returns_none_for_empty_collection(self):
         """When cache count is 0, cache_lookup returns None."""
-        import store
+        from telos_agent.mcp.gemini import store
         importlib.reload(store)
 
         mock_cache = MagicMock()
@@ -82,7 +79,7 @@ class TestCacheLookupLogic:
 
     def test_cache_hit_when_distance_below_threshold(self):
         """When distance is small enough (high similarity), return the cached doc."""
-        import store
+        from telos_agent.mcp.gemini import store
         importlib.reload(store)
 
         mock_cache = MagicMock()
@@ -98,7 +95,7 @@ class TestCacheLookupLogic:
 
     def test_cache_miss_when_distance_above_threshold(self):
         """When distance is too large (low similarity), return None."""
-        import store
+        from telos_agent.mcp.gemini import store
         importlib.reload(store)
 
         mock_cache = MagicMock()
@@ -114,10 +111,10 @@ class TestCacheLookupLogic:
 
     def test_cache_boundary_exact_threshold(self):
         """At exactly the threshold boundary, it should be a hit (<=)."""
-        import store
+        from telos_agent.mcp.gemini import store
         importlib.reload(store)
 
-        threshold_distance = 1.0 - config.CACHE_SIMILARITY  # 0.15
+        threshold_distance = 1.0 - settings.CACHE_SIMILARITY  # 0.15
 
         mock_cache = MagicMock()
         mock_cache.count.return_value = 1

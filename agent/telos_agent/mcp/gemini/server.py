@@ -6,33 +6,24 @@ Tools
   summarize()              → 15-bullet plain-English overview (cached)
   answer_question(query)   → 1-5 sentence plain-English answer
 
-Run:
-    python server.py
-    # → http://127.0.0.1:8000/sse
-
-Claude Desktop config:
-    { "mcpServers": { "gemini-context": { "url": "http://localhost:8000/sse" } } }
+Invoked by the orchestrator via ``python -m telos_agent.mcp.gemini``
+(stdio transport). Can also be run standalone for development.
 """
 
 from __future__ import annotations
-
-import os
 
 from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
 
 load_dotenv()
 
-import agent  # noqa: E402  (needs load_dotenv first)
+from . import pipeline  # noqa: E402  (needs load_dotenv first)
 
 # ---------------------------------------------------------------------------
 # FastMCP app
 # ---------------------------------------------------------------------------
 
-_host = os.environ.get("MCP_HOST", "127.0.0.1")
-_port = int(os.environ.get("MCP_PORT", "8000"))
-
-mcp = FastMCP("gemini-context", host=_host, port=_port)
+mcp = FastMCP("gemini-context")
 
 
 # ---------------------------------------------------------------------------
@@ -49,7 +40,7 @@ def summarize() -> str:
     have changed.
     """
     try:
-        return agent.summarize()
+        return pipeline.summarize()
     except Exception as exc:  # noqa: BLE001
         return f"ERROR: {exc}"
 
@@ -70,14 +61,6 @@ def answer_question(query: str) -> str:
         query: The question to answer.
     """
     try:
-        return agent.answer_question(query)
+        return pipeline.answer_question(query)
     except Exception as exc:  # noqa: BLE001
         return f"ERROR: {exc}"
-
-
-# ---------------------------------------------------------------------------
-# Entry point
-# ---------------------------------------------------------------------------
-
-if __name__ == "__main__":
-    mcp.run(transport="sse")

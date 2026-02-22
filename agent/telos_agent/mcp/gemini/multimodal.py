@@ -1,7 +1,7 @@
 """
 Multimodal processing: images and PDFs → text descriptions → Chunks.
 
-Images are described by a vision LLM (config.VISION_MODEL) via a single
+Images are described by a vision LLM (settings.VISION_MODEL) via a single
 API call. PDFs are first processed with pypdf for text extraction; pages
 with very little text (likely scanned/image pages) are sent to the vision
 model for description.
@@ -22,8 +22,8 @@ from pathlib import Path
 import openai
 from dotenv import load_dotenv
 
-import config
-from chunker import Chunk, chunk_file
+from . import settings
+from .chunker import Chunk, chunk_file
 
 load_dotenv()
 
@@ -50,7 +50,7 @@ _IMAGE_MIME: dict[str, str] = {
 
 
 # ---------------------------------------------------------------------------
-# Vision client — lazy singleton (same OpenRouter key as agent.py)
+# Vision client — lazy singleton (same OpenRouter key as pipeline.py)
 # ---------------------------------------------------------------------------
 
 _vision_client: openai.OpenAI | None = None
@@ -65,7 +65,7 @@ def _get_vision_client() -> openai.OpenAI:
                 "OPENROUTER_API_KEY is not set. Copy .env.example → .env and add your key."
             )
         _vision_client = openai.OpenAI(
-            base_url=config.LLM_BASE_URL,
+            base_url=settings.LLM_BASE_URL,
             api_key=api_key,
             default_headers={"X-Title": "gemini-context-mcp"},
         )
@@ -75,7 +75,7 @@ def _get_vision_client() -> openai.OpenAI:
 def _vision_call(mime: str, b64_data: str) -> str:
     """Send a base64-encoded image to the vision model and return the description."""
     response = _get_vision_client().chat.completions.create(
-        model=config.VISION_MODEL,
+        model=settings.VISION_MODEL,
         messages=[{
             "role": "user",
             "content": [
@@ -83,7 +83,7 @@ def _vision_call(mime: str, b64_data: str) -> str:
                 {"type": "text", "text": _VISION_PROMPT},
             ],
         }],
-        max_tokens=config.MAX_TOKENS_VISION,
+        max_tokens=settings.MAX_TOKENS_VISION,
         temperature=0.1,
     )
     return response.choices[0].message.content or "(no description returned)"
@@ -92,7 +92,7 @@ def _vision_call(mime: str, b64_data: str) -> str:
 def _file_call(filename: str, b64_data: str) -> str:
     """Send a base64-encoded file (e.g. PDF) via OpenRouter's file content type."""
     response = _get_vision_client().chat.completions.create(
-        model=config.VISION_MODEL,
+        model=settings.VISION_MODEL,
         messages=[{
             "role": "user",
             "content": [
@@ -106,7 +106,7 @@ def _file_call(filename: str, b64_data: str) -> str:
                 {"type": "text", "text": _VISION_PROMPT},
             ],
         }],
-        max_tokens=config.MAX_TOKENS_VISION,
+        max_tokens=settings.MAX_TOKENS_VISION,
         temperature=0.1,
     )
     return response.choices[0].message.content or "(no description returned)"
@@ -167,8 +167,8 @@ def _describe_pdf(path: Path) -> str:
 # ---------------------------------------------------------------------------
 
 def _walk_multimodal_paths():
-    """Yield every image and PDF path under config.BASE_DIR."""
-    stack = [config.BASE_DIR]
+    """Yield every image and PDF path under settings.BASE_DIR."""
+    stack = [settings.BASE_DIR]
     while stack:
         current = stack.pop()
         try:
@@ -177,11 +177,11 @@ def _walk_multimodal_paths():
             continue
         for entry in entries:
             if entry.is_dir():
-                if entry.name not in config.SKIP_DIRS:
+                if entry.name not in settings.SKIP_DIRS:
                     stack.append(entry)
             elif entry.is_file():
                 ext = entry.suffix.lower()
-                if ext in config.IMAGE_EXTS or ext in config.PDF_EXTS:
+                if ext in settings.IMAGE_EXTS or ext in settings.PDF_EXTS:
                     yield entry
 
 
@@ -203,14 +203,14 @@ def multimodal_hash() -> str:
 
 def build_multimodal_chunks() -> list[Chunk]:
     """
-    Describe every image and PDF under config.BASE_DIR via vision LLM / pypdf.
+    Describe every image and PDF under settings.BASE_DIR via vision LLM / pypdf.
     Returns Chunks whose text is the generated description, ready to embed.
     """
     chunks: list[Chunk] = []
     for path in _walk_multimodal_paths():
-        rel = str(path.relative_to(config.BASE_DIR)).replace("\\", "/")
+        rel = str(path.relative_to(settings.BASE_DIR)).replace("\\", "/")
         try:
-            if path.suffix.lower() in config.IMAGE_EXTS:
+            if path.suffix.lower() in settings.IMAGE_EXTS:
                 text = _describe_image(path)
             else:
                 text = _describe_pdf(path)

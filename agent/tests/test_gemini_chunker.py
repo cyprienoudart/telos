@@ -1,15 +1,15 @@
-"""Unit tests for chunker.py — sentence splitting, chunking, hashing."""
+"""Unit tests for telos_agent.mcp.gemini.chunker — sentence splitting, chunking, hashing."""
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
-# Ensure the package root is importable
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-import config
-from chunker import Chunk, _split_sentences, build_all_chunks, chunk_file, context_hash
+from telos_agent.mcp.gemini import settings
+from telos_agent.mcp.gemini.chunker import (
+    Chunk,
+    _split_sentences,
+    build_all_chunks,
+    chunk_file,
+    context_hash,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -84,7 +84,7 @@ class TestChunkFile:
 class TestContextHash:
     def test_hash_is_hex_string(self, tmp_path):
         (tmp_path / "a.txt").write_text("hello")
-        config.set_base_dir(tmp_path)
+        settings.set_base_dir(tmp_path)
         h = context_hash()
         assert isinstance(h, str)
         assert len(h) == 32  # MD5 hex digest
@@ -93,7 +93,7 @@ class TestContextHash:
     def test_hash_changes_on_file_change(self, tmp_path):
         f = tmp_path / "a.txt"
         f.write_text("v1")
-        config.set_base_dir(tmp_path)
+        settings.set_base_dir(tmp_path)
         h1 = context_hash()
 
         f.write_text("v2222222222222")  # different size → different hash
@@ -102,7 +102,7 @@ class TestContextHash:
 
     def test_hash_stable_for_same_content(self, tmp_path):
         (tmp_path / "a.txt").write_text("stable")
-        config.set_base_dir(tmp_path)
+        settings.set_base_dir(tmp_path)
         assert context_hash() == context_hash()
 
 
@@ -114,7 +114,7 @@ class TestBuildAllChunks:
     def test_chunks_from_text_files(self, tmp_path):
         (tmp_path / "readme.md").write_text("# Hello\nWorld.")
         (tmp_path / "main.py").write_text("print('hi')")
-        config.set_base_dir(tmp_path)
+        settings.set_base_dir(tmp_path)
         chunks = build_all_chunks()
         sources = {c.source for c in chunks}
         assert "readme.md" in sources
@@ -123,7 +123,7 @@ class TestBuildAllChunks:
     def test_skips_binary_files(self, tmp_path):
         (tmp_path / "data.bin").write_bytes(b"\x00\x01")
         (tmp_path / "ok.txt").write_text("ok")
-        config.set_base_dir(tmp_path)
+        settings.set_base_dir(tmp_path)
         chunks = build_all_chunks()
         sources = {c.source for c in chunks}
         assert "ok.txt" in sources
@@ -132,7 +132,7 @@ class TestBuildAllChunks:
     def test_skips_image_files(self, tmp_path):
         (tmp_path / "photo.png").write_bytes(b"\x89PNG")
         (tmp_path / "ok.txt").write_text("ok")
-        config.set_base_dir(tmp_path)
+        settings.set_base_dir(tmp_path)
         chunks = build_all_chunks()
         sources = {c.source for c in chunks}
         assert "photo.png" not in sources
@@ -142,11 +142,11 @@ class TestBuildAllChunks:
         d.mkdir()
         (d / "cached.pyc").write_bytes(b"\x00")
         (tmp_path / "ok.txt").write_text("ok")
-        config.set_base_dir(tmp_path)
+        settings.set_base_dir(tmp_path)
         chunks = build_all_chunks()
         sources = {c.source for c in chunks}
         assert all("__pycache__" not in s for s in sources)
 
     def test_empty_dir(self, tmp_path):
-        config.set_base_dir(tmp_path)
+        settings.set_base_dir(tmp_path)
         assert build_all_chunks() == []

@@ -5,7 +5,7 @@ Public API
 ----------
   Chunk                    dataclass — source path + text
   context_hash()           MD5 over file sizes + mtimes; used as cache key
-  build_all_chunks()       chunk every text file under config.BASE_DIR
+  build_all_chunks()       chunk every text file under settings.BASE_DIR
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ import hashlib
 import re
 from dataclasses import dataclass
 
-import config
+from . import settings
 
 
 # ---------------------------------------------------------------------------
@@ -33,11 +33,11 @@ class Chunk:
 
 def _walk_text_paths():
     """
-    Yield every text-file Path under config.BASE_DIR, pruning config.SKIP_DIRS
-    and skipping config.BINARY_EXTS. Reads config.BASE_DIR at call time so
-    benchmark.py can switch projects by reassigning config.BASE_DIR.
+    Yield every text-file Path under settings.BASE_DIR, pruning settings.SKIP_DIRS
+    and skipping settings.BINARY_EXTS. Reads settings.BASE_DIR at call time so
+    benchmark.py can switch projects by reassigning settings.BASE_DIR.
     """
-    stack = [config.BASE_DIR]
+    stack = [settings.BASE_DIR]
     while stack:
         current = stack.pop()
         try:
@@ -46,20 +46,20 @@ def _walk_text_paths():
             continue
         for entry in entries:
             if entry.is_dir():
-                if entry.name not in config.SKIP_DIRS:
+                if entry.name not in settings.SKIP_DIRS:
                     stack.append(entry)
             elif (entry.is_file()
-                  and entry.suffix.lower() not in config.BINARY_EXTS
-                  and entry.suffix.lower() not in config.IMAGE_EXTS
-                  and entry.suffix.lower() not in config.PDF_EXTS
-                  and entry.name not in config.SKIP_FILES):
+                  and entry.suffix.lower() not in settings.BINARY_EXTS
+                  and entry.suffix.lower() not in settings.IMAGE_EXTS
+                  and entry.suffix.lower() not in settings.PDF_EXTS
+                  and entry.name not in settings.SKIP_FILES):
                 yield entry
 
 
 def _iter_text_files():
-    """Yield (rel_path, text) for every readable text file under config.BASE_DIR."""
+    """Yield (rel_path, text) for every readable text file under settings.BASE_DIR."""
     for p in sorted(_walk_text_paths(), key=str):
-        rel = str(p.relative_to(config.BASE_DIR)).replace("\\", "/")
+        rel = str(p.relative_to(settings.BASE_DIR)).replace("\\", "/")
         try:
             yield rel, p.read_text(encoding="utf-8", errors="replace")
         except OSError:
@@ -133,7 +133,7 @@ def _split_sentences(text: str) -> list[str]:
 def chunk_file(source: str, text: str) -> list[Chunk]:
     """
     Split *text* into overlapping Chunks at sentence boundaries.
-    Target size: config.CHUNK_MAX_WORDS words, overlap: config.CHUNK_OVERLAP_WORDS.
+    Target size: settings.CHUNK_MAX_WORDS words, overlap: settings.CHUNK_OVERLAP_WORDS.
     """
     sentences = _split_sentences(text)
     chunks:  list[Chunk] = []
@@ -142,13 +142,13 @@ def chunk_file(source: str, text: str) -> list[Chunk]:
 
     for sent in sentences:
         n = len(sent.split())
-        if w_words + n > config.CHUNK_MAX_WORDS and window:
+        if w_words + n > settings.CHUNK_MAX_WORDS and window:
             chunks.append(Chunk(source=source, text=" ".join(window)))
             overlap: list[str] = []
             ow = 0
             for s in reversed(window):
                 sw = len(s.split())
-                if ow + sw <= config.CHUNK_OVERLAP_WORDS:
+                if ow + sw <= settings.CHUNK_OVERLAP_WORDS:
                     overlap.insert(0, s)
                     ow += sw
                 else:
@@ -164,7 +164,7 @@ def chunk_file(source: str, text: str) -> list[Chunk]:
 
 
 def build_all_chunks() -> list[Chunk]:
-    """Chunk every text file under config.BASE_DIR and return all Chunks."""
+    """Chunk every text file under settings.BASE_DIR and return all Chunks."""
     chunks: list[Chunk] = []
     for rel, text in _iter_text_files():
         chunks.extend(chunk_file(rel, text))
