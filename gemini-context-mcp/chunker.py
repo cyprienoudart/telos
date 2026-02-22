@@ -50,6 +50,8 @@ def _walk_text_paths():
                     stack.append(entry)
             elif (entry.is_file()
                   and entry.suffix.lower() not in config.BINARY_EXTS
+                  and entry.suffix.lower() not in config.IMAGE_EXTS
+                  and entry.suffix.lower() not in config.PDF_EXTS
                   and entry.name not in config.SKIP_FILES):
                 yield entry
 
@@ -128,7 +130,7 @@ def _split_sentences(text: str) -> list[str]:
 # Chunker
 # ---------------------------------------------------------------------------
 
-def _chunk_file(source: str, text: str) -> list[Chunk]:
+def chunk_file(source: str, text: str) -> list[Chunk]:
     """
     Split *text* into overlapping Chunks at sentence boundaries.
     Target size: config.CHUNK_MAX_WORDS words, overlap: config.CHUNK_OVERLAP_WORDS.
@@ -165,5 +167,5 @@ def build_all_chunks() -> list[Chunk]:
     """Chunk every text file under config.BASE_DIR and return all Chunks."""
     chunks: list[Chunk] = []
     for rel, text in _iter_text_files():
-        chunks.extend(_chunk_file(rel, text))
+        chunks.extend(chunk_file(rel, text))
     return chunks

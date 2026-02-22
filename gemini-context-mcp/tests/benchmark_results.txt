@@ -2,331 +2,450 @@
 
 ══════════════════════════════════════════════════════════════════════
   FastEmbed → ChromaDB → LLM  quality + timing benchmark
-  3 projects · 12 questions each
+  3 projects · 14 questions each
 ══════════════════════════════════════════════════════════════════════
 
 ──────────────────────────────────────────────────────────────────────
   telos/context  (tiny)
   C:\Users\Kora\Dev\telos\gemini-context-mcp\context
 ──────────────────────────────────────────────────────────────────────
-  Scanning corpus...  Corpus: 6 files · 10 chunks · 2,129 words  (24 ms)
-  Loading ChromaDB index...  ChromaDB index: 273 ms      10 chunks
+  Scanning corpus...  Corpus: 6 files · 10 chunks · 2,129 words  (4 ms)
+  Loading ChromaDB index...  ChromaDB index: 117 ms      10 chunks
 
   Q 1: What does this project do and what problem does it solve?
-   A: Project Telos is an internal platform designed to manage
-       asynchronous research workflows. It provides a central
-       place for team members to organize their data and
-       coordinate complex research tasks. By using this system,
-       the team can better handle the various steps and
-       information involved in their ongoing research projects.
-      ⏱ 762 ms
+   A: Project Telos is an internal platform designed to manage research
+       workflows that do not happen in real time. It acts as a
+       central hub for organizing information from various sources
+       like codebases, emails, and Slack messages. By using
+       specialized AI agents and an orchestrator, the system helps
+       gather and build context for complex tasks. This allows the
+       team to handle data-driven research and automated workflows
+       more efficiently.
+      ⏱ 2.49 s
 
   Q 2: What programming languages and frameworks are used?
-   A: Project Telos uses Python 3.13 as its primary programming
-       language. The project also utilizes the FastAPI framework
-       for building the application. For data management and
-       storage, the team uses PostgreSQL and Redis. Additionally,
-       the system is deployed using Docker Compose and Kubernetes.
-      ⏱ 11 ms
+   A: Project Telos is built using Python 3.13 and the FastAPI
+       framework. It also utilizes PostgreSQL for its database and
+       Redis for caching. The system is deployed using Docker
+       Compose and Kubernetes.
+      ⏱ 1.20 s
 
   Q 3: What are the main external dependencies?
-   A: Project Telos relies on several external tools and technologies to
-       function properly. The system uses Python 3.13 and FastAPI
-       for its core logic, while PostgreSQL and Redis are used to
-       store and manage data. For deployment and operations, it
-       uses Docker Compose, Kubernetes, and GitHub Actions.
-       Additionally, sensitive information is managed using a tool
-       called Vault.
-      ⏱ 12 ms
+   A: Project Telos relies on several external technologies including
+       PostgreSQL and Redis for data management. The system also
+       uses E2B for orchestration and subagent instances to handle
+       specific tasks. For communication and data gathering, it
+       connects to external platforms like Slack, email, and
+       various CRM tools. Additionally, the project utilizes
+       models from Claude and Gemini to power its AI agents.
+      ⏱ 1.64 s
 
   Q 4: How do you install and run this project?
    A: To run this project locally, you first need to copy the example
-       environment file to a new file named dot env and fill in
-       your database and secret keys. Next, use Docker Compose to
-       start the database and Redis services. You then install the
-       necessary software requirements using the pip install
-       command. Finally, you can start the application by running
-       the uvicorn command provided in the documentation.
-      ⏱ 13 ms
+       environment file and fill in your database and security
+       keys. Next, you use a tool called Docker to start the
+       database and storage services. After that, you install the
+       necessary software requirements using a command called pip.
+       Finally, you start the application by running a command
+       that launches the server.
+      ⏱ 1.62 s
 
   Q 5: What is the folder or module structure?
-   A: Project Telos is organized into two main directories called docs
-       and codebase. The docs folder contains reference
-       documentation, team information, and project priorities.
-       The codebase folder is divided into subdirectories for the
-       application entry point, authentication handling, and data
-       models. This structure helps manage the platform's research
-       workflows and technical components in a clear way.
-      ⏱ 18 ms
+   A: The project is organized into two main directories called docs and
+       codebase. The docs folder contains reference documentation,
+       team information, and visual files like architecture
+       diagrams and whiteboard photos. The codebase folder
+       includes a source directory with modules for the
+       application entry point, authentication handling, and user
+       data models. This structure helps manage the platform's
+       research workflows and technical components in a clear way.
+      ⏱ 1.45 s
 
   Q 6: How is authentication or access control handled?
    A: Authentication is handled by a security layer that checks for a
        valid digital token in the header of every request to
        protected areas. If the token is missing, expired, or
-       invalid, the system blocks the request and returns an error
-       message. Access control is managed through a hierarchy of
-       roles, where users like admins have more permissions than
-       members or viewers. Additionally, the system can lock an
-       account if there are ten failed login attempts in a row to
-       keep it safe. For extra security, the system also tracks
-       and rotates refresh tokens to detect and prevent
-       unauthorized reuse of a session.
-      ⏱ 31 ms
+       invalid, the system blocks access and returns an error
+       message. Access control is also managed through a hierarchy
+       of roles, such as admin, member, and viewer, to ensure
+       users can only see what they are allowed to. Additionally,
+       the system can lock an account if there are ten failed
+       login attempts in a row. To keep sessions secure, the
+       system uses refresh tokens that can be revoked if someone
+       tries to reuse an old one.
+      ⏱ 1.80 s
 
   Q 7: What database or storage technology is used?
-   A: Project Telos uses PostgreSQL and Redis for its storage needs.
-       These technologies are part of the platform's technical
-       stack used to manage research workflows. Additionally, the
-       project uses Vault to securely store production secrets.
-      ⏱ 23 ms
+   A: Project Telos uses PostgreSQL and Redis as its primary storage
+       technologies. These tools are part of the project's
+       technical stack used to manage data and workflows.
+       Additionally, the system uses Vault to securely store
+       production secrets.
+      ⏱ 1.34 s
 
   Q 8: How are errors and exceptions handled?
-   A: The system handles errors by returning a JSON response that
-       includes a specific error message and a 401 status code.
-       For example, it will notify the user if their authorization
-       header is missing, if their token has expired, or if the
-       token is otherwise invalid. Additionally, the system logs
-       warnings when refresh tokens are not found or when security
-       issues like token reuse are detected. If a security risk is
-       found, the system can also revoke access for an entire
-       group of related tokens.
-      ⏱ 17 ms
+   A: The system handles errors by returning specific messages and
+       status codes when something goes wrong during
+       authentication. If a security token is missing, invalid, or
+       expired, the system sends back a 401 error with a
+       description of the problem. Additionally, if the system
+       detects that an old token is being reused, it logs a
+       warning and revokes access for that entire group of tokens
+       to keep the account safe. In some cases, if a token cannot
+       be found or has expired, the system simply returns no
+       information and logs the event for administrators.
+      ⏱ 1.65 s
 
   Q 9: What tests exist and how do you run them?
    A: The provided excerpts do not contain information about what tests
        exist or how to run them.
-      ⏱ 30 ms
+      ⏱ 1.05 s
 
   Q10: What environment variables or config files are required?
-   A: To run the project, you need to create a configuration file named
-       .env by copying the provided .env.example file. This file
-       must be filled with specific information, including your
-       database URL, Redis URL, and a secret key. It is important
-       to remember that these secrets should never be shared or
-       committed to the project's public history. For the
-       production version of the app, these secrets are managed
-       securely using a tool called Vault.
-      ⏱ 17 ms
+   A: To run the project locally, you need to create a configuration
+       file named .env by copying the provided example file. This
+       file must be filled with specific environment variables
+       including your database URL, Redis URL, and a secret key.
+       It is important to note that these secrets should never be
+       committed to the code repository. For production
+       environments, secrets are managed using a tool called
+       Vault.
+      ⏱ 1.59 s
 
   Q11: What are the main classes or components and what do they do?
-   A: Project Telos is an internal platform used to manage research
-       workflows and is built using Python, FastAPI, and
-       PostgreSQL. The system includes a UserModel class that
-       defines how user information like email addresses and roles
-       are stored and validated. There are also specific
-       categories for user roles, such as admin or viewer, and
-       account statuses like active or suspended. Additionally,
-       the system features an authentication handler for managing
-       sessions and a main application entry point.
-      ⏱ 16 ms
+   A: The system is built around a central orchestrator that manages
+       specialized AI agents to handle tasks like coding,
+       marketing, and customer data. A core component called the
+       UserModel stores and validates user information, such as
+       email addresses and account roles, while ensuring security
+       through login protections. The workflow also includes an
+       exploration agent that gathers context from various sources
+       like Slack, email, and uploaded documents. Together, these
+       components allow a user to interact with the system through
+       voice or chat to execute complex automated workflows.
+      ⏱ 2.06 s
 
   Q12: How is the core data-processing or inference pipeline implemented?
-   A: The provided excerpts do not contain information about how the
-       core data-processing or inference pipeline is implemented.
-      ⏱ 29 ms
+   A: The system uses an E2B orchestrator instance that manages a
+       central Claude agent to handle the workflow. This
+       orchestrator coordinates with a Gemini explore agent to
+       gather information from sources like codebases, emails, and
+       Slack. It then directs specialized subagents to perform
+       specific tasks, such as managing CRM data or marketing
+       platforms. The entire process is supported by a fine-tuned
+       AI that communicates with the user through voice chat to
+       ask and answer questions.
+      ⏱ 1.51 s
 
-  Timing — min 11 ms  ·  avg 82 ms  ·  max 762 ms
+  Q13: What is shown on the whiteboard or diagram in the context store?
+   A: The context store contains a technical system architecture diagram
+       for an AI-driven agentic workflow. This diagram is found in
+       a file named whiteboard.jpg and uses color-coded categories
+       for infrastructure, context, and models. There is also a
+       placeholder for an architecture diagram PDF, though the
+       provided text focuses on the details within the whiteboard
+       image.
+      ⏱ 17 ms
+
+  Q14: Describe the system architecture diagram including all components and connections.
+   A: The system architecture for Project Telos is an AI-driven workflow
+       that connects a user to various agents and data sources. At
+       the center is an orchestrator instance that manages a
+       Claude agent and three specialized subagents for coding,
+       customer relations, and marketing. To gather information,
+       an exploration agent connects the orchestrator to a context
+       bucket containing code, documents, and images, as well as
+       read-only access to email, Slack, and CRM data. The user
+       interacts with the system through a specialized question-
+       asking AI, possibly using voice chat. The entire
+       infrastructure is built using E2B instances to host the
+       different agents and their specific tools.
+      ⏱ 2.42 s
+
+  Timing — min 17 ms  ·  avg 1.56 s  ·  max 2.49 s
 
 ──────────────────────────────────────────────────────────────────────
   telegram-voice-ai-bot
   C:\Users\Kora\Dev\telegram-voice-ai-bot
 ──────────────────────────────────────────────────────────────────────
-  Scanning corpus...  Corpus: 26 files · 69 chunks · 24,319 words  (66 ms)
-  Loading ChromaDB index...  ChromaDB index: 8 ms        69 chunks
+  Scanning corpus...  Corpus: 25 files · 68 chunks · 24,070 words  (42 ms)
+  Loading ChromaDB index...  ChromaDB index: 13.95 s     68 chunks
 
   Q 1: What does this project do and what problem does it solve?
    A: This project is a Telegram bot that uses artificial intelligence
        to help users record voice notes and track their emotional
        health. It solves the problem of monitoring mental well-
-       being by analyzing voice reflections to identify emotional
-       trends and therapy patterns over time. Users can easily
-       save notes, receive therapy analysis, and view statistics
-       on their moods through simple chat commands. The system
-       also helps organize these personal reflections into a
-       secure database for long-term tracking and review.
-      ⏱ 81 ms
+       being by analyzing voice reflections to provide therapy
+       session tracking and emotional trend reports. Users can
+       easily save notes, view their emotional history, and
+       receive analysis on their moods over time.
+      ⏱ 1.93 s
 
   Q 2: What programming languages and frameworks are used?
-   A: The provided excerpts mention the use of the TypeScript and
-       Node.js programming languages. The project also utilizes
-       frameworks and tools such as Next.js, Nuxt.js, Vuepress,
-       Sveltekit, and Gatsby. Additionally, the code uses Supabase
-       for database management and Vite for building the
-       application.
-      ⏱ 17 ms
+   A: The provided excerpts mention the use of Node.js as a runtime
+       environment. They also show that the project uses the
+       Supabase-js library to interact with a Supabase database.
+       No other specific programming languages or frameworks are
+       mentioned in the text.
+      ⏱ 1.27 s
 
   Q 3: What are the main external dependencies?
    A: The provided excerpts do not contain information about the main
        external dependencies.
-      ⏱ 42 ms
+      ⏱ 1.01 s
 
   Q 4: How do you install and run this project?
-   A: To install and run this project, you first need to create a
-       configuration file named .env and install the necessary
-       packages using the command npm install. After setting your
-       environment variables, you should initialize the database
-       by running npm run db:init-supabase. Once the setup is
-       complete, you can start the development server by running
-       npm run dev. Finally, you can test your bot by sending a
-       start message to it on Telegram.
-      ⏱ 106 ms
+   A: To install the project, you first need to create a configuration
+       file and install the necessary packages using the setup
+       script. Next, you must provide your specific credentials
+       for the database and the bot in that configuration file.
+       Once the setup is complete, you can start the project by
+       running the command to launch the development server. You
+       can then test your bot by sending a start message to it on
+       Telegram. If you want to put the project online, you can
+       use the command to deploy it to Vercel.
+      ⏱ 1.69 s
 
   Q 5: What is the folder or module structure?
-   A: The project structure includes a variety of dependency and output
-       directories such as node_modules, bower_components, and
-       build/Release. It also contains specific folders for
-       different frameworks, including .next for Next.js, .nuxt
-       for Nuxt.js, and .svelte-kit for SvelteKit. Additionally,
-       there are directories for configuration and cache, such as
-       .serverless, .firebase, and .docusaurus.
-      ⏱ 58 ms
+   A: The project uses a standard Node.js structure where dependencies
+       are managed within a node_modules folder. Key configuration
+       files like package-lock.json, vercel.json, and vercel-
+       env.json are located in the root directory. The main
+       application logic appears to be contained in a file named
+       server.js, which handles various web routes and functions.
+      ⏱ 2.16 s
 
   Q 6: How is authentication or access control handled?
-   A: Authentication is handled by a middleware function that identifies
-       users based on their unique Telegram ID. If a user does not
-       already exist in the database, the system automatically
-       creates a new profile for them using their Telegram
-       information. For data security, the system uses Row Level
-       Security policies that currently allow all operations on
-       the database tables. Access to the database also requires
-       specific environment variables like a service role key and
-       an anonymous key.
-      ⏱ 68 ms
+   A: Authentication is handled through a middleware process that
+       identifies users by their unique Telegram ID when they
+       interact with the bot. If a user is not already in the
+       database, the system automatically creates a new profile
+       for them using their Telegram information. For data
+       security, the system uses Row Level Security policies that
+       currently allow all operations on the database tables.
+       Additionally, the setup requires specific secret keys and
+       environment variables to securely connect to the database
+       and services.
+      ⏱ 1.76 s
 
   Q 7: What database or storage technology is used?
    A: The project uses a PostgreSQL database through the Supabase
-       platform, which includes features like connection pooling
-       and row-level security. It also mentions the use of a local
-       SQLite database file located at database/bot.db.
-       Additionally, the documentation suggests using Redis for
-       caching frequently accessed data to improve performance.
-      ⏱ 55 ms
+       platform. It also mentions the use of SQLite, specifically
+       a database file located at database/bot.db. Additionally,
+       Redis is suggested as a potential option for caching
+       frequently accessed data.
+      ⏱ 1.20 s
 
   Q 8: How are errors and exceptions handled?
-   A: When errors occur, the system uses a try-catch method to stop the
-       process and log a specific error message to the console for
-       debugging. If a problem happens during a database
-       operation, the system throws the error to ensure it is
-       handled properly. For web-related errors, the system saves
-       a log of the failure and sends a response back with a
-       status code and a description of what went wrong. In some
-       cases, the system also logs the error message in a specific
-       color to make it easier to identify during testing.
-      ⏱ 119 ms
+   A: When an error occurs, the system catches it and logs a descriptive
+       message to the console for debugging. In many cases, the
+       error is then re-thrown to be handled by other parts of the
+       application. For web-related requests, the system saves a
+       log of the error and sends a response back with a 500
+       status code and a message explaining that an internal
+       server error happened. Some scripts also use color-coded
+       logs to clearly display error messages in the terminal.
+      ⏱ 1.65 s
 
   Q 9: What tests exist and how do you run them?
    A: You can test your setup by running the command npm run db:init-
-       supabase to initialize and check your database connection.
-       To verify the server is ready, the setup script
-       automatically checks for the existence of the server file.
-       You can also test your Telegram bot by sending it a start
-       message or send a test webhook to your Voiceflow endpoint
-       using a curl command. Finally, you can monitor real-time
-       performance and errors through the function logs in your
-       Vercel dashboard.
-      ⏱ 106 ms
+       supabase to check your database connection and
+       initialization. To verify the server is ready, the setup
+       script automatically checks for the existence of the server
+       file. You can also test your Telegram bot by sending it a
+       start message or send a test webhook to your Voiceflow
+       endpoint using a curl command. Finally, you can monitor
+       function logs and performance metrics through the Vercel
+       dashboard.
+      ⏱ 1.64 s
 
   Q10: What environment variables or config files are required?
-   A: To set up the system, you must have a .env file containing your
-       specific configuration values. The required environment
-       variables include your Telegram Bot Token, VoiceFlow API
-       Key, and VoiceFlow Webhook Secret. For the database to
-       work, you also need to provide your Supabase URL and
-       Service Role Key. If you are deploying to Vercel, you will
-       need to set these same variables in the Vercel dashboard
-       along with a database connection string.
-      ⏱ 80 ms
+   A: To set up the system, you must create a file named .env by copying
+       the example provided in the env.example file. The required
+       environment variables include your Telegram Bot Token,
+       VoiceFlow API Key, and VoiceFlow Webhook Secret. For the
+       database to work, you also need to provide your Supabase
+       URL and the Supabase Service Role Key. If you are
+       developing locally, you should also specify a path for your
+       database file.
+      ⏱ 2.94 s
 
   Q11: What are the main classes or components and what do they do?
-   A: The main component is a Database Manager class that handles
-       connections and operations for a Supabase database. This
-       class is responsible for saving and retrieving user notes,
-       including details like emotion scores and content types. It
-       also manages therapy session data, such as session
-       duration, mood changes, and key insights. Additionally, the
-       system includes a server configuration that routes web
-       traffic for services like Telegram and Voiceflow.
-      ⏱ 50 ms
+   A: The main component is the Database Manager, which handles all the
+       connections and operations for the application's database.
+       It is responsible for saving and retrieving user notes, as
+       well as managing therapy session data like mood scores and
+       key insights. Additionally, the system uses a server
+       configuration to direct web traffic to specific locations,
+       such as Telegram or Voiceflow webhooks. The application
+       also relies on various external tools to handle tasks like
+       network requests, data security, and real-time updates.
+      ⏱ 15.88 s
 
   Q12: How is the core data-processing or inference pipeline implemented?
    A: The provided excerpts do not contain information about how the
        core data-processing or inference pipeline is implemented.
        The documents focus on database setup, environment
        variables, and package dependencies.
-      ⏱ 24 ms
+      ⏱ 7.29 s
 
-  Timing — min 17 ms  ·  avg 67 ms  ·  max 119 ms
+  Q13: What is shown on the whiteboard or diagram in the context store?
+   A: I am sorry, but the answer to that question is not in the provided
+       excerpts.
+      ⏱ 1.25 s
+
+  Q14: Describe the system architecture diagram including all components and connections.
+   A: The provided excerpts do not contain a system architecture diagram
+       or a description of its components and connections.
+      ⏱ 1.06 s
+
+  Timing — min 1.01 s  ·  avg 3.05 s  ·  max 15.88 s
 
 ──────────────────────────────────────────────────────────────────────
   ai-teachers-old
   C:\Users\Kora\Dev\ai-teachers-old
 ──────────────────────────────────────────────────────────────────────
-  Scanning corpus...  Corpus: 77 files · 912 chunks · 290,748 words  (947 ms)
-  Loading ChromaDB index...  ChromaDB index: 54 ms       912 chunks
+  Scanning corpus...  Corpus: 76 files · 911 chunks · 290,561 words  (489 ms)
+  Loading ChromaDB index...  ChromaDB index: 199.02 s    911 chunks
 
   Q 1: What does this project do and what problem does it solve?
-   A: I am sorry, but the provided excerpts do not contain information
-       about what this project does or the problem it solves.
-      ⏱ 119 ms
+   A: This project provides educational support for teenagers by
+       delivering clear and brief responses tailored to their
+       needs. It helps solve the problem of complex communication
+       by focusing on essential information that educators seek.
+       Additionally, it offers guidance on creative skills like 2D
+       animation and character design to help students tell
+       stories through motion.
+      ⏱ 3.57 s
 
   Q 2: What programming languages and frameworks are used?
-   A: I am sorry, but the provided excerpts do not contain information
-       about the programming languages and frameworks used.
-      ⏱ 34 ms
+   A: Based on the documents, the programming languages used include
+       Python, C++, SQL, and Fortran. The technical skills also
+       mention working with Big Data, Linux, and Geant4 or Corsika
+       for modeling. For building user interfaces, the PyQt
+       framework is used for data visualization and creating graph
+       functionality.
+      ⏱ 1.64 s
 
   Q 3: What are the main external dependencies?
-   A: The provided excerpts do not contain information about the main
-       external dependencies.
-      ⏱ 42 ms
+   A: The main external dependencies include various software libraries
+       such as Django, FastAPI, and LangChain. The project also
+       relies on tools for artificial intelligence like OpenAI,
+       Ollama, and Hugging Face. Additionally, it uses database
+       and data management tools like ChromaDB, Milvus, and
+       SQLAlchemy. Other important components include utility
+       libraries for handling web requests, security, and data
+       processing.
+      ⏱ 1.70 s
 
   Q 4: How do you install and run this project?
-   A: I am sorry, but the provided excerpts do not contain information
-       on how to install and run this project.
-      ⏱ 45 ms
+   A: To install the project, you first create and activate a virtual
+       environment, then install the necessary dependencies using
+       the requirements file. After that, you must set up your
+       environment variables in a new file and apply database
+       migrations to prepare the system. You should also create an
+       admin user to access the management panel. Finally, you can
+       start the project by running the development server and
+       visiting the provided local web address in your browser.
+      ⏱ 1.45 s
 
   Q 5: What is the folder or module structure?
-   A: I am sorry, but the provided excerpts do not contain information
-       about the folder or module structure.
-      ⏱ 48 ms
+   A: The project is organized into several main folders including
+       controllers, ai, and main. The controllers folder contains
+       the logic for handling home page actions and file uploads,
+       while the ai folder manages settings and language model
+       integrations. Additionally, the main folder contains a
+       models subfolder that defines various data structures like
+       Chat, User, and Message.
+      ⏱ 1.46 s
 
   Q 6: How is authentication or access control handled?
-   A: I am sorry, but the provided excerpts do not contain information
-       about how authentication or access control is handled.
-      ⏱ 78 ms
+   A: Access control is handled by checking if a user is logged in and
+       verifying their specific group membership. The system uses
+       permissions to restrict access to only those users who
+       belong to the students or teachers groups. When a user
+       tries to view information, the system checks their profile
+       and returns a message confirming their role or denies
+       access if they do not belong to a required group.
+       Additionally, the system ensures that users can only access
+       specific courses they are officially enrolled in.
+      ⏱ 7.50 s
 
   Q 7: What database or storage technology is used?
-   A: I am sorry, but the provided excerpts do not contain information
-       about the database or storage technology used.
-      ⏱ 34 ms
+   A: Based on the provided excerpts, the storage technology used is
+       SQLite. The documents specifically mention several
+       .sqlite.sql files and the use of SQL commands like CREATE
+       TABLE and INSERT INTO. Additionally, the excerpts refer to
+       Chroma DB and its internal database structure.
+      ⏱ 1.76 s
 
   Q 8: How are errors and exceptions handled?
-   A: I am sorry, but the provided excerpts do not contain information
-       on how errors and exceptions are handled.
-      ⏱ 30 ms
+   A: Errors are handled by a validation function that checks for
+       missing information and raises a specific error message if
+       required fields are not found. When a technical problem
+       occurs during a process, such as trying to download a
+       video, the system reports the error and stops the action.
+       For example, if a video download is blocked, the system
+       identifies it as a forbidden request and raises a download
+       error. These errors are then processed through a standard
+       framework that can raise uncaught exceptions or return
+       specific error responses.
+      ⏱ 1.89 s
 
   Q 9: What tests exist and how do you run them?
-   A: I am sorry, but the provided excerpts do not contain information
-       about what tests exist or how to run them.
-      ⏱ 32 ms
+   A: The provided excerpts show tests for saving course links and tests
+       for generating student reports, which check things like
+       user personality and chat topics. There is also a log file
+       that records an error when trying to process YouTube videos
+       because some required software is missing. The excerpts do
+       not contain instructions on how to run these tests.
+      ⏱ 1.51 s
 
   Q10: What environment variables or config files are required?
-   A: I am sorry, but the provided excerpts do not contain information
-       about the required environment variables or configuration
-       files.
-      ⏱ 59 ms
+   A: To set up the project, you need to create a file named .env in the
+       main folder. You should define the specific variables in
+       this file based on the examples provided in the
+       .env.example file. Additionally, the project uses a
+       requirements.txt file to manage and install all necessary
+       dependencies.
+      ⏱ 2.01 s
 
   Q11: What are the main classes or components and what do they do?
-   A: I am sorry, but the provided excerpts do not contain information
-       about the main classes or components.
-      ⏱ 51 ms
+   A: The main component mentioned is the UserAnalyticViewset, which is
+       a class used to manage data for user analytics. It uses a
+       specific model called UserAnalytic to represent the data
+       and a serializer called UserAnalyticSerializer to handle
+       the data format. Other parts of the text discuss animation
+       concepts, such as using shapes to create characters and
+       breaking down movement into four types to simplify the
+       process. Character animation also involves timing and
+       spacing techniques, like calculating frames based on a
+       project's frames per second.
+      ⏱ 1.71 s
 
   Q12: How is the core data-processing or inference pipeline implemented?
-   A: I am sorry, but the provided excerpts do not contain information
-       about how the core data-processing or inference pipeline is
-       implemented.
-      ⏱ 46 ms
+   A: The core pipeline is implemented by first using a YouTube loader
+       to extract information from a video URL. This data is then
+       processed through a vector store index creator to load and
+       vectorize the information. Finally, a query function uses
+       that index to search for specific information and return a
+       response to the user. To run this system, you must have the
+       LangChain, Chroma DB, and OpenAI packages installed.
+      ⏱ 3.46 s
 
-  Timing — min 30 ms  ·  avg 52 ms  ·  max 119 ms
+  Q13: What is shown on the whiteboard or diagram in the context store?
+   A: The provided excerpts do not contain information about what is
+       shown on a whiteboard or diagram.
+      ⏱ 10.06 s
+
+  Q14: Describe the system architecture diagram including all components and connections.
+   A: The provided excerpts do not contain information about a system
+       architecture diagram, its components, or its connections.
+       The text focuses on animation concepts such as timing,
+       spacing, frames per second, and drawings per second.
+      ⏱ 1.85 s
+
+  Timing — min 1.45 s  ·  avg 2.97 s  ·  max 10.06 s
 
 
 ══════════════════════════════════════════════════════════════════════
@@ -334,8 +453,8 @@
 ══════════════════════════════════════════════════════════════════════
   Project                      Files   Chunks      Words     Build      Avg      Max
   ──────────────────────────  ──────  ───────  ─────────  ────────  ───────  ───────
-  telos/context  (tiny)            6       10      2,129    273 ms    82 ms   762 ms
-  telegram-voice-ai-bot           26       69     24,319      8 ms    67 ms   119 ms
-  ai-teachers-old                 77      912    290,748     54 ms    52 ms   119 ms
+  telos/context  (tiny)            6       10      2,129    117 ms   1.56 s   2.49 s
+  telegram-voice-ai-bot           25       68     24,070   13.95 s   3.05 s  15.88 s
+  ai-teachers-old                 76      911    290,561  199.02 s   2.97 s  10.06 s
 ══════════════════════════════════════════════════════════════════════
 

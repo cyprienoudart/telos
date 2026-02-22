@@ -17,10 +17,14 @@ BASE_DIR: Path = Path(os.environ.get("CONTEXT_DIR", "./context")).resolve()
 # File-type filters
 # ---------------------------------------------------------------------------
 
-_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".tiff"}
-_PDF_EXTS   = {".pdf"}
+# Multimodal file types — processed via vision LLM, not plain-text chunking.
+IMAGE_EXTS: frozenset[str] = frozenset({
+    ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".tiff",
+})
+PDF_EXTS: frozenset[str] = frozenset({".pdf"})
 
-BINARY_EXTS: frozenset[str] = frozenset(_IMAGE_EXTS | _PDF_EXTS | {
+# True binaries — skipped entirely (no text, no vision value).
+BINARY_EXTS: frozenset[str] = frozenset({
     # archives
     ".zip", ".tar", ".gz", ".bz2", ".xz", ".7z",
     # compiled / native
@@ -60,8 +64,10 @@ SKIP_DIRS: frozenset[str] = frozenset({
 
 LLM_BASE_URL       = "https://openrouter.ai/api/v1"
 LLM_MODEL          = os.environ.get("OPENROUTER_MODEL", "google/gemini-2.0-flash-001")
+VISION_MODEL       = os.environ.get("VISION_MODEL", LLM_MODEL)   # must support vision input
 MAX_TOKENS_SUMMARY = 700
 MAX_TOKENS_ANSWER  = 250
+MAX_TOKENS_VISION  = 500   # per image / PDF description
 
 # ---------------------------------------------------------------------------
 # Chunking

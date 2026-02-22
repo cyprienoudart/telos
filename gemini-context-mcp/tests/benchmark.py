@@ -81,6 +81,9 @@ QUESTIONS: list[str] = [
     "What environment variables or config files are required?",
     "What are the main classes or components and what do they do?",
     "How is the core data-processing or inference pipeline implemented?",
+    # Multimodal-specific (hit whiteboard.jpg in telos/context; 'not found' elsewhere)
+    "What is shown on the whiteboard or diagram in the context store?",
+    "Describe the system architecture diagram including all components and connections.",
 ]
 
 # ---------------------------------------------------------------------------

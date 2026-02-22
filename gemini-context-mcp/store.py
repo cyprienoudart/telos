@@ -19,6 +19,7 @@ from fastembed import TextEmbedding
 
 import config
 from chunker import build_all_chunks, context_hash
+import multimodal
 
 
 # ---------------------------------------------------------------------------
@@ -64,14 +65,20 @@ def _project_id() -> str:
 # Context index
 # ---------------------------------------------------------------------------
 
+def _full_hash() -> str:
+    """Combined hash of all text files + all multimodal files."""
+    combined = context_hash() + multimodal.multimodal_hash()
+    return hashlib.md5(combined.encode()).hexdigest()
+
+
 def _get_context_collection() -> chromadb.Collection:
     """
     Return the ChromaDB collection for the current project.
-    Rebuilds automatically when files change (detected via context_hash).
+    Rebuilds automatically when any text, image, or PDF file changes.
     """
     client = _get_chroma_client()
     name   = f"ctx_{_project_id()}"
-    h      = context_hash()
+    h      = _full_hash()
 
     try:
         col = client.get_collection(name)
@@ -81,7 +88,7 @@ def _get_context_collection() -> chromadb.Collection:
     except Exception:
         pass
 
-    chunks = build_all_chunks()
+    chunks = build_all_chunks() + multimodal.build_multimodal_chunks()
     col    = client.create_collection(
         name,
         metadata={"content_hash": h, "hnsw:space": "cosine"},
@@ -139,7 +146,7 @@ def _get_cache_collection() -> chromadb.Collection:
     """
     client = _get_chroma_client()
     name   = f"cache_{_project_id()}"
-    h      = context_hash()
+    h      = _full_hash()
 
     try:
         col = client.get_collection(name)
