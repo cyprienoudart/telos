@@ -832,6 +832,7 @@ button {
    ======================================== */
 
 .debug-build-btn {
+  display: none;
   position: fixed;
   bottom: 16px;
   right: 16px;
