@@ -49,7 +49,17 @@ async def start_conversation(req: ConversationStartRequest):
         except (ValueError, RuntimeError) as exc:
             raise HTTPException(400, str(exc)) from exc
 
-    result = session.loop.start(req.message)
+    result = session.loop.start(
+        req.message,
+        additional_context=req.additional_context,
+        github_url=req.github_url,
+    )
+
+    # Copy uploaded files into the session directory alongside context.md
+    if req.files_dir:
+        from server.routes.context import copy_files_to_session
+        copy_files_to_session(req.files_dir, session.context_path.parent)
+
     session.question_info = result.get("_question_info") or {
         "targets": [],
         "question": result.get("first_question", ""),

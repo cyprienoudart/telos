@@ -61,7 +61,9 @@ class ConversationLoop:
         else:
             return 0.95, 15
 
-    def start(self, user_text: str, attached_files: Optional[list[str]] = None) -> dict:
+    def start(self, user_text: str, attached_files: Optional[list[str]] = None,
+              additional_context: Optional[str] = None,
+              github_url: Optional[str] = None) -> dict:
         """
         Initialize the conversation from the user's first input.
         Supports multi-task: detects multiple categories and merges elements.
@@ -115,8 +117,17 @@ class ConversationLoop:
             else:
                 unknown_elements.append(elem["description"])
 
+        # Build source material from uploaded files + GitHub URL
+        source_parts: list[str] = []
+        if additional_context:
+            source_parts.append(additional_context)
+        if github_url:
+            source_parts.append(f"GitHub Repository: {github_url}")
+        source_material = "\n\n".join(source_parts) if source_parts else ""
+
         self.context_mgr.create_initial(
             mission=parsed["mission"],
+            source_material=source_material,
             known_info=known_info,
             unknown_elements=unknown_elements,
         )

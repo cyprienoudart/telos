@@ -17,7 +17,7 @@ import time
 import torch
 from transformers import (
     GPT2LMHeadModel,
-    GPT2Tokenizer,
+    AutoTokenizer,
     Trainer,
     TrainingArguments,
     DataCollatorForLanguageModeling,
@@ -36,7 +36,7 @@ MAX_LENGTH = 256
 class QuestionSFTDataset(Dataset):
     """Dataset for question generation fine-tuning."""
 
-    def __init__(self, data_path: str, tokenizer: GPT2Tokenizer,
+    def __init__(self, data_path: str, tokenizer,
                  max_length: int = MAX_LENGTH):
         self.tokenizer = tokenizer
         self.max_length = max_length
@@ -95,7 +95,7 @@ def main():
 
     # Load tokenizer and model
     print(f"📦 Loading base model: {MODEL_NAME}...")
-    tokenizer = GPT2Tokenizer.from_pretrained(MODEL_NAME)
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
     tokenizer.pad_token = tokenizer.eos_token
 
     model = GPT2LMHeadModel.from_pretrained(MODEL_NAME)
@@ -131,15 +131,10 @@ def main():
     print(f"   📊 Train: {train_size}, Eval: {eval_size}")
 
     # Calculate training steps for ~20 minutes
-    # Estimate: ~0.5s per step on MPS with batch_size=4
-    # 20 min = 1200s → ~2400 steps
-    # With dataset of ~750 examples, batch=4 → ~187 steps/epoch
-    # ~2400/187 ≈ ~12 epochs
-    estimated_steps_per_sec = 2.0 if device == "mps" else 0.5
-    target_seconds = 20 * 60  # 20 minutes
-    estimated_total_steps = int(target_seconds * estimated_steps_per_sec)
+    # With 675 train examples, batch=4, grad_accum=2 → ~84 effective steps/epoch
+    # On MPS, ~1s per step → 20 min = 1200s → ~1200 steps → ~14 epochs
     steps_per_epoch = max(1, train_size // 4)
-    num_epochs = max(5, min(30, estimated_total_steps // steps_per_epoch))
+    num_epochs = 15
 
     print(f"\n🚀 Training configuration:")
     print(f"   Epochs: {num_epochs}")
@@ -159,20 +154,17 @@ def main():
     # Training arguments
     training_args = TrainingArguments(
         output_dir=OUTPUT_DIR,
-        overwrite_output_dir=True,
         num_train_epochs=num_epochs,
         per_device_train_batch_size=4,
         per_device_eval_batch_size=4,
         learning_rate=5e-4,
         weight_decay=0.01,
-        warmup_steps=50,
+        warmup_steps=100,
         logging_steps=50,
         eval_strategy="steps",
         eval_steps=200,
-        save_steps=500,
-        save_total_limit=2,
+        save_strategy="no",
         fp16=False,  # MPS doesn't support fp16 well
-        use_mps_device=(device == "mps"),
         report_to="none",
         dataloader_num_workers=0,
         gradient_accumulation_steps=2,
@@ -195,9 +187,19 @@ def main():
 
     train_result = trainer.train()
 
-    # Save the LoRA adapter
+    # Save the LoRA adapter (skip model card to avoid missing template errors)
     print("\n💾 Saving fine-tuned model...")
-    model.save_pretrained(OUTPUT_DIR)
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    try:
+        model.save_pretrained(OUTPUT_DIR, safe_serialization=True)
+    except Exception:
+        # Fallback: save adapter manually if model card template fails
+        import shutil
+        model.base_model.save_pretrained(OUTPUT_DIR, safe_serialization=True)
+    # Clean up model card if it was partially created
+    readme = os.path.join(OUTPUT_DIR, "README.md")
+    if os.path.exists(readme):
+        os.remove(readme)
     tokenizer.save_pretrained(OUTPUT_DIR)
 
     # Test generation

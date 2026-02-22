@@ -13,11 +13,18 @@ import {
 
 // ── Types ────────────────────────────────────────────────────────────────
 
+export interface MessageAttachment {
+    name: string;
+    size: number;
+}
+
 export interface Message {
     id: string;
     role: "user" | "ai";
     content: string;
     timestamp: Date;
+    attachments?: MessageAttachment[];
+    githubUrl?: string;
 }
 
 export type ChatPhase = "conversation" | "planning" | "confirming" | "building" | "done";
@@ -86,7 +93,7 @@ interface ChatContextType {
     activeChatId: string | null;
     activeChat: Chat | null;
     estimateLoading: boolean;
-    createChat: (firstMessage: string, githubUrl?: string) => Promise<string>;
+    createChat: (firstMessage: string, files?: File[], githubUrl?: string) => Promise<string>;
     sendMessage: (chatId: string, content: string) => Promise<string | null>;
     changeEstimateModel: (chatId: string, model: string) => void;
     confirmBuild: (chatId: string) => void;
@@ -142,13 +149,17 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     // ── Create Chat (POST /api/backend/conversation/start) ───────────
 
     const createChat = useCallback(
-        async (firstMessage: string, githubUrl?: string): Promise<string> => {
+        async (firstMessage: string, files?: File[], githubUrl?: string): Promise<string> => {
             const chatId = generateId();
             const userMsg: Message = {
                 id: generateId(),
                 role: "user",
                 content: firstMessage,
                 timestamp: new Date(),
+                attachments: files && files.length > 0
+                    ? files.map((f) => ({ name: f.name, size: f.size }))
+                    : undefined,
+                githubUrl: githubUrl || undefined,
             };
 
             const newChat: Chat = {
@@ -174,8 +185,44 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             setActiveChatId(chatId);
 
             try {
+                // Step 1: Process uploaded files via Gemini multimodal (if any)
+                let additionalContext: string | null = null;
+                let filesDir: string | null = null;
+                if (files && files.length > 0) {
+                    try {
+                        const formData = new FormData();
+                        for (const file of files) {
+                            formData.append("files", file);
+                        }
+                        const uploadRes = await fetch("/api/backend/context/process", {
+                            method: "POST",
+                            body: formData,
+                        });
+                        if (uploadRes.ok) {
+                            const uploadData = await uploadRes.json();
+                            if (uploadData.extracted_text) {
+                                additionalContext = uploadData.extracted_text;
+                            }
+                            if (uploadData.files_dir) {
+                                filesDir = uploadData.files_dir;
+                            }
+                        }
+                    } catch {
+                        // File processing failed — continue without it
+                    }
+                }
+
+                // Step 2: Start the conversation with message + optional context
                 const body: Record<string, string> = { message: firstMessage };
-                if (githubUrl) body.github_url = githubUrl;
+                if (additionalContext) {
+                    body.additional_context = additionalContext;
+                }
+                if (githubUrl) {
+                    body.github_url = githubUrl;
+                }
+                if (filesDir) {
+                    body.files_dir = filesDir;
+                }
 
                 const res = await fetch("/api/backend/conversation/start", {
                     method: "POST",

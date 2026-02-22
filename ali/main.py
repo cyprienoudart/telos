@@ -10,6 +10,7 @@ Usage:
 """
 from __future__ import annotations
 
+import re
 import sys
 import os
 
@@ -19,6 +20,17 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from ali.conversation_loop import ConversationLoop
+
+# Patterns that mean "skip this question"
+SKIP_PATTERNS = re.compile(
+    r"^("
+    r"no\s*idea|idk|i\s*don'?t\s*know|not\s*sure|skip|pass|next"
+    r"|i\s*have\s*no\s*idea|no\s*clue|don'?t\s*know"
+    r"|i'?m\s*not\s*sure|whatever|doesn'?t?\s*matter"
+    r"|i\s*don'?t\s*care|no\s*preference|none|nah|n/?a"
+    r")$",
+    re.IGNORECASE,
+)
 
 
 def main():
@@ -33,7 +45,7 @@ def main():
         if args[i] == "--context" and i + 1 < len(args):
             context_path = args[i + 1]
             i += 2
-        elif args[i] == "--help" or args[i] == "-h":
+        elif args[i] in ("--help", "-h"):
             print(__doc__)
             sys.exit(0)
         elif not args[i].startswith("-"):
@@ -42,31 +54,21 @@ def main():
         else:
             i += 1
 
-    # Welcome
-    print()
-    print("╔══════════════════════════════════════════════════════════╗")
-    print("║            🎯 TELOS — Project Understanding            ║")
-    print("║                                                        ║")
-    print("║  Tell me about your project and I'll ask the right     ║")
-    print("║  questions to understand exactly what you need.        ║")
-    print("║                                                        ║")
-    print("║  Type 'quit' or 'done' at any time to end.             ║")
-    print("╚══════════════════════════════════════════════════════════╝")
-    print()
+    # # Welcome
+    # print()
+    # print("🎯 TELOS — Tell me about your project and I'll figure out what you need.")
+    # print()
 
     # Get initial text if not provided as argument
     if not initial_text:
-        print("📝 What project do you need help with?")
-        print("   (Describe it in a few sentences — the more detail, the better)")
-        print()
         try:
-            initial_text = input("👤 You: ").strip()
+            initial_text = input("You: ").strip()
         except (EOFError, KeyboardInterrupt):
-            print("\n👋 Goodbye!")
+            # print("\nGoodbye!")
             sys.exit(0)
 
         if not initial_text:
-            print("Please describe your project to get started.")
+            # print("Please describe your project to get started.")
             sys.exit(1)
 
     # Initialize and start
@@ -77,99 +79,44 @@ def main():
 
     result = loop.start(initial_text)
 
-    # Show what TELOS detected
-    categories = result.get("categories", [result["category"]])
-    cat_display = ", ".join(c.replace("_", " ").title() for c in categories)
-
-    print()
-    print(f"   📋 Mission: {result['mission']}")
-    print(f"   📂 {'Categories' if len(categories) > 1 else 'Category'}: {cat_display}")
-    print(f"   ✅ Pre-understood: {result['pre_answered_count']}/{result['total_elements']} elements")
-    print(f"   📊 Coverage: {result['initial_coverage'] * 100:.0f}%")
-    print()
-
     if result["done"]:
-        print("✨ I already have enough from your description! No questions needed.")
-        print(f"📄 Context saved to: {context_path}")
-        print()
-        print(loop.context_mgr.to_prompt())
+        # print("\nTELOS: I already have everything I need from your description!")
+        # print(f"\n📄 Saved to {context_path}")
         return
 
     # Conversation loop
     question = result.get("first_question")
     question_info = result.get("_question_info") or {"targets": [], "question": question}
 
-    print("─" * 58)
-    print("  I have a few questions to make sure I understand everything.")
-    print("─" * 58)
-    print()
-
     while question:
-        status = loop.get_status()
-        progress = "█" * int(status["coverage"] * 20) + "░" * (20 - int(status["coverage"] * 20))
-        print(f"   [{progress}] {status['coverage_pct']} coverage")
-        print()
-        print(f"🤔 TELOS: {question}")
-        print()
+        print(f"\nTELOS: {question}\n")
 
         try:
-            user_answer = input("👤 You: ").strip()
+            user_answer = input("You: ").strip()
         except (EOFError, KeyboardInterrupt):
-            print("\n\n👋 Ending conversation. Saving what we have...")
             break
 
         if not user_answer:
             continue
 
-        if user_answer.lower() in ("quit", "exit", "done", "go", "stop", "q"):
-            print("\n✨ Got it! Saving everything we discussed.")
+        if user_answer.lower() in ("quit", "exit", "done", "stop", "q"):
             break
 
-        # Process answer
-        result = loop.process_answer(user_answer, question_info)
-
-        if result.get("resolved"):
-            n = len(result["resolved"])
-            print(f"\n   ✅ Got it! Understood {n} thing{'s' if n > 1 else ''}.")
-        if result.get("bonus"):
-            n = len(result["bonus"])
-            print(f"   🎁 Bonus — you also answered {n} extra thing{'s' if n > 1 else ''}!")
-        print()
+        # Skip if user doesn't know / no idea
+        if SKIP_PATTERNS.match(user_answer.strip()):
+            result = loop.process_answer("", question_info)
+        else:
+            result = loop.process_answer(user_answer, question_info)
 
         if result.get("done"):
-            print("✨ I have everything I need!")
+            # print("\nTELOS: That's everything I needed, thank you!")
             break
 
         question = result.get("next_question")
         question_info = result.get("_question_info") or {"targets": [], "question": question or ""}
 
-    # Final output
-    status = loop.get_status()
-    print()
-    print("╔══════════════════════════════════════════════════════════╗")
-    print("║                    📊 Summary                          ║")
-    print("╠══════════════════════════════════════════════════════════╣")
-    print(f"║  Coverage: {status['coverage_pct']:>5}                                     ║")
-    print(f"║  Questions asked: {status['turn']:>2}                                      ║")
-    print(f"║  Elements resolved: {status['answered_count']:>2}/{status['total_elements']:<2}                                  ║")
-    print(f"║  Context saved to: {context_path:<34}   ║")
-    print("╚══════════════════════════════════════════════════════════╝")
-    print()
-
-    # Show remaining undefined (if any)
-    undefined = loop.sft_model.get_undefined_elements(loop.elements)
-    if undefined:
-        print("📋 We can figure these out later:")
-        for e in undefined[:5]:
-            print(f"   • {e['description']}")
-        print()
-
-    # Show context.md
-    print("═" * 58)
-    print("📄 Generated Project Brief:")
-    print("═" * 58)
-    print()
-    print(loop.context_mgr.to_prompt())
+    # # Done
+    # print(f"\n📄 Saved to {context_path}")
 
 
 if __name__ == "__main__":

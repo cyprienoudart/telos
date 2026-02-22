@@ -486,6 +486,198 @@ button {
 }
 
 /* ========================================
+   FILE CHIPS — Uploaded file previews
+   ======================================== */
+
+.file-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 680px;
+  width: 100%;
+  padding: 0 24px;
+  margin-bottom: 12px;
+  animation: fadeInUp 0.3s ease;
+}
+
+.file-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-primary);
+  transition: all var(--transition);
+}
+
+.file-chip:hover {
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow-xs);
+}
+
+.file-chip__icon {
+  color: var(--text-hint);
+  flex-shrink: 0;
+}
+
+.file-chip__name {
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-chip__size {
+  font-size: 11px;
+  color: var(--text-hint);
+  flex-shrink: 0;
+}
+
+.file-chip__remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-hint);
+  cursor: pointer;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.file-chip__remove:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* ========================================
+   HOME ACTIONS — Attach + GitHub row
+   ======================================== */
+
+.home-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 680px;
+  width: 100%;
+  padding: 0 24px;
+  margin-top: 12px;
+  animation: fadeInUp 0.6s ease 0.4s both;
+}
+
+.home-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.home-action-btn:hover {
+  border-color: var(--border-focus);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.home-action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* GitHub URL input */
+.github-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  padding: 6px 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  transition: all var(--transition);
+}
+
+.github-input-wrapper:hover {
+  border-color: var(--border-focus);
+}
+
+.github-input-wrapper:focus-within {
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow-sm);
+  background: var(--bg);
+}
+
+.github-input-icon {
+  color: var(--text-hint);
+  flex-shrink: 0;
+}
+
+.github-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--text-primary);
+  min-width: 0;
+}
+
+.github-input::placeholder {
+  color: var(--text-hint);
+}
+
+.github-input:disabled {
+  opacity: 0.4;
+}
+
+/* ========================================
+   PROCESSING INDICATOR
+   ======================================== */
+
+.processing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  animation: fadeIn 0.3s ease;
+}
+
+.processing-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========================================
    CHAT INSTANCE — Active conversation
    ======================================== */
 
@@ -531,6 +723,74 @@ button {
 
 .message--user .message__content {
   color: var(--text-primary);
+}
+
+/* ── Message Attachments (files + GitHub in chat history) ── */
+
+.message-attachments {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.message-file-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.file-chip--inline {
+  cursor: default;
+}
+
+/* GitHub chip — clickable link */
+.github-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: all var(--transition);
+  width: fit-content;
+}
+
+.github-chip:hover {
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow-xs);
+  color: var(--accent);
+}
+
+.github-chip__icon {
+  color: var(--text-hint);
+  flex-shrink: 0;
+}
+
+.github-chip:hover .github-chip__icon {
+  color: var(--text-primary);
+}
+
+.github-chip__url {
+  max-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.github-chip__external {
+  color: var(--text-hint);
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.github-chip:hover .github-chip__external {
+  opacity: 1;
 }
 
 .message--ai .message__content {

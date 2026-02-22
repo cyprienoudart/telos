@@ -4,6 +4,7 @@ All Claude Code invocations go through this module. It builds the
 appropriate CLI command with flags for isolation, MCP config, and
 permissions, then runs it as a subprocess.
 """
+from __future__ import annotations
 
 import json
 import os

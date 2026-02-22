@@ -12,7 +12,6 @@ Usage:
       --body "Congratulations on your achievements..." \
       --image assets/iwd-header.png \
       --output-dir demo/emails/
-
     # Batch from JSON file
     uv run python -m telos_agent.tools.send_email \
       --batch recipients.json \
@@ -20,6 +19,7 @@ Usage:
       --body "..." \
       --output-dir demo/emails/
 """
+from __future__ import annotations
 
 import argparse
 import base64

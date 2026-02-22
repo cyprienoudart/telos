@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import List, Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -9,19 +11,21 @@ from pydantic import BaseModel, Field
 
 class ConversationStartRequest(BaseModel):
     message: str = Field(..., min_length=1, description="User's initial project description")
-    context_dir: str | None = Field(None, description="Path to context files for RAG pre-answering")
-    github_url: str | None = Field(None, description="GitHub repo URL to clone as project context")
+    context_dir: Optional[str] = Field(None, description="Path to context files for RAG pre-answering")
+    additional_context: Optional[str] = Field(None, description="Gemini-extracted text from uploaded files")
+    github_url: Optional[str] = Field(None, description="GitHub repo URL to clone as project context")
+    files_dir: Optional[str] = Field(None, description="Temp dir with uploaded files to copy into session")
 
 
 class ConversationStartResponse(BaseModel):
     session_id: str
     mission: str
-    categories: list[str]
+    categories: List[str]
     pre_answered_count: int
     rag_answered_count: int
     total_elements: int
     initial_coverage: float
-    first_question: str | None
+    first_question: Optional[str]
     done: bool
     repo_url: str | None = None
     repo_dir: str | None = None
@@ -32,10 +36,10 @@ class ConversationAnswerRequest(BaseModel):
 
 
 class ConversationAnswerResponse(BaseModel):
-    resolved: list[str]
-    bonus: list[str]
+    resolved: List[str]
+    bonus: List[str]
     coverage: float
-    next_question: str | None
+    next_question: Optional[str]
     done: bool
     turn: int
 
@@ -48,14 +52,15 @@ class ConversationStatusResponse(BaseModel):
     undefined_count: int
     total_elements: int
     done: bool
-    categories: list[str]
+    categories: List[str]
 
 
 # ── Build ─────────────────────────────────────────────────────────────────
 
 class BuildStartRequest(BaseModel):
     session_id: str = Field(..., description="Session ID from completed conversation")
-    context_dir: str | None = Field(None, description="Path to context files for Gemini MCP")
+    project_dir: Optional[str] = Field(None, description="Target directory for the built project")
+    context_dir: Optional[str] = Field(None, description="Path to context files for Gemini MCP")
     max_iterations: int = Field(10, ge=1, le=50)
     model: str = Field("opus")
 
@@ -107,8 +112,8 @@ class BuildStatusResponse(BaseModel):
     status: str  # "running", "completed", "failed"
     iteration: int
     total_iterations: int
-    success: bool | None = None
-    error: str | None = None
+    success: Optional[bool] = None
+    error: Optional[str] = None
 
 
 # ── PRD Progress ─────────────────────────────────────────────────────────

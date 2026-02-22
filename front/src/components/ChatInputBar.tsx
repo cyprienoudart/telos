@@ -7,9 +7,10 @@ interface ChatInputBarProps {
     onSend: (message: string) => void;
     placeholder?: string;
     autoFocus?: boolean;
+    disabled?: boolean;
 }
 
-export default function ChatInputBar({ onSend, placeholder = "Ask me anything...", autoFocus = false }: ChatInputBarProps) {
+export default function ChatInputBar({ onSend, placeholder = "Ask me anything...", autoFocus = false, disabled = false }: ChatInputBarProps) {
     const [value, setValue] = useState("");
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -29,7 +30,7 @@ export default function ChatInputBar({ onSend, placeholder = "Ask me anything...
 
     const handleSend = () => {
         const trimmed = value.trim();
-        if (!trimmed) return;
+        if (!trimmed || disabled) return;
         onSend(trimmed);
         setValue("");
         if (textareaRef.current) {
@@ -61,13 +62,14 @@ export default function ChatInputBar({ onSend, placeholder = "Ask me anything...
                     onKeyDown={handleKeyDown}
                     placeholder={placeholder}
                     rows={1}
+                    disabled={disabled}
                 />
                 <div className="chat-input-actions">
                     <MicButton onTranscript={handleTranscript} />
                     <button
                         className="send-btn"
                         onClick={handleSend}
-                        disabled={isEmpty}
+                        disabled={isEmpty || disabled}
                         title="Send message"
                         type="button"
                     >
