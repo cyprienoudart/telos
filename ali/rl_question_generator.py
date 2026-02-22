@@ -79,10 +79,10 @@ class RLQuestionGenerator:
             if self._llm_tokenizer.pad_token is None:
                 self._llm_tokenizer.pad_token = self._llm_tokenizer.eos_token
 
-            print("   🧠 Loaded fine-tuned question LLM (GPT-2 + LoRA)")
+            # print("   🧠 Loaded fine-tuned question LLM (GPT-2 + LoRA)")
 
         except Exception as e:
-            print(f"   ⚠️ Could not load question LLM: {e}")
+            # print(f"   ⚠️ Could not load question LLM: {e}")
             self._llm_model = None
             self._llm_tokenizer = None
 
@@ -167,7 +167,7 @@ class RLQuestionGenerator:
             return question
 
         except Exception as e:
-            print(f"   ⚠️ LLM generation failed: {e}")
+            # print(f"   ⚠️ LLM generation failed: {e}")
             return None
 
     # ─── Expert-crafted question templates (fallback) ──────────────

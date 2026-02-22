@@ -74,7 +74,7 @@ class SFTElementModel:
 
             model_path = Path(self.c1_llm_path)
             if not model_path.exists():
-                print("   ℹ️  C1 LLM not found — using lookup fallback")
+                # print("   ℹ️  C1 LLM not found — using lookup fallback")
                 return None, None
 
             # Clean adapter config for PEFT version compatibility
@@ -88,10 +88,9 @@ class SFTElementModel:
             model = PeftModel.from_pretrained(base_model, self.c1_llm_path)
             model.eval()
 
-            print("   🧠 Loaded fine-tuned C1 LLM (GPT-2 + LoRA)")
+            # print("   🧠 Loaded fine-tuned C1 LLM (GPT-2 + LoRA)")
             return tokenizer, model
-        except Exception as e:
-            print(f"   ⚠️  Could not load C1 LLM: {e}")
+        except Exception:
             return None, None
 
     def identify_from_text(self, user_text: str,
@@ -147,7 +146,8 @@ class SFTElementModel:
                 return parsed
 
         except Exception as e:
-            print(f"   ⚠️  C1 LLM inference failed: {e}")
+            # print(f"   ⚠️  C1 LLM inference failed: {e}")
+            pass
 
         return None
 

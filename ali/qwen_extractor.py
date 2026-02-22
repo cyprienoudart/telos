@@ -95,10 +95,10 @@ class QwenExtractor:
             if self._llm_tokenizer.pad_token is None:
                 self._llm_tokenizer.pad_token = self._llm_tokenizer.eos_token
 
-            print("   🧠 Loaded fine-tuned extractor LLM (GPT-2 + LoRA)")
+            # print("   🧠 Loaded fine-tuned extractor LLM (GPT-2 + LoRA)")
 
         except Exception as e:
-            print(f"   ⚠️ Could not load extractor LLM: {e}")
+            # print(f"   ⚠️ Could not load extractor LLM: {e}")
             self._llm_model = None
             self._llm_tokenizer = None
 
@@ -228,7 +228,7 @@ class QwenExtractor:
             }
 
         except Exception as e:
-            print(f"   ⚠️ LLM extraction failed: {e}")
+            # print(f"   ⚠️ LLM extraction failed: {e}")
             return None
 
     def _build_llm_prompt(self, answer: str, targets: list[str],

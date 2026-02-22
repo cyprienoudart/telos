@@ -132,21 +132,22 @@ def main():
     print(f"   📊 Train: {train_size}, Eval: {eval_size}")
 
     # Calculate training epochs
-    # With dataset of ~1000+ examples, batch=4 → ~250+ steps/epoch
-    # Target ~15-20 minutes of training
-    estimated_steps_per_sec = 2.0 if device == "mps" else 0.5
-    target_seconds = 15 * 60  # 15 minutes
-    estimated_total_steps = int(target_seconds * estimated_steps_per_sec)
-    steps_per_epoch = max(1, train_size // 4)
-    num_epochs = max(5, min(25, estimated_total_steps // steps_per_epoch))
+    # Empirical: ~1.7s per optimizer step on MPS with batch=4, grad_accum=2
+    # effective batch = 4 * 2 = 8, steps_per_epoch = train_size // 8
+    effective_batch = 4 * 2  # per_device_batch * gradient_accumulation
+    steps_per_epoch = max(1, train_size // effective_batch)
+    target_minutes = 30
+    secs_per_step = 1.7 if device == "mps" else 3.0
+    target_steps = int(target_minutes * 60 / secs_per_step)
+    num_epochs = max(5, min(25, target_steps // steps_per_epoch))
 
     print(f"\n🚀 Training configuration:")
     print(f"   Epochs: {num_epochs}")
-    print(f"   Batch size: 4")
+    print(f"   Batch size: 4 (effective: {effective_batch} with grad accum)")
     print(f"   Learning rate: 5e-4")
     print(f"   Steps/epoch: ~{steps_per_epoch}")
     print(f"   Estimated total steps: ~{steps_per_epoch * num_epochs}")
-    print(f"   Target duration: ~15 minutes")
+    print(f"   Target duration: ~{target_minutes} minutes")
     print()
 
     # Data collator
@@ -163,7 +164,7 @@ def main():
         per_device_eval_batch_size=4,
         learning_rate=5e-4,
         weight_decay=0.01,
-        warmup_steps=50,
+        warmup_steps=80,
         logging_steps=50,
         eval_strategy="steps",
         eval_steps=200,
