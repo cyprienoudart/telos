@@ -33,7 +33,7 @@ class ConversationLoop:
     MAX_TURNS = 10
     COVERAGE_THRESHOLD = 0.90
 
-    def __init__(self, missions_path: str = "training_data/missions.jsonl",
+    def __init__(self, missions_path: str = "train/data/missions.jsonl",
                  context_path: str = "context.md"):
         self.parser = InputParser(missions_path=missions_path)
         self.sft_model = SFTElementModel(missions_path=missions_path)

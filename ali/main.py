@@ -71,7 +71,7 @@ def main():
 
     # Initialize and start
     loop = ConversationLoop(
-        missions_path="training_data/missions.jsonl",
+        missions_path="train/data/missions.jsonl",
         context_path=context_path,
     )
 

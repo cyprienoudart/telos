@@ -175,17 +175,17 @@ class RLQuestionGenerator:
     QUESTION_TEMPLATES = {
         # ── Design & Brand ──────────────────────────────────────
         "design_style": [
-            "What vibe are you going for visually? Think modern, minimal, bold, retro — anything inspire you?",
+            "What vibe are you going for visually? Think modern, minimal, bold, retro... anything inspire you?",
             "If you showed someone this project, what feeling should they get at first glance?",
             "Are there any websites, apps, or brands whose look you love? That helps me nail the direction.",
             "Do you lean more towards clean and simple, or rich and detailed?",
         ],
         "existing_branding": [
-            "Do you already have brand assets — logo, color palette, fonts — or are we building from scratch?",
+            "Do you already have brand assets (logo, color palette, fonts) or are we building from scratch?",
             "Is there an existing brand identity we should work within, or is this a fresh start?",
         ],
         "design_direction": [
-            "Walk me through the mood — what colors, textures, or vibes are you imagining?",
+            "Walk me through the mood: what colors, textures, or vibes are you imagining?",
             "If this project were a brand, how would you describe its personality in 3 words?",
         ],
         "color_preferences": [
@@ -195,14 +195,14 @@ class RLQuestionGenerator:
             "What visuals do we need to create? Photos, illustrations, icons, AI-generated images?",
         ],
         "visual_assets": [
-            "What kind of visual content do you need — photos, graphics, video clips, animations?",
+            "What kind of visual content do you need? Photos, graphics, video clips, animations?",
         ],
 
         # ── Audience ────────────────────────────────────────────
         "target_audience": [
             "Who's this really for? Paint me a picture of your ideal user or customer.",
             "Who are you trying to reach, and what do they care about most?",
-            "Tell me about your audience — age, interests, what keeps them up at night.",
+            "Tell me about your audience: age, interests, what keeps them up at night.",
         ],
         "target_customers": [
             "Who's buying from you? What does a typical customer look like?",
@@ -214,7 +214,7 @@ class RLQuestionGenerator:
             "Who's going to actually use this day-to-day? What's their role?",
         ],
         "existing_audience_size": [
-            "How big is your current reach — email list, social followers, customer base?",
+            "How big is your current reach? Email list, social followers, customer base?",
         ],
 
         # ── Content & Messaging ─────────────────────────────────
@@ -223,13 +223,13 @@ class RLQuestionGenerator:
             "What's the core message? Boil it down to one sentence.",
         ],
         "messaging_tone": [
-            "How should this sound — professional, casual, inspiring, playful, urgent?",
+            "How should this sound? Professional, casual, inspiring, playful, urgent?",
         ],
         "content_ready": [
-            "How's the content looking — do you have text and images ready, or do we need to create everything?",
+            "How's the content looking? Do you have text and images ready, or do we need to create everything?",
         ],
         "brand_voice": [
-            "What tone should the writing have — formal, casual, witty, inspirational?",
+            "What tone should the writing have? Formal, casual, witty, inspirational?",
         ],
         "brand_tone": [
             "What personality should come through in the messaging?",
@@ -237,7 +237,7 @@ class RLQuestionGenerator:
 
         # ── Technical ───────────────────────────────────────────
         "tech_platform": [
-            "Any preference on the tech side — WordPress, Shopify, custom code, something else?",
+            "Any preference on the tech side? WordPress, Shopify, custom code, something else?",
         ],
         "tech_stack": [
             "What tech are you using or planning to use? Frontend, backend, database?",
@@ -245,35 +245,32 @@ class RLQuestionGenerator:
 
         # ── Scope & Deliverables ────────────────────────────────
         "deliverables": [
-            "Let's get specific — what exactly do you need delivered at the end of this?",
+            "Let's get specific: what exactly do you need delivered at the end of this?",
         ],
         "pages_structure": [
-            "What pages do you need? Home, About, Services, Contact — or something more custom?",
+            "What pages do you need? Home, About, Services, Contact, or something more custom?",
         ],
         "core_features": [
-            "What are the must-have features — the things that make or break this project?",
+            "What are the must-have features? The things that make or break this project?",
         ],
         "campaign_channels": [
-            "Where should this reach people — email, social media, paid ads, your website?",
+            "Where should this reach people? Email, social media, paid ads, your website?",
         ],
 
-        # ── Timeline & Budget ───────────────────────────────────
-        "timeline": [
-            "What's the timeline looking like? Any hard deadlines I should know about?",
-        ],
+        # ── Budget ────────────────────────────────────────────────
         "budget": [
             "What budget range are you working with? Even a rough idea helps me scope things right.",
         ],
 
         # ── Campaign / Mission ──────────────────────────────────
         "campaign_goal": [
-            "What's the #1 goal here — more sales, brand awareness, customer engagement?",
+            "What's the #1 goal here? More sales, brand awareness, customer engagement?",
         ],
         "event_theme": [
             "What's the occasion or theme? Tell me the story behind this campaign.",
         ],
         "main_content_purpose": [
-            "What's the main purpose of this — what problem does it solve or goal does it achieve?",
+            "What's the main purpose of this? What problem does it solve or goal does it achieve?",
         ],
         "app_purpose": [
             "What problem does this app solve? What's the core use case?",
@@ -282,7 +279,7 @@ class RLQuestionGenerator:
             "What specific problem does this SaaS solve, and who has that problem?",
         ],
         "offer_promotion": [
-            "Is there a special offer or promotion tied to this — discount, free trial?",
+            "Is there a special offer or promotion tied to this? A discount, free trial?",
         ],
         "products_services": [
             "What are you selling? Walk me through your product or service lineup.",
@@ -290,23 +287,23 @@ class RLQuestionGenerator:
 
         # ── Email ───────────────────────────────────────────────
         "email_goals": [
-            "What should email marketing achieve for you — sales, engagement, retention?",
+            "What should email marketing achieve for you? Sales, engagement, retention?",
         ],
         "email_types": [
-            "What types of emails — newsletters, automated sequences, promotions, transactional?",
+            "What types of emails do you need? Newsletters, automated sequences, promotions?",
         ],
         "email_platform": [
-            "Using an email platform already — Mailchimp, Klaviyo — or need a recommendation?",
+            "Are you using an email platform already (Mailchimp, Klaviyo) or need a recommendation?",
         ],
 
         # ── Chatbot ─────────────────────────────────────────────
         "bot_purpose": [
-            "What should the chatbot do — answer FAQs, handle orders, provide support?",
+            "What should the chatbot do? Answer FAQs, handle orders, provide support?",
         ],
 
         # ── Video ───────────────────────────────────────────────
         "video_purpose": [
-            "What's the goal of this video — promote, explain, educate, or inspire?",
+            "What's the goal of this video? To promote, explain, educate, or inspire?",
         ],
 
         # ── UX ──────────────────────────────────────────────────
@@ -326,29 +323,29 @@ class RLQuestionGenerator:
     # ─── Multi-element cluster questions ───────────────────────────
     CLUSTER_TEMPLATES = {
         "design_and_brand": [
-            "Let's talk about the look and feel — what visual style are you going for, and do you have existing brand assets (logo, colors, fonts) we should use?",
+            "Let's talk about the look and feel. What visual style are you going for, and do you have existing brand assets (logo, colors, fonts) we should use?",
             "How should this look? Any design references you love, existing branding to work with, or color preferences?",
         ],
         "audience_and_reach": [
-            "Tell me about who you're trying to reach — describe your ideal customer, and how big is your current audience?",
-            "Let's define the audience — who are they, what do they care about, and how many of them can you reach today?",
+            "Tell me about who you're trying to reach. Describe your ideal customer, and how big is your current audience?",
+            "Let's define the audience: who are they, what do they care about, and how many can you reach today?",
         ],
         "content_and_messaging": [
-            "What's the core message, and do you already have content ready — or do we need to create everything?",
-            "Let's nail the messaging — what's the one thing people should take away, and what voice should we use?",
+            "What's the core message, and do you already have content ready or do we need to create everything?",
+            "Let's nail the messaging. What's the one thing people should take away, and what voice should we use?",
         ],
         "scope_and_deliverables": [
-            "Let's define what you actually need delivered — what are all the concrete pieces that need to get done?",
+            "Let's define what you actually need delivered. What are all the concrete pieces that need to get done?",
         ],
         "business_and_logistics": [
-            "Let's talk logistics — what's the timeline, and do you have a budget range in mind?",
-            "When do you need this done, and what budget are we working with?",
+            "Do you have a budget range in mind for this project?",
+            "What budget are we working with?",
         ],
         "offer_and_commerce": [
             "Is there a promotion or special offer tied to this? And what products or services are involved?",
         ],
         "technical_setup": [
-            "What's the technical situation — what platform are you on, and are there tools or integrations we need to account for?",
+            "What's the technical situation? What platform are you on, and are there tools or integrations we need to account for?",
         ],
     }
 
@@ -456,7 +453,7 @@ class RLQuestionGenerator:
             if not templates:
                 desc = elem.get("description", elem["name"].replace("_", " "))
                 templates = [
-                    f"Tell me about {desc.lower()} — what are you thinking?",
+                    f"Tell me about {desc.lower()}. What are you thinking?",
                 ]
             if templates:
                 question = random.choice(templates)

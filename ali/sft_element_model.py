@@ -20,7 +20,7 @@ class SFTElementModel:
     Fallback: Lookup mode matches mission to closest category in missions.jsonl.
     """
 
-    def __init__(self, missions_path: str = "training_data/missions.jsonl"):
+    def __init__(self, missions_path: str = "train/data/missions.jsonl"):
         self.missions = self._load_missions(missions_path)
         self.c1_llm_path = "ali/trained_models/c1_llm"
         self.llm_tokenizer, self.llm_model = self._load_c1_llm()

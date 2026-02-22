@@ -140,7 +140,7 @@ class InputParser:
         ],
     }
 
-    def __init__(self, missions_path: str = "training_data/missions.jsonl"):
+    def __init__(self, missions_path: str = "train/data/missions.jsonl"):
         self.missions = self._load_missions(missions_path)
 
     def _load_missions(self, path: str) -> list[dict]:

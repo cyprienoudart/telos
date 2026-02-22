@@ -405,7 +405,6 @@ class QwenExtractor:
             "audience_size": self._extract_audience_size,
             "offer_promotion": self._extract_offer,
             "offer_incentive": self._extract_offer,
-            "timeline": self._extract_timeline,
             "campaign_dates": self._extract_dates,
             "budget": self._extract_budget,
             "budget_range": self._extract_budget,
@@ -463,7 +462,7 @@ class QwenExtractor:
 
         for ind in no_indicators:
             if ind in text_lower:
-                return "No existing branding — starting fresh"
+                return "No existing branding, starting fresh"
         for ind in has_indicators:
             if ind in text_lower:
                 return "Has existing branding assets"
@@ -493,18 +492,6 @@ class QwenExtractor:
         for w in offer_words:
             if w in text_lower:
                 return text.strip()
-        return None
-
-    def _extract_timeline(self, text: str, text_lower: str) -> str | None:
-        timeline_patterns = [
-            r'\b(\d+\s*(?:day|week|month|year)s?)\b',
-            r'\b(asap|urgent|no rush|flexible|end of (?:month|year|week))\b',
-            r'\b(march|april|may|june|july|august|september|october|november|december|january|february)\s*\d*\b',
-        ]
-        for pattern in timeline_patterns:
-            match = re.search(pattern, text_lower)
-            if match:
-                return match.group(0).strip()
         return None
 
     def _extract_dates(self, text: str, text_lower: str) -> str | None:

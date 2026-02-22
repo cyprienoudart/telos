@@ -44,7 +44,7 @@ class ElementClusterer:
             "visualization_types", "filtering_drilldown",
         ],
         "business_and_logistics": [
-            "timeline", "budget", "budget_range", "campaign_dates",
+            "budget", "budget_range", "campaign_dates",
             "campaign_duration", "success_metrics", "approval_process",
             "maintenance_plan",
         ],
