@@ -1,10 +1,3 @@
-
-# telos
-Hackeurope project
-Devpost: https://devpost.com/software/telos-w9emdy
-
-
-=======
 <p align="center">
   <img src="front/public/Telos logo-Photoroom.png" alt="Telos" width="320" />
 </p>
@@ -24,6 +17,7 @@ Devpost: https://devpost.com/software/telos-w9emdy
 </p>
 
 ---
+Devpost: https://devpost.com/software/telos-w9emdy
 
 ## The Problem
 
