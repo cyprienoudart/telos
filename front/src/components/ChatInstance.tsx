@@ -3,19 +3,40 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useChatContext } from "./ChatContext";
 import BuildCostTracker from "./BuildCostTracker";
-import BuildStream from "./BuildStream";
 import PrdProgressPanel from "./PrdProgressPanel";
 import ChatInputBar from "./ChatInputBar";
 import CostEstimate from "./CostEstimate";
 import VoiceOrb from "./VoiceOrb";
 import { useVoiceEngine } from "@/hooks/useVoiceEngine";
 
+function BuildProgressBar({ phase, prdProgress }: {
+    phase: "planning" | "building";
+    prdProgress: { overall_percent: number } | null;
+}) {
+    const isPlanning = phase === "planning";
+    const percent = isPlanning ? null : (prdProgress?.overall_percent ?? 0);
+    const label = isPlanning
+        ? "Generating plan & PRDs\u2026"
+        : `Building\u2026 ${Math.round(percent ?? 0)}%`;
+
+    return (
+        <div className="build-progress-bar">
+            <div className="build-progress-bar__label">{label}</div>
+            <div className="build-progress-bar__track">
+                <div
+                    className={`build-progress-bar__fill ${isPlanning ? "build-progress-bar__fill--indeterminate" : ""}`}
+                    style={isPlanning ? undefined : { width: `${percent}%` }}
+                />
+            </div>
+        </div>
+    );
+}
+
 export default function ChatInstance() {
     const { activeChat, sendMessage, changeEstimateModel, confirmBuild, declineBuild, estimateLoading } = useChatContext();
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [voiceModeActive, setVoiceModeActive] = useState(false);
 
-    // Voice transcript → backend → AI response → TTS
     const handleVoiceTranscript = useCallback(
         async (text: string): Promise<string | null> => {
             if (!activeChat) return null;
@@ -73,7 +94,7 @@ export default function ChatInstance() {
                 </button>
             </div>
 
-            {/* Voice Orb — shown when voice mode is active */}
+            {/* Voice Orb */}
             {voiceModeActive && (
                 <div className="voice-orb-section">
                     <VoiceOrb mode={voiceEngine.mode} audioLevel={voiceEngine.audioLevel} />
@@ -84,7 +105,7 @@ export default function ChatInstance() {
             )}
 
             {/* Messages */}
-            <div className={`messages-area ${voiceModeActive ? "messages-area--compact" : ""} ${(activeChat.phase === "building" || activeChat.phase === "done") ? "messages-area--with-build" : ""}`}>
+            <div className={`messages-area ${voiceModeActive ? "messages-area--compact" : ""}`}>
                 {activeChat.messages.map((msg) => (
                     <div
                         key={msg.id}
@@ -99,7 +120,15 @@ export default function ChatInstance() {
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Cost estimate confirmation — shown before build */}
+            {/* Progress bar — shown during planning and building */}
+            {(activeChat.phase === "planning" || activeChat.phase === "building") && (
+                <BuildProgressBar
+                    phase={activeChat.phase}
+                    prdProgress={activeChat.prdProgress}
+                />
+            )}
+
+            {/* Cost estimate confirmation */}
             {activeChat.phase === "confirming" && activeChat.costEstimate && (
                 <div className="cost-estimate-wrapper">
                     <CostEstimate
@@ -127,15 +156,7 @@ export default function ChatInstance() {
                 <PrdProgressPanel progress={activeChat.prdProgress} />
             )}
 
-            {/* Build stream — shown during building and done */}
-            {(activeChat.phase === "building" || activeChat.phase === "done") && (
-                <BuildStream
-                    trajectory={activeChat.trajectory}
-                    phase={activeChat.phase === "done" ? "done" : "building"}
-                />
-            )}
-
-            {/* Input at bottom — hidden during build and confirming */}
+            {/* Input at bottom — only during conversation */}
             {!voiceModeActive && activeChat.phase === "conversation" && (
                 <div className="chat-instance__input">
                     <ChatInputBar onSend={handleSend} autoFocus placeholder="Follow up…" />

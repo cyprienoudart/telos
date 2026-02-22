@@ -38,11 +38,6 @@ export interface CostEstimateData {
     }[];
 }
 
-export interface TrajectoryEvent {
-    type: string;
-    [key: string]: unknown;
-}
-
 export interface PrdCheckboxItem {
     text: string;
     checked: boolean;
@@ -69,7 +64,6 @@ export interface Chat {
     id: string;
     title: string;
     messages: Message[];
-    trajectory: TrajectoryEvent[];
     createdAt: Date;
     sessionId: string | null;
     buildId: string | null;
@@ -158,7 +152,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                         ? firstMessage.slice(0, 40) + "\u2026"
                         : firstMessage,
                 messages: [userMsg],
-                trajectory: [],
                 createdAt: new Date(),
                 sessionId: null,
                 buildId: null,
@@ -205,7 +198,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                 );
 
                 if (data.done) {
-                    // Enough context already — start build (enters planning phase)
                     addMessage(
                         setChats,
                         chatId,
@@ -327,9 +319,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                     )
                 );
 
-                // Open SSE stream — shows trajectory during planning, handles planning_complete
-                streamBuildProgress(chatId, data.build_id);
-                pollPrdProgress(chatId, data.build_id);
+                pollBuildStatus(chatId, data.build_id);
             } catch {
                 addMessage(setChats, chatId, "ai", "Failed to start build.");
             }
@@ -385,84 +375,19 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         [triggerBuild],
     );
 
-    // ── SSE Build Progress Stream ────────────────────────────────────
+    // ── Build Status Polling ─────────────────────────────────────────
 
-    const streamBuildProgress = useCallback(
+    const pollBuildStatus = useCallback(
         (chatId: string, buildId: string) => {
-            const source = new EventSource(`/api/backend/build/${buildId}/stream`);
+            let prevPhase = "";
 
-            // Batch trajectory events to avoid excessive re-renders
-            let pendingEvents: TrajectoryEvent[] = [];
-            let rafScheduled = false;
-
-            const flushEvents = () => {
-                if (pendingEvents.length === 0) return;
-                const batch = pendingEvents;
-                pendingEvents = [];
-                rafScheduled = false;
-                setChats((prev) =>
-                    prev.map((c) =>
-                        c.id === chatId
-                            ? { ...c, trajectory: [...c.trajectory, ...batch] }
-                            : c
-                    )
-                );
-            };
-
-            source.addEventListener("trajectory", (e) => {
+            const poll = async () => {
                 try {
-                    const evt: TrajectoryEvent = JSON.parse(e.data);
-                    console.log("[SSE] trajectory event:", evt.type, evt);
-                    pendingEvents.push(evt);
-                    if (!rafScheduled) {
-                        rafScheduled = true;
-                        requestAnimationFrame(flushEvents);
-                    }
+                    const res = await fetch(`/api/backend/build/${buildId}/status`);
+                    if (!res.ok) return;
+                    const data = await res.json();
 
-                    // Planning complete → fetch estimate and transition to confirming
-                    if (evt.type === "planning_complete") {
-                        fetch(`/api/backend/build/${buildId}/estimate`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ model: "opus" }),
-                        })
-                            .then((res) => res.ok ? res.json() : null)
-                            .then((estimate) => {
-                                if (estimate) {
-                                    setChats((prev) =>
-                                        prev.map((c) =>
-                                            c.id === chatId
-                                                ? { ...c, phase: "confirming", costEstimate: estimate }
-                                                : c
-                                        )
-                                    );
-                                }
-                            })
-                            .catch(() => {
-                                // If estimate fails, still move to confirming with no estimate
-                                setChats((prev) =>
-                                    prev.map((c) =>
-                                        c.id === chatId ? { ...c, phase: "confirming" } : c
-                                    )
-                                );
-                            });
-                    }
-                } catch {
-                    // skip malformed events
-                }
-            });
-
-            source.addEventListener("open", () => {
-                console.log("[SSE] EventSource connected for build:", buildId);
-            });
-
-            source.addEventListener("progress", (e) => {
-                addMessage(setChats, chatId, "ai", e.data);
-            });
-
-            source.addEventListener("status", (e) => {
-                try {
-                    const data = JSON.parse(e.data);
+                    // Update iteration count
                     if (typeof data.iteration === "number") {
                         setChats((prev) =>
                             prev.map((c) =>
@@ -470,50 +395,70 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                             )
                         );
                     }
-                } catch {
-                    // skip
-                }
-            });
 
-            source.addEventListener("done", (e) => {
-                // Flush any remaining trajectory events
-                flushEvents();
-                try {
-                    const data = JSON.parse(e.data);
-                    const status = data.success ? "Build completed!" : `Build failed: ${data.error}`;
-                    addMessage(setChats, chatId, "ai", status);
-                } catch {
-                    addMessage(setChats, chatId, "ai", "Build finished.");
-                }
-                // Final PRD progress snapshot
-                fetch(`/api/backend/build/${buildId}/prds`)
-                    .then((res) => res.ok ? res.json() : null)
-                    .then((prdData) => {
-                        if (prdData) {
+                    // Planning complete → fetch estimate and show confirming
+                    if (data.build_phase === "planned" && prevPhase !== "planned") {
+                        prevPhase = "planned";
+                        try {
+                            const estRes = await fetch(`/api/backend/build/${buildId}/estimate`, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ model: "opus" }),
+                            });
+                            const estimate = estRes.ok ? await estRes.json() : null;
                             setChats((prev) =>
                                 prev.map((c) =>
-                                    c.id === chatId ? { ...c, prdProgress: prdData } : c
+                                    c.id === chatId
+                                        ? { ...c, phase: "confirming", costEstimate: estimate }
+                                        : c
+                                )
+                            );
+                        } catch {
+                            setChats((prev) =>
+                                prev.map((c) =>
+                                    c.id === chatId ? { ...c, phase: "confirming" } : c
                                 )
                             );
                         }
-                    })
-                    .catch(() => {});
-                setChats((prev) =>
-                    prev.map((c) =>
-                        c.id === chatId ? { ...c, phase: "done" } : c
-                    )
-                );
-                source.close();
-            });
+                    }
 
-            source.onerror = (err) => {
-                console.error("[SSE] EventSource error, readyState:", source.readyState, err);
-                // Only close on CLOSED state (connection failed permanently).
-                // CONNECTING state (readyState=0) means EventSource is auto-reconnecting.
-                if (source.readyState === EventSource.CLOSED) {
-                    source.close();
+                    // Executing phase
+                    if (data.build_phase === "executing" && prevPhase !== "executing") {
+                        prevPhase = "executing";
+                    }
+
+                    // Build finished
+                    if (data.status === "completed" || data.status === "failed") {
+                        clearInterval(interval);
+                        const msg = data.success ? "Build completed!" : `Build failed: ${data.error}`;
+                        addMessage(setChats, chatId, "ai", msg);
+                        // Final PRD fetch
+                        try {
+                            const prdRes = await fetch(`/api/backend/build/${buildId}/prds`);
+                            if (prdRes.ok) {
+                                const prdData = await prdRes.json();
+                                setChats((prev) =>
+                                    prev.map((c) =>
+                                        c.id === chatId ? { ...c, prdProgress: prdData } : c
+                                    )
+                                );
+                            }
+                        } catch { /* ignore */ }
+                        setChats((prev) =>
+                            prev.map((c) =>
+                                c.id === chatId ? { ...c, phase: "done" } : c
+                            )
+                        );
+                    }
+                } catch {
+                    // silently skip failed polls
                 }
             };
+
+            // Immediate first poll
+            poll();
+            const interval = setInterval(poll, 3000);
+            return interval;
         },
         [],
     );
@@ -544,7 +489,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                 const chat = chatsRef.current.find((c) => c.id === chatId);
                 if (chat?.phase === "done") {
                     clearInterval(interval);
-                    // Final fetch to capture completed state
                     fetchProgress();
                     return;
                 }
@@ -571,7 +515,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         const infoMsg: Message = {
             id: generateId(),
             role: "ai",
-            content: "Debug mode — skipping interview, generating plan\u2026",
+            content: "Debug mode \u2014 skipping interview, generating plan\u2026",
             timestamp: new Date(),
         };
 
@@ -579,7 +523,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             id: chatId,
             title: "Debug Build",
             messages: [infoMsg],
-            trajectory: [],
             createdAt: new Date(),
             sessionId: null,
             buildId: null,
@@ -594,7 +537,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         setChats([newChat]);
         setActiveChatId(chatId);
 
-        // Start debug build → enters planning phase
         try {
             const res = await fetch("/api/backend/build/debug-start", {
                 method: "POST",
@@ -620,8 +562,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                 )
             );
 
-            // SSE stream will show trajectory during planning and handle planning_complete
-            streamBuildProgress(chatId, data.build_id);
+            // Poll build status (handles planning_complete → confirming transition)
+            pollBuildStatus(chatId, data.build_id);
             pollPrdProgress(chatId, data.build_id);
         } catch {
             addMessage(setChats, chatId, "ai", "Failed to start debug build.");
@@ -631,7 +573,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                 )
             );
         }
-    }, [streamBuildProgress, pollPrdProgress]);
+    }, [pollBuildStatus, pollPrdProgress]);
 
     // ── Change Estimate Model ─────────────────────────────────────
 
@@ -641,7 +583,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             if (!chat || chat.phase !== "confirming") return;
 
             if (chat.buildId) {
-                // Build already started (in planned phase) — use per-build estimate
                 setEstimateLoading(true);
                 fetch(`/api/backend/build/${chat.buildId}/estimate`, {
                     method: "POST",
@@ -681,7 +622,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                 )
             );
 
-            // Confirm the build — unblocks the waiting thread
             try {
                 await fetch(`/api/backend/build/${chat.buildId}/confirm`, {
                     method: "POST",
@@ -712,12 +652,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     // ── Reset All (demo cleanup) ──────────────────────────────────
 
     const resetAll = useCallback(async () => {
-        // Clear backend sessions and builds in parallel
         await Promise.allSettled([
             fetch("/api/backend/conversation/reset", { method: "POST" }),
             fetch("/api/backend/build/reset", { method: "POST" }),
         ]);
-        // Clear frontend state
         setChats([]);
         setActiveChatId(null);
         questionInfoRef.current = {};

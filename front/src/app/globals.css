@@ -1696,3 +1696,40 @@ button {
     max-width: 200px;
   }
 }
+
+/* ── Build Progress Bar ──────────────────────────────────────────────── */
+
+.build-progress-bar {
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.build-progress-bar__label {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.build-progress-bar__track {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.build-progress-bar__fill {
+  height: 100%;
+  background: #111;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.build-progress-bar__fill--indeterminate {
+  width: 40% !important;
+  animation: progress-indeterminate 1.5s ease-in-out infinite;
+}
+
+@keyframes progress-indeterminate {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}

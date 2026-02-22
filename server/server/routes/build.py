@@ -202,6 +202,7 @@ async def build_status(build_id: str):
     return BuildStatusResponse(
         build_id=state.id,
         status=state.status,
+        build_phase=state.build_phase,
         iteration=state.iteration,
         total_iterations=state.total_iterations,
         success=state.success,

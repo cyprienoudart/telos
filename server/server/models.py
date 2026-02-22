@@ -105,6 +105,7 @@ class CostEstimateResponse(BaseModel):
 class BuildStatusResponse(BaseModel):
     build_id: str
     status: str  # "running", "completed", "failed"
+    build_phase: str  # "planning", "planned", "executing"
     iteration: int
     total_iterations: int
     success: bool | None = None

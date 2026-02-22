@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import type { TrajectoryEvent } from "./ChatContext";
+interface TrajectoryEvent {
+    type: string;
+    [key: string]: unknown;
+}
 
 // ── Tool pill color categories ──────────────────────────────────────────
 
