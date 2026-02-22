@@ -10,6 +10,7 @@ Usage:
 
 from __future__ import annotations
 
+import os
 import sys
 import textwrap
 import time
@@ -57,12 +58,27 @@ print(f"  (output also saved to {_OUTPUT_FILE})")
 # ---------------------------------------------------------------------------
 # Projects to benchmark
 # ---------------------------------------------------------------------------
+# Set BENCHMARK_PROJECTS as colon-separated "label=path" pairs, e.g.:
+#   BENCHMARK_PROJECTS="my-app=/path/to/app:other=/path/to/other"
+# Falls back to the bundled context/ sample data.
 
-PROJECTS: list[tuple[str, Path]] = [
-    ("telos/context  (tiny)",   Path("C:/Users/Kora/Dev/telos/gemini-context-mcp/context")),
-    ("telegram-voice-ai-bot",   Path("C:/Users/Kora/Dev/telegram-voice-ai-bot")),
-    ("ai-teachers-old",         Path("C:/Users/Kora/Dev/ai-teachers-old")),
-]
+_DEFAULT_CONTEXT = Path(__file__).parent.parent / "context"
+
+
+def _parse_projects() -> list[tuple[str, Path]]:
+    raw = os.environ.get("BENCHMARK_PROJECTS", "").strip()
+    if not raw:
+        return [("context (bundled sample)", _DEFAULT_CONTEXT)]
+    projects: list[tuple[str, Path]] = []
+    for entry in raw.split(":"):
+        if "=" not in entry:
+            continue
+        label, path_str = entry.split("=", 1)
+        projects.append((label.strip(), Path(path_str.strip())))
+    return projects or [("context (bundled sample)", _DEFAULT_CONTEXT)]
+
+
+PROJECTS = _parse_projects()
 
 # ---------------------------------------------------------------------------
 # Questions (generic — work across any codebase)
@@ -127,7 +143,7 @@ for label, project_path in PROJECTS:
         print(f"  [SKIP] path does not exist")
         continue
 
-    config.BASE_DIR = project_path.resolve()
+    config.set_base_dir(project_path)
 
     # ── Corpus stats ────────────────────────────────────────────────────────
     print("  Scanning corpus...", end="", flush=True)
