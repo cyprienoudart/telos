@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 class ConversationStartRequest(BaseModel):
     message: str = Field(..., min_length=1, description="User's initial project description")
     context_dir: str | None = Field(None, description="Path to context files for RAG pre-answering")
+    github_url: str | None = Field(None, description="GitHub repo URL to clone as project context")
 
 
 class ConversationStartResponse(BaseModel):
@@ -22,6 +23,8 @@ class ConversationStartResponse(BaseModel):
     initial_coverage: float
     first_question: str | None
     done: bool
+    repo_url: str | None = None
+    repo_dir: str | None = None
 
 
 class ConversationAnswerRequest(BaseModel):
@@ -52,8 +55,16 @@ class ConversationStatusResponse(BaseModel):
 
 class BuildStartRequest(BaseModel):
     session_id: str = Field(..., description="Session ID from completed conversation")
-    project_dir: str = Field(..., description="Target directory for the built project")
     context_dir: str | None = Field(None, description="Path to context files for Gemini MCP")
+    max_iterations: int = Field(10, ge=1, le=50)
+    model: str = Field("opus")
+
+
+class DebugBuildStartRequest(BaseModel):
+    """Skip Ali interview — use a pre-baked fixture file to start the build."""
+    fixture_path: str | None = Field(None, description="Path to context fixture (defaults to test/fixtures/debug_context.md)")
+    project_dir: str | None = Field(None, description="Build target directory (defaults to /tmp/telos-debug-build)")
+    context_dir: str | None = Field(None, description="Context dir for Gemini MCP")
     max_iterations: int = Field(10, ge=1, le=50)
     model: str = Field("opus")
 
