@@ -821,9 +821,124 @@
   @media (max-width: 768px) {
     .nav-hamburger { display: flex; }
   }
+
+  /* ─── IWD Banner Strip ─────────────────── */
+  .iwd-banner {
+    background: linear-gradient(135deg, #6b21a8, #7c3aed);
+    color: #c9a84c;
+    text-align: center;
+    padding: 12px 24px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  /* ─── IWD Campaign Section ─────────────── */
+  .iwd-campaign {
+    padding: 100px 0;
+    background: var(--surface-alt);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .iwd-campaign::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -10%;
+    width: 50%;
+    height: 160%;
+    background: radial-gradient(ellipse, rgba(107, 33, 168, 0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .iwd-campaign-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .iwd-campaign-image img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    box-shadow:
+      0 32px 64px -16px rgba(26, 26, 46, 0.15),
+      0 0 0 1px rgba(26, 26, 46, 0.04);
+  }
+
+  .iwd-campaign-content .section-eyebrow {
+    color: #7c3aed;
+  }
+
+  .iwd-campaign-content .section-eyebrow::before {
+    background: #7c3aed;
+  }
+
+  .iwd-campaign-content .section-title {
+    margin-bottom: 20px;
+  }
+
+  .iwd-campaign-copy {
+    font-size: 17px;
+    color: var(--text-secondary);
+    font-weight: 300;
+    line-height: 1.7;
+    margin-bottom: 36px;
+  }
+
+  .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 32px;
+    background: var(--navy);
+    color: var(--surface);
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    border-radius: var(--radius);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--blue-accent);
+    transform: translateX(-101%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .cta-btn:hover::before { transform: translateX(0); }
+  .cta-btn span { position: relative; z-index: 1; }
+
+  .hero-visual-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (max-width: 1024px) {
+    .iwd-campaign-inner { grid-template-columns: 1fr; gap: 40px; }
+  }
 </style>
 </head>
 <body>
+
+<!-- ─── IWD Banner ─────────────────────────────── -->
+<div class="iwd-banner">Celebrating Women Who Build — International Women's Day, March 8</div>
 
 <!-- ─── Navigation ─────────────────────────────── -->
 <nav class="nav" id="nav">
@@ -860,7 +975,7 @@
       </div>
     </div>
     <div class="hero-visual">
-      <div class="hero-visual-box"></div>
+      <div class="hero-visual-box"><img src="assets/iwd-hero.png" alt="International Women's Day Hero"></div>
       <div class="hero-float-stat top-right">
         <div class="float-number">97%</div>
         <div class="float-label">Client Retention</div>
@@ -869,6 +984,22 @@
         <div class="float-number">4.2x</div>
         <div class="float-label">Avg. ROI Delivered</div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── IWD Campaign ───────────────────────────── -->
+<section id="iwd-campaign" class="iwd-campaign">
+  <div class="container iwd-campaign-inner">
+    <div class="iwd-campaign-image reveal">
+      <img src="assets/iwd-social.png" alt="International Women's Day">
+    </div>
+    <div class="iwd-campaign-content reveal">
+      <div class="section-eyebrow">International Women's Day</div>
+      <h2 class="section-title">Honoring the women who lead, build, and transform</h2>
+      <p class="iwd-campaign-copy">This March 8, we celebrate the extraordinary women among our clients and partners who have shattered expectations and achieved remarkable business milestones. From founding industry-defining companies to driving transformative growth, their leadership inspires everything we do at Apex Dynamics.</p>
+      <p class="iwd-campaign-copy">Join us in recognizing their achievements and learn how we are committed to supporting women-led innovation through our new IWD initiative.</p>
+      <a href="#" class="cta-btn"><span>Celebrate With Us</span></a>
     </div>
   </div>
 </section>
