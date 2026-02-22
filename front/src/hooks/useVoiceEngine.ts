@@ -14,7 +14,14 @@ interface UseVoiceEngineReturn {
     stopConversation: () => void;
 }
 
-export function useVoiceEngine(): UseVoiceEngineReturn {
+/**
+ * @param onTranscriptCommit Called when the user finishes speaking.
+ *   Receives the transcript text, should return the AI response text to TTS
+ *   (or null to skip TTS).
+ */
+export function useVoiceEngine(
+    onTranscriptCommit?: (text: string) => Promise<string | null>,
+): UseVoiceEngineReturn {
     const [mode, setMode] = useState<VoiceMode>("idle");
     const [audioLevel, setAudioLevel] = useState(0);
     const [isActive, setIsActive] = useState(false);
@@ -29,6 +36,12 @@ export function useVoiceEngine(): UseVoiceEngineReturn {
     const scribeWsRef = useRef<WebSocket | null>(null);
     const isActiveRef = useRef(false);
     const ttsAbortRef = useRef<AbortController | null>(null);
+    const onTranscriptCommitRef = useRef(onTranscriptCommit);
+
+    // Keep callback ref fresh
+    useEffect(() => {
+        onTranscriptCommitRef.current = onTranscriptCommit;
+    }, [onTranscriptCommit]);
 
     // Clean up on unmount
     useEffect(() => {
@@ -62,12 +75,31 @@ export function useVoiceEngine(): UseVoiceEngineReturn {
         setMode("loading");
         setAudioLevel(0);
 
-        // Stop mic recording during TTS
+        // Stop mic recording during processing
         if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
             mediaRecorderRef.current.pause();
         }
 
-        // Request TTS from backend
+        // Route transcript through backend via callback, get AI response
+        let ttsText = text; // fallback: TTS the user's own text
+        if (onTranscriptCommitRef.current) {
+            try {
+                const aiResponse = await onTranscriptCommitRef.current(text);
+                if (aiResponse) {
+                    ttsText = aiResponse;
+                } else {
+                    // No response to speak (e.g. conversation done, build started)
+                    resumeMicMonitoring();
+                    return;
+                }
+            } catch {
+                console.error("Transcript commit callback failed");
+                resumeMicMonitoring();
+                return;
+            }
+        }
+
+        // Request TTS of the AI response
         try {
             const abortController = new AbortController();
             ttsAbortRef.current = abortController;
@@ -75,7 +107,7 @@ export function useVoiceEngine(): UseVoiceEngineReturn {
             const response = await fetch("/api/tts-stream", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ text }),
+                body: JSON.stringify({ text: ttsText }),
                 signal: abortController.signal,
             });
 
@@ -106,7 +138,6 @@ export function useVoiceEngine(): UseVoiceEngineReturn {
                     if (line.startsWith("data: ")) {
                         const payload = line.slice(6).trim();
                         if (payload === "[DONE]") {
-                            // TTS complete, wait for playback to finish
                             break;
                         }
                         try {

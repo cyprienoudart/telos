@@ -114,6 +114,37 @@ def summarize() -> str:
 
 
 # ---------------------------------------------------------------------------
+# "I don't know" detection — used by the RAG bridge to filter answers
+# ---------------------------------------------------------------------------
+
+_IDK_PHRASES = frozenset([
+    "i don't know",
+    "i do not know",
+    "i'm not sure",
+    "i am not sure",
+    "not enough information",
+    "cannot determine",
+    "no information",
+    "not mentioned",
+    "not provided",
+    "unable to answer",
+    "insufficient context",
+])
+
+
+def _is_idk(answer: str) -> bool:
+    """Return True if *answer* is an 'I don't know'-style non-answer."""
+    normalised = answer.strip().rstrip(".!").lower()
+    if normalised in _IDK_PHRASES:
+        return True
+    # Catch longer sentences that start with an IDK phrase
+    for phrase in _IDK_PHRASES:
+        if normalised.startswith(phrase):
+            return True
+    return False
+
+
+# ---------------------------------------------------------------------------
 # answer_question() — semantic cache → dense retrieval → LLM
 # ---------------------------------------------------------------------------
 
@@ -138,7 +169,10 @@ def answer_question(query: str) -> str:
         "- Answer in 1 to 5 plain-English sentences.\n"
         "- Imagine you are explaining to someone who is not technical at all.\n"
         "- No bullet points, no markdown, no code snippets.\n"
-        "- If the answer is not in the excerpts, say so in one simple sentence.\n\n"
+        "- CRITICAL: If the excerpts do not contain enough information to answer "
+        "the question, you MUST respond with exactly: \"I don't know.\"\n"
+        "- Do NOT guess, speculate, or infer beyond what the excerpts say.\n"
+        "- It is much better to say \"I don't know\" than to give an inaccurate answer.\n\n"
         f"Retrieved excerpts:\n{context}\n\n"
         f"Question: {query}\n\n"
         "Answer:"

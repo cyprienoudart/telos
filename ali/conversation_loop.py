@@ -151,6 +151,48 @@ class ConversationLoop:
 
         return result
 
+    def apply_rag_answers(self, rag_answers: dict[str, str]) -> int:
+        """Pre-fill elements from RAG answers (called between start() and first user question).
+
+        Args:
+            rag_answers: Mapping of {element_description: answer_text} from Gemini RAG.
+                         Only contains answers where the RAG was confident (no "I don't know").
+
+        Returns:
+            Count of elements that were pre-answered.
+        """
+        if not rag_answers:
+            return 0
+
+        count = 0
+        for elem in self.elements:
+            if elem["status"] != "undefined":
+                continue
+            # Match by description (what the RAG was queried with)
+            answer = rag_answers.get(elem["description"])
+            if not answer:
+                continue
+            elem["status"] = "answered"
+            elem["value"] = answer
+            count += 1
+
+            # Update context manager
+            section = self._element_to_section_name(elem["name"])
+            existing = self.context_mgr.known_info.get(section, "")
+            if answer not in existing:
+                self.context_mgr.known_info[section] = (existing + "\n" + answer).strip()
+
+        if count > 0:
+            # Remove answered elements from unknown list
+            self.context_mgr.unknown_elements = [
+                e["description"] for e in self.elements if e["status"] == "undefined"
+            ]
+            self.context_mgr._write()
+            # Re-cluster with updated elements
+            self.clusters = self.clusterer.cluster(self.elements)
+
+        return count
+
     def process_answer(self, user_answer: str, question_info: dict = None) -> dict:
         """
         Process a user's answer and generate the next question.

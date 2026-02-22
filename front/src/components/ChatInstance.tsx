@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useChatContext } from "./ChatContext";
 import ChatInputBar from "./ChatInputBar";
 import VoiceOrb from "./VoiceOrb";
@@ -10,7 +10,17 @@ export default function ChatInstance() {
     const { activeChat, sendMessage } = useChatContext();
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [voiceModeActive, setVoiceModeActive] = useState(false);
-    const voiceEngine = useVoiceEngine();
+
+    // Voice transcript → backend → AI response → TTS
+    const handleVoiceTranscript = useCallback(
+        async (text: string): Promise<string | null> => {
+            if (!activeChat) return null;
+            return sendMessage(activeChat.id, text);
+        },
+        [activeChat, sendMessage],
+    );
+
+    const voiceEngine = useVoiceEngine(handleVoiceTranscript);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
