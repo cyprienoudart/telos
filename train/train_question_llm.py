@@ -131,11 +131,10 @@ def main():
     print(f"   📊 Train: {train_size}, Eval: {eval_size}")
 
     # Calculate training steps for ~20 minutes
-    # With 750 examples, batch=4, grad_accum=2 → effective batch=8 → ~84 steps/epoch
-    # On MPS, ~0.3-0.5s per step → 20 min = 1200s → ~2400-4000 steps
-    # ~3000/84 ≈ ~35 epochs — cap at 30 for safety
+    # With 675 train examples, batch=4, grad_accum=2 → ~84 effective steps/epoch
+    # On MPS, ~1s per step → 20 min = 1200s → ~1200 steps → ~14 epochs
     steps_per_epoch = max(1, train_size // 4)
-    num_epochs = 30
+    num_epochs = 15
 
     print(f"\n🚀 Training configuration:")
     print(f"   Epochs: {num_epochs}")
@@ -160,12 +159,11 @@ def main():
         per_device_eval_batch_size=4,
         learning_rate=5e-4,
         weight_decay=0.01,
-        warmup_steps=50,
+        warmup_steps=100,
         logging_steps=50,
         eval_strategy="steps",
         eval_steps=200,
-        save_steps=500,
-        save_total_limit=2,
+        save_strategy="no",
         fp16=False,  # MPS doesn't support fp16 well
         report_to="none",
         dataloader_num_workers=0,
@@ -189,9 +187,19 @@ def main():
 
     train_result = trainer.train()
 
-    # Save the LoRA adapter
+    # Save the LoRA adapter (skip model card to avoid missing template errors)
     print("\n💾 Saving fine-tuned model...")
-    model.save_pretrained(OUTPUT_DIR)
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    try:
+        model.save_pretrained(OUTPUT_DIR, safe_serialization=True)
+    except Exception:
+        # Fallback: save adapter manually if model card template fails
+        import shutil
+        model.base_model.save_pretrained(OUTPUT_DIR, safe_serialization=True)
+    # Clean up model card if it was partially created
+    readme = os.path.join(OUTPUT_DIR, "README.md")
+    if os.path.exists(readme):
+        os.remove(readme)
     tokenizer.save_pretrained(OUTPUT_DIR)
 
     # Test generation
