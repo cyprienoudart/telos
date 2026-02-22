@@ -78,6 +78,9 @@ def summarize() -> str:
     """
     Produce a 15-bullet plain-English overview of the entire context store.
     Written for a non-technical reader. Cached in memory until files change.
+
+    Note: uses only the first chunk per file, so very large files may not
+    be fully represented in the summary.
     """
     global _summary_cache, _summary_hash
 

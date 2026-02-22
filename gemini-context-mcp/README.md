@@ -4,13 +4,15 @@ A standalone [Model Context Protocol](https://modelcontextprotocol.io/) server
 that lets Claude (or any MCP client) query a **local context store** — documents,
 source code, PDFs, and images — without giving Claude direct filesystem access.
 
-A Gemini agent autonomously explores the context store using an internal tool loop
-and returns natural-language answers. Claude sees only the answer.
+The pipeline is: embed context with FastEmbed → index with ChromaDB → retrieve
+relevant chunks → answer via an OpenRouter LLM (Gemini 2.0 Flash by default).
 
 ```
-Claude ──(MCP/SSE)──► server.py ──► agent.py ──► Gemini 2.0 Flash
-                                          │
-                                          └──(tools)──► context/ (local files)
+Claude ──(MCP/SSE)──► server.py ──► agent.py ──► OpenRouter (Gemini 2.0 Flash)
+                                        │
+                                   FastEmbed + ChromaDB
+                                        │
+                                    context/ (local files)
 ```
 
 ---
@@ -20,48 +22,72 @@ Claude ──(MCP/SSE)──► server.py ──► agent.py ──► Gemini 2.
 ### 1. Prerequisites
 
 - Python 3.13+
-- A [Gemini API key](https://aistudio.google.com/app/apikey) (free tier works)
+- An [OpenRouter API key](https://openrouter.ai/keys) (free tier works)
 
 ### 2. Set up the environment
 
 ```bash
 cd gemini-context-mcp
-python -m venv .venv
-source .venv/Scripts/activate   # Windows (Git Bash / MSYS2)
-# source .venv/bin/activate     # macOS / Linux
+uv venv .venv
+source .venv/bin/activate       # macOS / Linux
+# source .venv/Scripts/activate # Windows (Git Bash / MSYS2)
 
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 ```
 
 ### 3. Configure
 
 ```bash
 cp .env.example .env
-# Edit .env and set GEMINI_API_KEY=your_actual_key
+# Edit .env and set OPENROUTER_API_KEY=your_actual_key
 ```
 
-### 4. (Optional) Add multimodal files
-
-Drop sample files into `context/docs/` to test vision capabilities:
-- `architecture.pdf` — any PDF document
-- `whiteboard.jpg` — any JPEG or PNG image
-
-### 5. Start the server
+### 4. Start the server
 
 ```bash
 python server.py
-# → INFO: Uvicorn running on http://0.0.0.0:8000
+# → INFO: Uvicorn running on http://127.0.0.1:8000
 ```
 
 ---
 
 ## MCP Tools
 
-| Tool | Description | Gemini? |
-|------|-------------|---------|
-| `query_context(question)` | Ask anything about the context store | Yes |
-| `list_context()` | List all files as a tree | No (free) |
-| `get_context_file(filename, focus?)` | Get/describe a specific file | Only for multimodal or when focus is set |
+| Tool | Description |
+|------|-------------|
+| `summarize()` | 15-bullet plain-English overview of the entire context store (cached in memory) |
+| `answer_question(query)` | 1–5 sentence plain-English answer using retrieved context (semantically cached) |
+
+### `answer_question()` pipeline
+
+1. Embed the query with FastEmbed
+2. Semantic cache lookup — instant return on hit (≥ 0.85 cosine similarity)
+3. Dense retrieval — top 3 chunks from ChromaDB
+4. LLM call via OpenRouter — answer in 1–5 plain-English sentences
+5. Store answer in the semantic cache
+
+### `summarize()` pipeline
+
+1. Collect the **first chunk per file** from the context store
+2. Single LLM call to produce 15 bullet points
+3. Cached in memory until files change (detected via content hash)
+
+> **Note:** `summarize()` uses only the first chunk per file, so very large files
+> may not be fully represented in the summary.
+
+---
+
+## Sample Data
+
+The `context/` directory contains demo data for testing:
+
+- `docs/team.md` — fictional team roster
+- `docs/priorities.md` — sprint priorities and bugs
+- `docs/README.md` — project overview
+- `docs/whiteboard.jpg` — sample image (tests multimodal pipeline)
+- `codebase/src/` — sample Python source files
+
+This data is used by the integration test and benchmark by default.
 
 ---
 
@@ -83,77 +109,56 @@ Restart Claude Desktop. The tools will appear in the tool picker.
 
 ---
 
-## Testing Without Claude Desktop
-
-### 1. Path traversal tests (no API key needed)
-
-```bash
-# Activate venv first
-python -c "import tools; print(tools.list_files('../../etc'))"
-# → ERROR: Path '../../etc' is outside the context store or invalid.
-
-python -c "import tools; print(tools.list_files('.'))"
-# → codebase/src/auth/handler.py
-#   codebase/src/main.py
-#   ...
-```
-
-### 2. Direct agent test
-
-```bash
-python -c "
-from dotenv import load_dotenv; load_dotenv()
-import agent
-print(agent.run_agent('Who is on the engineering team?'))
-"
-```
-
-### 3. MCP Inspector (recommended)
-
-```bash
-# Server must be running
-npx @modelcontextprotocol/inspector http://localhost:8000/sse
-```
-
-Open the Inspector UI, call `list_context` first (no API key), then `query_context`.
-
----
-
 ## Configuration Reference
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `GEMINI_API_KEY` | *(required)* | Your Gemini API key |
+| `OPENROUTER_API_KEY` | *(required)* | Your OpenRouter API key |
 | `CONTEXT_DIR` | `./context` | Path to the context store directory |
-| `GEMINI_MODEL` | `gemini-2.0-flash` | Gemini model to use |
+| `OPENROUTER_MODEL` | `google/gemini-2.0-flash-001` | LLM model for answering/summarizing |
+| `VISION_MODEL` | Same as `OPENROUTER_MODEL` | Model for image/PDF description (must support vision) |
+| `FASTEMBED_MODEL` | `BAAI/bge-small-en-v1.5` | Embedding model for FastEmbed |
+| `CHROMA_DIR` | `~/.cache/gemini-context-mcp/chroma` | ChromaDB persistence directory |
 | `MCP_HOST` | `127.0.0.1` | Server bind host |
 | `MCP_PORT` | `8000` | Server bind port |
 
 ---
 
-## Architecture Notes
+## Testing
 
-- **Path safety**: `tools._safe_resolve()` is the single chokepoint. Every tool
-  call goes through it. Symlink traversal is blocked by `Path.resolve()` +
-  `relative_to(BASE_DIR)`.
-- **Multimodal**: Images and PDFs return a `__MULTIMODAL__` sentinel from
-  `read_file()`. The agent intercepts it in `_dispatch()` and makes a separate
-  one-shot Gemini vision call, injecting the text description back into the loop.
-  The main agentic loop stays text-only.
-- **Manual function calling**: `AutomaticFunctionCallingConfig(disable=True)` gives
-  full control over the multi-turn loop. Capped at 20 iterations.
-- **No Gemini for `list_context`**: The outer `list_context` tool calls
-  `tools.list_files()` directly — no API cost, always deterministic.
-- **Error handling**: All outer MCP tools catch all exceptions and return error
-  strings. MCP tools must never raise.
+```bash
+# Unit tests (no API key needed)
+uv pip install -r requirements-dev.txt
+python -m pytest tests/ -v -m "not integration"
+
+# Integration test (requires OPENROUTER_API_KEY in .env)
+python tests/test_integration.py
+
+# Benchmark (requires OPENROUTER_API_KEY in .env)
+python tests/benchmark.py
+```
 
 ---
 
-## Security Considerations
+## Concurrency
 
-This server is intended for local / trusted network use. Before exposing it:
+The server is single-threaded. FastMCP handles one request at a time.
+ChromaDB, the embedding model, and the LLM client are all initialized
+as lazy singletons — there is no thread-safety machinery. This is fine
+for local/single-user use. For concurrent access, run behind a process
+manager (e.g. `gunicorn` with workers) or add locking.
 
-- Bind to `127.0.0.1` instead of `0.0.0.0` if only used locally.
-- Add authentication middleware if exposing over a network.
-- The Gemini API key is read from the environment; never commit `.env`.
-- The context store is readable by anyone who can reach the MCP server.
+---
+
+## Architecture Notes
+
+- **No agentic loop**: The server uses a simple RAG pipeline — embed, retrieve,
+  answer. There is no multi-turn tool-calling loop.
+- **Multimodal**: Images are described by a vision LLM. PDFs are processed with
+  pypdf for text extraction; image-heavy pages are sent to the vision model
+  via OpenRouter's file content type.
+- **Semantic cache**: Query embeddings are compared against previously asked
+  questions. If cosine similarity exceeds 0.85, the cached answer is returned
+  without an LLM call.
+- **Content hashing**: An MD5 hash over file sizes + mtimes detects changes.
+  When files change, both the context index and semantic cache are rebuilt.
