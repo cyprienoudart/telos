@@ -1,0 +1,36 @@
+{
+  "silhouette_scores": {
+    "web_development": 0.0542,
+    "marketing_campaign": 0.0948,
+    "design_branding": 0.1678,
+    "content_creation": 0.0999,
+    "ecommerce": 0.0598,
+    "mobile_app": 0.0543,
+    "data_analytics": 0.0639,
+    "event_campaign": 0.121,
+    "saas_product": 0.0718,
+    "social_media": 0.0807,
+    "api_backend": 0.0652,
+    "video_production": 0.0619,
+    "email_marketing": 0.0873,
+    "chatbot_ai": 0.113,
+    "ux_redesign": 0.0715
+  },
+  "cluster_sizes": {
+    "web_development": 7,
+    "marketing_campaign": 4,
+    "design_branding": 3,
+    "content_creation": 4,
+    "ecommerce": 7,
+    "mobile_app": 2,
+    "data_analytics": 7,
+    "event_campaign": 3,
+    "saas_product": 2,
+    "social_media": 3,
+    "api_backend": 7,
+    "video_production": 3,
+    "email_marketing": 2,
+    "chatbot_ai": 7,
+    "ux_redesign": 4
+  }
+}

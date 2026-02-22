@@ -1,0 +1,947 @@
+[
+  {
+    "element": "brand_purpose",
+    "times_asked": 7,
+    "avg_score": 100.0,
+    "bonus_rate": 0.429,
+    "effectiveness": 108.57
+  },
+  {
+    "element": "data_sources",
+    "times_asked": 6,
+    "avg_score": 100.0,
+    "bonus_rate": 0.333,
+    "effectiveness": 106.67
+  },
+  {
+    "element": "problem_solution",
+    "times_asked": 7,
+    "avg_score": 100.0,
+    "bonus_rate": 0.286,
+    "effectiveness": 105.71
+  },
+  {
+    "element": "products_services",
+    "times_asked": 7,
+    "avg_score": 100.0,
+    "bonus_rate": 0.286,
+    "effectiveness": 105.71
+  },
+  {
+    "element": "business_goals",
+    "times_asked": 8,
+    "avg_score": 100.0,
+    "bonus_rate": 0.25,
+    "effectiveness": 105.0
+  },
+  {
+    "element": "content_type",
+    "times_asked": 4,
+    "avg_score": 100.0,
+    "bonus_rate": 0.25,
+    "effectiveness": 105.0
+  },
+  {
+    "element": "bot_purpose",
+    "times_asked": 7,
+    "avg_score": 100.0,
+    "bonus_rate": 0.143,
+    "effectiveness": 102.86
+  },
+  {
+    "element": "main_content_purpose",
+    "times_asked": 7,
+    "avg_score": 100.0,
+    "bonus_rate": 0.143,
+    "effectiveness": 102.86
+  },
+  {
+    "element": "target_subscribers",
+    "times_asked": 3,
+    "avg_score": 95.0,
+    "bonus_rate": 0.333,
+    "effectiveness": 101.67
+  },
+  {
+    "element": "campaign_goal",
+    "times_asked": 3,
+    "avg_score": 100.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 100.0
+  },
+  {
+    "element": "current_problems",
+    "times_asked": 5,
+    "avg_score": 100.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 100.0
+  },
+  {
+    "element": "app_purpose",
+    "times_asked": 6,
+    "avg_score": 100.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 100.0
+  },
+  {
+    "element": "content_goal",
+    "times_asked": 4,
+    "avg_score": 95.0,
+    "bonus_rate": 0.25,
+    "effectiveness": 100.0
+  },
+  {
+    "element": "event_theme",
+    "times_asked": 4,
+    "avg_score": 100.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 100.0
+  },
+  {
+    "element": "service_purpose",
+    "times_asked": 8,
+    "avg_score": 100.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 100.0
+  },
+  {
+    "element": "email_goals",
+    "times_asked": 4,
+    "avg_score": 100.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 100.0
+  },
+  {
+    "element": "video_purpose",
+    "times_asked": 2,
+    "avg_score": 100.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 100.0
+  },
+  {
+    "element": "target_market",
+    "times_asked": 7,
+    "avg_score": 95.0,
+    "bonus_rate": 0.143,
+    "effectiveness": 97.86
+  },
+  {
+    "element": "use_cases",
+    "times_asked": 8,
+    "avg_score": 95.0,
+    "bonus_rate": 0.125,
+    "effectiveness": 97.5
+  },
+  {
+    "element": "target_audience",
+    "times_asked": 27,
+    "avg_score": 93.3,
+    "bonus_rate": 0.185,
+    "effectiveness": 97.04
+  },
+  {
+    "element": "consumers",
+    "times_asked": 10,
+    "avg_score": 95.0,
+    "bonus_rate": 0.1,
+    "effectiveness": 97.0
+  },
+  {
+    "element": "brand_personality",
+    "times_asked": 7,
+    "avg_score": 90.0,
+    "bonus_rate": 0.286,
+    "effectiveness": 95.71
+  },
+  {
+    "element": "core_endpoints",
+    "times_asked": 8,
+    "avg_score": 90.0,
+    "bonus_rate": 0.25,
+    "effectiveness": 95.0
+  },
+  {
+    "element": "target_customers",
+    "times_asked": 8,
+    "avg_score": 95.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 95.0
+  },
+  {
+    "element": "key_metrics",
+    "times_asked": 5,
+    "avg_score": 95.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 95.0
+  },
+  {
+    "element": "campaign_objectives",
+    "times_asked": 4,
+    "avg_score": 95.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 95.0
+  },
+  {
+    "element": "email_types",
+    "times_asked": 4,
+    "avg_score": 90.0,
+    "bonus_rate": 0.25,
+    "effectiveness": 95.0
+  },
+  {
+    "element": "target_users",
+    "times_asked": 32,
+    "avg_score": 93.0,
+    "bonus_rate": 0.094,
+    "effectiveness": 94.84
+  },
+  {
+    "element": "pages_structure",
+    "times_asked": 5,
+    "avg_score": 90.0,
+    "bonus_rate": 0.2,
+    "effectiveness": 94.0
+  },
+  {
+    "element": "product_catalog_size",
+    "times_asked": 7,
+    "avg_score": 90.0,
+    "bonus_rate": 0.143,
+    "effectiveness": 92.86
+  },
+  {
+    "element": "pricing_strategy",
+    "times_asked": 8,
+    "avg_score": 85.0,
+    "bonus_rate": 0.375,
+    "effectiveness": 92.5
+  },
+  {
+    "element": "core_features",
+    "times_asked": 18,
+    "avg_score": 88.6,
+    "bonus_rate": 0.167,
+    "effectiveness": 91.94
+  },
+  {
+    "element": "video_length",
+    "times_asked": 3,
+    "avg_score": 85.0,
+    "bonus_rate": 0.333,
+    "effectiveness": 91.67
+  },
+  {
+    "element": "deliverables",
+    "times_asked": 11,
+    "avg_score": 85.0,
+    "bonus_rate": 0.273,
+    "effectiveness": 90.45
+  },
+  {
+    "element": "campaign_channels",
+    "times_asked": 2,
+    "avg_score": 90.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 90.0
+  },
+  {
+    "element": "existing_assets",
+    "times_asked": 8,
+    "avg_score": 80.0,
+    "bonus_rate": 0.5,
+    "effectiveness": 90.0
+  },
+  {
+    "element": "platform",
+    "times_asked": 8,
+    "avg_score": 85.0,
+    "bonus_rate": 0.25,
+    "effectiveness": 90.0
+  },
+  {
+    "element": "platforms",
+    "times_asked": 6,
+    "avg_score": 90.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 90.0
+  },
+  {
+    "element": "topics_themes",
+    "times_asked": 5,
+    "avg_score": 85.0,
+    "bonus_rate": 0.2,
+    "effectiveness": 89.0
+  },
+  {
+    "element": "pricing_model",
+    "times_asked": 7,
+    "avg_score": 85.0,
+    "bonus_rate": 0.143,
+    "effectiveness": 87.86
+  },
+  {
+    "element": "content_pillars",
+    "times_asked": 7,
+    "avg_score": 85.0,
+    "bonus_rate": 0.143,
+    "effectiveness": 87.86
+  },
+  {
+    "element": "key_message",
+    "times_asked": 4,
+    "avg_score": 87.5,
+    "bonus_rate": 0.0,
+    "effectiveness": 87.5
+  },
+  {
+    "element": "video_style",
+    "times_asked": 3,
+    "avg_score": 80.0,
+    "bonus_rate": 0.333,
+    "effectiveness": 86.67
+  },
+  {
+    "element": "knowledge_base",
+    "times_asked": 8,
+    "avg_score": 85.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 85.0
+  },
+  {
+    "element": "scope",
+    "times_asked": 5,
+    "avg_score": 85.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 85.0
+  },
+  {
+    "element": "existing_platform",
+    "times_asked": 4,
+    "avg_score": 80.0,
+    "bonus_rate": 0.25,
+    "effectiveness": 85.0
+  },
+  {
+    "element": "authentication",
+    "times_asked": 9,
+    "avg_score": 80.0,
+    "bonus_rate": 0.222,
+    "effectiveness": 84.44
+  },
+  {
+    "element": "success_metrics",
+    "times_asked": 7,
+    "avg_score": 84.3,
+    "bonus_rate": 0.0,
+    "effectiveness": 84.29
+  },
+  {
+    "element": "user_auth_roles",
+    "times_asked": 5,
+    "avg_score": 80.0,
+    "bonus_rate": 0.2,
+    "effectiveness": 84.0
+  },
+  {
+    "element": "user_research",
+    "times_asked": 5,
+    "avg_score": 80.0,
+    "bonus_rate": 0.2,
+    "effectiveness": 84.0
+  },
+  {
+    "element": "user_auth",
+    "times_asked": 6,
+    "avg_score": 80.0,
+    "bonus_rate": 0.167,
+    "effectiveness": 83.33
+  },
+  {
+    "element": "data_model",
+    "times_asked": 15,
+    "avg_score": 79.0,
+    "bonus_rate": 0.133,
+    "effectiveness": 81.67
+  },
+  {
+    "element": "real_time_needs",
+    "times_asked": 7,
+    "avg_score": 75.0,
+    "bonus_rate": 0.286,
+    "effectiveness": 80.71
+  },
+  {
+    "element": "offer_promotion",
+    "times_asked": 2,
+    "avg_score": 80.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 80.0
+  },
+  {
+    "element": "payment_methods",
+    "times_asked": 6,
+    "avg_score": 80.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 80.0
+  },
+  {
+    "element": "visualization_types",
+    "times_asked": 5,
+    "avg_score": 80.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 80.0
+  },
+  {
+    "element": "sending_frequency",
+    "times_asked": 5,
+    "avg_score": 80.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 80.0
+  },
+  {
+    "element": "content_volume",
+    "times_asked": 5,
+    "avg_score": 75.0,
+    "bonus_rate": 0.2,
+    "effectiveness": 79.0
+  },
+  {
+    "element": "color_preferences",
+    "times_asked": 5,
+    "avg_score": 75.0,
+    "bonus_rate": 0.2,
+    "effectiveness": 79.0
+  },
+  {
+    "element": "tone_personality",
+    "times_asked": 6,
+    "avg_score": 75.0,
+    "bonus_rate": 0.167,
+    "effectiveness": 78.33
+  },
+  {
+    "element": "posting_frequency",
+    "times_asked": 6,
+    "avg_score": 75.0,
+    "bonus_rate": 0.167,
+    "effectiveness": 78.33
+  },
+  {
+    "element": "shipping_logistics",
+    "times_asked": 5,
+    "avg_score": 75.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 75.0
+  },
+  {
+    "element": "platform_preference",
+    "times_asked": 8,
+    "avg_score": 70.0,
+    "bonus_rate": 0.25,
+    "effectiveness": 75.0
+  },
+  {
+    "element": "design_system",
+    "times_asked": 6,
+    "avg_score": 75.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 75.0
+  },
+  {
+    "element": "data_storage",
+    "times_asked": 6,
+    "avg_score": 75.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 75.0
+  },
+  {
+    "element": "design_direction",
+    "times_asked": 3,
+    "avg_score": 75.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 75.0
+  },
+  {
+    "element": "email_platform",
+    "times_asked": 4,
+    "avg_score": 75.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 75.0
+  },
+  {
+    "element": "distribution_channels",
+    "times_asked": 4,
+    "avg_score": 65.0,
+    "bonus_rate": 0.5,
+    "effectiveness": 75.0
+  },
+  {
+    "element": "script_content",
+    "times_asked": 2,
+    "avg_score": 75.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 75.0
+  },
+  {
+    "element": "tech_stack",
+    "times_asked": 16,
+    "avg_score": 71.9,
+    "bonus_rate": 0.125,
+    "effectiveness": 74.38
+  },
+  {
+    "element": "tech_platform",
+    "times_asked": 7,
+    "avg_score": 65.0,
+    "bonus_rate": 0.429,
+    "effectiveness": 73.57
+  },
+  {
+    "element": "brand_voice",
+    "times_asked": 13,
+    "avg_score": 70.0,
+    "bonus_rate": 0.154,
+    "effectiveness": 73.08
+  },
+  {
+    "element": "industry_context",
+    "times_asked": 7,
+    "avg_score": 70.0,
+    "bonus_rate": 0.143,
+    "effectiveness": 72.86
+  },
+  {
+    "element": "existing_branding",
+    "times_asked": 8,
+    "avg_score": 66.2,
+    "bonus_rate": 0.25,
+    "effectiveness": 71.25
+  },
+  {
+    "element": "existing_audience_size",
+    "times_asked": 3,
+    "avg_score": 70.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 70.0
+  },
+  {
+    "element": "platform_deployment",
+    "times_asked": 6,
+    "avg_score": 70.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 70.0
+  },
+  {
+    "element": "key_user_flows",
+    "times_asked": 6,
+    "avg_score": 70.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 70.0
+  },
+  {
+    "element": "visual_assets_needed",
+    "times_asked": 5,
+    "avg_score": 70.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 70.0
+  },
+  {
+    "element": "content_strategy",
+    "times_asked": 5,
+    "avg_score": 70.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 70.0
+  },
+  {
+    "element": "engagement_strategy",
+    "times_asked": 2,
+    "avg_score": 50.0,
+    "bonus_rate": 1.0,
+    "effectiveness": 70.0
+  },
+  {
+    "element": "brand_guidelines",
+    "times_asked": 3,
+    "avg_score": 70.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 70.0
+  },
+  {
+    "element": "lead_magnet",
+    "times_asked": 1,
+    "avg_score": 50.0,
+    "bonus_rate": 1.0,
+    "effectiveness": 70.0
+  },
+  {
+    "element": "messaging_tone",
+    "times_asked": 5,
+    "avg_score": 65.0,
+    "bonus_rate": 0.2,
+    "effectiveness": 69.0
+  },
+  {
+    "element": "design_template",
+    "times_asked": 5,
+    "avg_score": 65.0,
+    "bonus_rate": 0.2,
+    "effectiveness": 69.0
+  },
+  {
+    "element": "design_style",
+    "times_asked": 28,
+    "avg_score": 67.1,
+    "bonus_rate": 0.071,
+    "effectiveness": 68.57
+  },
+  {
+    "element": "typography_preferences",
+    "times_asked": 3,
+    "avg_score": 55.0,
+    "bonus_rate": 0.667,
+    "effectiveness": 68.33
+  },
+  {
+    "element": "ai_model",
+    "times_asked": 7,
+    "avg_score": 65.0,
+    "bonus_rate": 0.143,
+    "effectiveness": 67.86
+  },
+  {
+    "element": "fallback_handling",
+    "times_asked": 8,
+    "avg_score": 60.0,
+    "bonus_rate": 0.375,
+    "effectiveness": 67.5
+  },
+  {
+    "element": "rate_limiting",
+    "times_asked": 9,
+    "avg_score": 65.0,
+    "bonus_rate": 0.111,
+    "effectiveness": 67.22
+  },
+  {
+    "element": "offline_capability",
+    "times_asked": 9,
+    "avg_score": 65.0,
+    "bonus_rate": 0.111,
+    "effectiveness": 67.22
+  },
+  {
+    "element": "data_volume",
+    "times_asked": 14,
+    "avg_score": 61.4,
+    "bonus_rate": 0.286,
+    "effectiveness": 67.14
+  },
+  {
+    "element": "access_control",
+    "times_asked": 7,
+    "avg_score": 60.0,
+    "bonus_rate": 0.286,
+    "effectiveness": 65.71
+  },
+  {
+    "element": "brand_tone",
+    "times_asked": 3,
+    "avg_score": 65.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 65.0
+  },
+  {
+    "element": "filtering_drilldown",
+    "times_asked": 5,
+    "avg_score": 65.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 65.0
+  },
+  {
+    "element": "accessibility",
+    "times_asked": 6,
+    "avg_score": 65.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 65.0
+  },
+  {
+    "element": "visual_style",
+    "times_asked": 7,
+    "avg_score": 65.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 65.0
+  },
+  {
+    "element": "segmentation",
+    "times_asked": 4,
+    "avg_score": 60.0,
+    "bonus_rate": 0.25,
+    "effectiveness": 65.0
+  },
+  {
+    "element": "usage_contexts",
+    "times_asked": 5,
+    "avg_score": 65.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 65.0
+  },
+  {
+    "element": "inventory_management",
+    "times_asked": 2,
+    "avg_score": 55.0,
+    "bonus_rate": 0.5,
+    "effectiveness": 65.0
+  },
+  {
+    "element": "distribution_platform",
+    "times_asked": 3,
+    "avg_score": 65.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 65.0
+  },
+  {
+    "element": "seo_requirements",
+    "times_asked": 1,
+    "avg_score": 45.0,
+    "bonus_rate": 1.0,
+    "effectiveness": 65.0
+  },
+  {
+    "element": "paid_ads_budget",
+    "times_asked": 1,
+    "avg_score": 45.0,
+    "bonus_rate": 1.0,
+    "effectiveness": 65.0
+  },
+  {
+    "element": "existing_systems",
+    "times_asked": 7,
+    "avg_score": 60.0,
+    "bonus_rate": 0.143,
+    "effectiveness": 62.86
+  },
+  {
+    "element": "integrations",
+    "times_asked": 18,
+    "avg_score": 59.7,
+    "bonus_rate": 0.056,
+    "effectiveness": 60.83
+  },
+  {
+    "element": "billing_system",
+    "times_asked": 2,
+    "avg_score": 50.0,
+    "bonus_rate": 0.5,
+    "effectiveness": 60.0
+  },
+  {
+    "element": "visual_assets",
+    "times_asked": 2,
+    "avg_score": 60.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 60.0
+  },
+  {
+    "element": "mobile_responsive",
+    "times_asked": 4,
+    "avg_score": 60.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 60.0
+  },
+  {
+    "element": "existing_content",
+    "times_asked": 5,
+    "avg_score": 60.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 60.0
+  },
+  {
+    "element": "promotion_channel",
+    "times_asked": 4,
+    "avg_score": 60.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 60.0
+  },
+  {
+    "element": "content_ready",
+    "times_asked": 5,
+    "avg_score": 60.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 60.0
+  },
+  {
+    "element": "existing_presence",
+    "times_asked": 7,
+    "avg_score": 60.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 60.0
+  },
+  {
+    "element": "error_handling",
+    "times_asked": 2,
+    "avg_score": 50.0,
+    "bonus_rate": 0.5,
+    "effectiveness": 60.0
+  },
+  {
+    "element": "hosting_infra",
+    "times_asked": 1,
+    "avg_score": 40.0,
+    "bonus_rate": 1.0,
+    "effectiveness": 60.0
+  },
+  {
+    "element": "competitor_accounts",
+    "times_asked": 5,
+    "avg_score": 55.0,
+    "bonus_rate": 0.2,
+    "effectiveness": 59.0
+  },
+  {
+    "element": "responsiveness",
+    "times_asked": 5,
+    "avg_score": 55.0,
+    "bonus_rate": 0.2,
+    "effectiveness": 59.0
+  },
+  {
+    "element": "campaign_duration",
+    "times_asked": 3,
+    "avg_score": 55.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 55.0
+  },
+  {
+    "element": "integration_data",
+    "times_asked": 8,
+    "avg_score": 55.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 55.0
+  },
+  {
+    "element": "export_sharing",
+    "times_asked": 6,
+    "avg_score": 55.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 55.0
+  },
+  {
+    "element": "automation_flows",
+    "times_asked": 4,
+    "avg_score": 55.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 55.0
+  },
+  {
+    "element": "offer_incentive",
+    "times_asked": 1,
+    "avg_score": 55.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 55.0
+  },
+  {
+    "element": "conversation_flow",
+    "times_asked": 4,
+    "avg_score": 50.0,
+    "bonus_rate": 0.25,
+    "effectiveness": 55.0
+  },
+  {
+    "element": "seo_keywords",
+    "times_asked": 3,
+    "avg_score": 55.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 55.0
+  },
+  {
+    "element": "talent_requirements",
+    "times_asked": 2,
+    "avg_score": 55.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 55.0
+  },
+  {
+    "element": "onboarding_flow",
+    "times_asked": 1,
+    "avg_score": 55.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 55.0
+  },
+  {
+    "element": "competitor_analysis",
+    "times_asked": 2,
+    "avg_score": 55.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 55.0
+  },
+  {
+    "element": "notifications",
+    "times_asked": 4,
+    "avg_score": 55.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 55.0
+  },
+  {
+    "element": "legal_requirements",
+    "times_asked": 1,
+    "avg_score": 50.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 50.0
+  },
+  {
+    "element": "style_references",
+    "times_asked": 4,
+    "avg_score": 50.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 50.0
+  },
+  {
+    "element": "music_sound",
+    "times_asked": 1,
+    "avg_score": 50.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 50.0
+  },
+  {
+    "element": "content_calendar",
+    "times_asked": 1,
+    "avg_score": 45.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 45.0
+  },
+  {
+    "element": "multilingual",
+    "times_asked": 2,
+    "avg_score": 45.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 45.0
+  },
+  {
+    "element": "brand_values",
+    "times_asked": 2,
+    "avg_score": 45.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 45.0
+  },
+  {
+    "element": "marketing_integration",
+    "times_asked": 1,
+    "avg_score": 45.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 45.0
+  },
+  {
+    "element": "budget",
+    "times_asked": 2,
+    "avg_score": 40.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 40.0
+  },
+  {
+    "element": "timeline",
+    "times_asked": 1,
+    "avg_score": 40.0,
+    "bonus_rate": 0.0,
+    "effectiveness": 40.0
+  }
+]

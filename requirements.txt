@@ -1,0 +1,21 @@
+# Core dependencies for ALI model (Mac/CPU compatible)
+# For GPU training, also install: torch with CUDA, bitsandbytes
+
+# No heavy ML deps needed for hackathon mode
+# The model runs with template-based generation + heuristic scoring
+# When ready for real training, uncomment the GPU section below
+
+# --- Always needed ---
+sentence-transformers>=2.7.0
+scikit-learn>=1.4.0
+
+# --- For real model training (uncomment when GPU available) ---
+transformers>=4.40.0
+peft>=0.10.0
+torch>=2.0.0
+datasets>=2.18.0
+accelerate>=0.28.0
+trl>=0.8.0
+
+# --- GPU only (requires Python >= 3.10) ---
+# bitsandbytes>=0.43.0

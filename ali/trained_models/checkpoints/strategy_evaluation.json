@@ -1,0 +1,29 @@
+{
+  "results": {
+    "greedy": {
+      "mean_coverage": 0.865,
+      "mean_turns": 9.95,
+      "mean_reward": 151.9,
+      "pct_above_90": 0.256
+    },
+    "cluster": {
+      "mean_coverage": 0.9464,
+      "mean_turns": 4.02,
+      "mean_reward": 222.46,
+      "pct_above_90": 1.0
+    },
+    "balanced": {
+      "mean_coverage": 0.9362,
+      "mean_turns": 6.32,
+      "mean_reward": 198.82,
+      "pct_above_90": 1.0
+    },
+    "priority": {
+      "mean_coverage": 0.8691,
+      "mean_turns": 9.94,
+      "mean_reward": 152.7,
+      "pct_above_90": 0.292
+    }
+  },
+  "best_strategy": "cluster"
+}
