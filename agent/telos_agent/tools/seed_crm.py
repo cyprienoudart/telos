@@ -112,19 +112,33 @@ def _headers(api_key: str) -> dict:
 
 
 def create_company(client: httpx.Client, base_url: str, api_key: str, data: dict) -> str:
-    """Create a company, return its ID."""
+    """Create a company (or find existing by domain), return its ID."""
     payload = {
-        "name": {"firstName": data["name"], "lastName": ""},
+        "name": data["name"],
         "domainName": {"primaryLinkUrl": data["domain"]},
         "employees": data["employees"],
     }
     resp = client.post(f"{base_url}/rest/companies", headers=_headers(api_key), json=payload)
+    if resp.status_code == 400 and "duplicate" in resp.text.lower():
+        search = client.get(
+            f"{base_url}/rest/companies",
+            headers=_headers(api_key),
+            params={"filter": f"name[eq]:{data['name']}", "limit": "1"},
+        )
+        search.raise_for_status()
+        results = search.json()["data"]["companies"]
+        if results:
+            print(f"  (existing)")
+            return results[0]["id"]
     resp.raise_for_status()
-    return resp.json()["data"]["id"]
+    body = resp.json()["data"]
+    if "createCompany" in body:
+        return body["createCompany"]["id"]
+    return body["id"]
 
 
 def create_person(client: httpx.Client, base_url: str, api_key: str, data: dict, company_id: str) -> str:
-    """Create a person linked to a company, return their ID."""
+    """Create a person linked to a company (or find existing by email), return their ID."""
     payload = {
         "name": {"firstName": data["first"], "lastName": data["last"]},
         "emails": {"primaryEmail": data["email"]},
@@ -133,8 +147,22 @@ def create_person(client: httpx.Client, base_url: str, api_key: str, data: dict,
         "companyId": company_id,
     }
     resp = client.post(f"{base_url}/rest/people", headers=_headers(api_key), json=payload)
+    if resp.status_code == 400 and "duplicate" in resp.text.lower():
+        search = client.get(
+            f"{base_url}/rest/people",
+            headers=_headers(api_key),
+            params={"limit": "50"},
+        )
+        search.raise_for_status()
+        for p in search.json()["data"]["people"]:
+            if p.get("emails", {}).get("primaryEmail") == data["email"]:
+                print(f"  (existing)")
+                return p["id"]
     resp.raise_for_status()
-    return resp.json()["data"]["id"]
+    body = resp.json()["data"]
+    if "createPerson" in body:
+        return body["createPerson"]["id"]
+    return body["id"]
 
 
 def create_opportunity(
@@ -150,8 +178,22 @@ def create_opportunity(
         "companyId": company_id,
     }
     resp = client.post(f"{base_url}/rest/opportunities", headers=_headers(api_key), json=payload)
+    if resp.status_code == 400 and "duplicate" in resp.text.lower():
+        search = client.get(
+            f"{base_url}/rest/opportunities",
+            headers=_headers(api_key),
+            params={"filter": f"name[eq]:{name}", "limit": "1"},
+        )
+        search.raise_for_status()
+        results = search.json()["data"]["opportunities"]
+        if results:
+            print(f"  (existing)")
+            return results[0]["id"]
     resp.raise_for_status()
-    return resp.json()["data"]["id"]
+    body = resp.json()["data"]
+    if "createOpportunity" in body:
+        return body["createOpportunity"]["id"]
+    return body["id"]
 
 
 # ── Main ───────────────────────────────────────────────────────────────────
