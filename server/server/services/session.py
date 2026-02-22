@@ -18,6 +18,8 @@ class Session:
     question_info: dict = field(default_factory=dict)
     done: bool = False
     transcript: str = ""  # accumulated context.md content for build phase
+    repo_url: str | None = None  # original GitHub URL (echo back to client)
+    repo_dir: Path | None = None  # cloned repo path (context + build target)
 
 
 class SessionStore:

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter, HTTPException
 
 from server.models import (
@@ -12,7 +14,10 @@ from server.models import (
     ConversationStatusResponse,
 )
 from server.services.rag_bridge import pre_answer_elements
+from server.services.repo import clone_repo
 from server.services.session import SessionStore
+
+log = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/conversation", tags=["conversation"])
 
@@ -32,6 +37,18 @@ async def start_conversation(req: ConversationStartRequest):
     s = _get_store()
     session = s.create()
 
+    # Clone GitHub repo if provided — serves as both context_dir and build target
+    context_dir = req.context_dir
+    if req.github_url:
+        try:
+            repo_path = await clone_repo(req.github_url)
+            session.repo_url = req.github_url
+            session.repo_dir = repo_path
+            context_dir = str(repo_path)
+            log.info("Cloned %s → %s", req.github_url, repo_path)
+        except (ValueError, RuntimeError) as exc:
+            raise HTTPException(400, str(exc)) from exc
+
     result = session.loop.start(req.message)
     session.question_info = result.get("_question_info") or {
         "targets": [],
@@ -47,7 +64,7 @@ async def start_conversation(req: ConversationStartRequest):
             if e["status"] == "undefined"
         ]
         if undefined:
-            rag_answers = await pre_answer_elements(undefined, req.context_dir)
+            rag_answers = await pre_answer_elements(undefined, context_dir)
             if rag_answers:
                 rag_answered_count = session.loop.apply_rag_answers(rag_answers)
 
@@ -83,6 +100,8 @@ async def start_conversation(req: ConversationStartRequest):
         initial_coverage=result["initial_coverage"],
         first_question=result.get("first_question"),
         done=result["done"],
+        repo_url=session.repo_url,
+        repo_dir=str(session.repo_dir) if session.repo_dir else None,
     )
 
 
@@ -114,6 +133,15 @@ async def answer_question(session_id: str, req: ConversationAnswerRequest):
         done=result["done"],
         turn=result["turn"],
     )
+
+
+@router.post("/reset")
+async def reset_all():
+    """Delete all sessions — used for demo resets."""
+    s = _get_store()
+    count = len(s._sessions)
+    s._sessions.clear()
+    return {"deleted": count}
 
 
 @router.get("/{session_id}/status", response_model=ConversationStatusResponse)

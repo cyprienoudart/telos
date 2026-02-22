@@ -22,22 +22,32 @@ export interface Message {
 
 export type ChatPhase = "conversation" | "building" | "done";
 
+export interface TrajectoryEvent {
+    type: string;
+    [key: string]: unknown;
+}
+
 export interface Chat {
     id: string;
     title: string;
     messages: Message[];
+    trajectory: TrajectoryEvent[];
     createdAt: Date;
     sessionId: string | null;
     buildId: string | null;
     phase: ChatPhase;
+    repoUrl: string | null;
+    repoDir: string | null;
 }
 
 interface ChatContextType {
     chats: Chat[];
     activeChatId: string | null;
     activeChat: Chat | null;
-    createChat: (firstMessage: string) => Promise<string>;
+    createChat: (firstMessage: string, githubUrl?: string) => Promise<string>;
     sendMessage: (chatId: string, content: string) => Promise<string | null>;
+    debugBuild: () => Promise<void>;
+    resetAll: () => Promise<void>;
     setActiveChatId: (id: string | null) => void;
     goHome: () => void;
 }
@@ -86,7 +96,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     // ── Create Chat (POST /api/backend/conversation/start) ───────────
 
     const createChat = useCallback(
-        async (firstMessage: string): Promise<string> => {
+        async (firstMessage: string, githubUrl?: string): Promise<string> => {
             const chatId = generateId();
             const userMsg: Message = {
                 id: generateId(),
@@ -102,20 +112,26 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                         ? firstMessage.slice(0, 40) + "\u2026"
                         : firstMessage,
                 messages: [userMsg],
+                trajectory: [],
                 createdAt: new Date(),
                 sessionId: null,
                 buildId: null,
                 phase: "conversation",
+                repoUrl: githubUrl ?? null,
+                repoDir: null,
             };
 
             setChats((prev) => [newChat, ...prev]);
             setActiveChatId(chatId);
 
             try {
+                const body: Record<string, string> = { message: firstMessage };
+                if (githubUrl) body.github_url = githubUrl;
+
                 const res = await fetch("/api/backend/conversation/start", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ message: firstMessage }),
+                    body: JSON.stringify(body),
                 });
 
                 if (!res.ok) {
@@ -125,10 +141,17 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
                 const data = await res.json();
 
-                // Attach session ID
+                // Attach session ID + repo info
                 setChats((prev) =>
                     prev.map((c) =>
-                        c.id === chatId ? { ...c, sessionId: data.session_id } : c
+                        c.id === chatId
+                            ? {
+                                  ...c,
+                                  sessionId: data.session_id,
+                                  repoUrl: data.repo_url ?? null,
+                                  repoDir: data.repo_dir ?? null,
+                              }
+                            : c
                     )
                 );
 
@@ -147,9 +170,16 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                     );
                     triggerBuild(chatId, data.session_id);
                 } else if (data.first_question) {
-                    const meta = data.rag_answered_count > 0
-                        ? `I pre-answered ${data.rag_answered_count} items from your files. `
-                        : "";
+                    let meta = "";
+                    if (data.repo_url && data.rag_answered_count > 0) {
+                        const repoName = data.repo_url.replace(/^https:\/\/github\.com\//, "");
+                        meta = `Connected: ${repoName}. I pre-answered ${data.rag_answered_count} items from the codebase. `;
+                    } else if (data.rag_answered_count > 0) {
+                        meta = `I pre-answered ${data.rag_answered_count} items from your files. `;
+                    } else if (data.repo_url) {
+                        const repoName = data.repo_url.replace(/^https:\/\/github\.com\//, "");
+                        meta = `Connected: ${repoName}. `;
+                    }
                     addMessage(setChats, chatId, "ai", meta + data.first_question);
                     questionInfoRef.current[chatId] = data.first_question;
                 }
@@ -232,10 +262,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                 const res = await fetch("/api/backend/build/start", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        session_id: sessionId,
-                        project_dir: `/tmp/telos-build-${sessionId}`,
-                    }),
+                    body: JSON.stringify({ session_id: sessionId }),
                 });
 
                 if (!res.ok) {
@@ -265,11 +292,44 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         (chatId: string, buildId: string) => {
             const source = new EventSource(`/api/backend/build/${buildId}/stream`);
 
+            // Batch trajectory events to avoid excessive re-renders
+            let pendingEvents: TrajectoryEvent[] = [];
+            let rafScheduled = false;
+
+            const flushEvents = () => {
+                if (pendingEvents.length === 0) return;
+                const batch = pendingEvents;
+                pendingEvents = [];
+                rafScheduled = false;
+                setChats((prev) =>
+                    prev.map((c) =>
+                        c.id === chatId
+                            ? { ...c, trajectory: [...c.trajectory, ...batch] }
+                            : c
+                    )
+                );
+            };
+
+            source.addEventListener("trajectory", (e) => {
+                try {
+                    const evt: TrajectoryEvent = JSON.parse(e.data);
+                    pendingEvents.push(evt);
+                    if (!rafScheduled) {
+                        rafScheduled = true;
+                        requestAnimationFrame(flushEvents);
+                    }
+                } catch {
+                    // skip malformed events
+                }
+            });
+
             source.addEventListener("progress", (e) => {
                 addMessage(setChats, chatId, "ai", e.data);
             });
 
             source.addEventListener("done", (e) => {
+                // Flush any remaining trajectory events
+                flushEvents();
                 try {
                     const data = JSON.parse(e.data);
                     const status = data.success ? "Build completed!" : `Build failed: ${data.error}`;
@@ -292,6 +352,83 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         [],
     );
 
+    // ── Debug Build (skip interview, use fixture) ─────────────────────
+
+    const debugBuild = useCallback(async () => {
+        const chatId = generateId();
+        const infoMsg: Message = {
+            id: generateId(),
+            role: "ai",
+            content: "Debug mode — skipping interview, using test fixture. Starting build...",
+            timestamp: new Date(),
+        };
+
+        const newChat: Chat = {
+            id: chatId,
+            title: "Debug Build",
+            messages: [infoMsg],
+            trajectory: [],
+            createdAt: new Date(),
+            sessionId: null,
+            buildId: null,
+            phase: "building",
+            repoUrl: null,
+            repoDir: null,
+        };
+
+        setChats((prev) => [newChat, ...prev]);
+        setActiveChatId(chatId);
+
+        try {
+            const res = await fetch("/api/backend/build/debug-start", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({}),
+            });
+
+            if (!res.ok) {
+                const errText = await res.text();
+                addMessage(setChats, chatId, "ai", `Debug build failed: ${errText}`);
+                setChats((prev) =>
+                    prev.map((c) =>
+                        c.id === chatId ? { ...c, phase: "done" } : c
+                    )
+                );
+                return;
+            }
+
+            const data = await res.json();
+            setChats((prev) =>
+                prev.map((c) =>
+                    c.id === chatId ? { ...c, buildId: data.build_id } : c
+                )
+            );
+
+            streamBuildProgress(chatId, data.build_id);
+        } catch {
+            addMessage(setChats, chatId, "ai", "Failed to start debug build.");
+            setChats((prev) =>
+                prev.map((c) =>
+                    c.id === chatId ? { ...c, phase: "done" } : c
+                )
+            );
+        }
+    }, [streamBuildProgress]);
+
+    // ── Reset All (demo cleanup) ──────────────────────────────────
+
+    const resetAll = useCallback(async () => {
+        // Clear backend sessions and builds in parallel
+        await Promise.allSettled([
+            fetch("/api/backend/conversation/reset", { method: "POST" }),
+            fetch("/api/backend/build/reset", { method: "POST" }),
+        ]);
+        // Clear frontend state
+        setChats([]);
+        setActiveChatId(null);
+        questionInfoRef.current = {};
+    }, []);
+
     const goHome = useCallback(() => {
         setActiveChatId(null);
     }, []);
@@ -304,6 +441,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                 activeChat,
                 createChat,
                 sendMessage,
+                debugBuild,
+                resetAll,
                 setActiveChatId,
                 goHome,
             }}

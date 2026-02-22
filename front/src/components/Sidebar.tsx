@@ -3,7 +3,7 @@
 import { useChatContext } from "./ChatContext";
 
 export default function Sidebar() {
-    const { chats, activeChatId, setActiveChatId, goHome } = useChatContext();
+    const { chats, activeChatId, setActiveChatId, goHome, resetAll } = useChatContext();
 
     const formatTime = (date: Date) => {
         const now = new Date();
@@ -60,6 +60,15 @@ export default function Sidebar() {
 
             {/* Settings */}
             <div className="sidebar__settings">
+                {chats.length > 0 && (
+                    <button className="sidebar__settings-btn sidebar__reset-btn" onClick={resetAll}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="1 4 1 10 7 10" />
+                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+                        </svg>
+                        Reset Demo
+                    </button>
+                )}
                 <button className="sidebar__settings-btn">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="3" />
