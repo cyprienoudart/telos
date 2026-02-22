@@ -2,109 +2,49 @@
 
 ## Overview
 
-Query Twenty CRM to retrieve all Won-deal contacts, filter to women, and produce a `recipients.json` file that PRD 04 consumes for email rendering. This task is data-gathering only — no HTML or images are written.
+Query Twenty CRM for all Won-stage opportunities, resolve their linked contacts, filter to the four women clients, and write the results to `demo/emails/recipients.json`. This file is the handoff artifact consumed by PRD 04.
 
-**Agent:** `crm`
-**Phase:** 2b (parallel with PRD 02)
-**Depends on:** PRD 01 (none of its outputs are needed here — this PRD can start as soon as images are done, alongside PRD 02)
-**Output:** `demo/emails/recipients.json`
+## Subagent
 
----
+`crm`
+
+## Dependencies
+
+- **PRD 01 must complete first** (image assets should be in place before triggering downstream PRDs)
+- This PRD is **independent of PRD 02** — landing page and CRM lookup may run in any order after PRD 01
 
 ## Tech Stack
 
-| Concern | Detail |
-|---|---|
-| Primary | Twenty CRM MCP tools (`twenty-mcp-server` via npx, 29 tools) |
-| Fallback | REST API at `http://localhost:3000` with `Authorization: Bearer $TWENTY_API_KEY` |
-| GraphQL | `http://localhost:3000/graphql` (alternative if REST endpoints are unclear) |
-| Auth env var | `TWENTY_API_KEY` |
-| Output file | `demo/emails/recipients.json` |
-
----
-
-## Expected Result
-
-The known set of women contacts from Won deals (confirmed by the project interview):
-
-| Name | Company | Email |
-|---|---|---|
-| Sarah Johnson | Apex Tech | `sarah.johnson@apextech.io` |
-| Priya Patel | (TBD from CRM) | (resolve from CRM) |
-| Olivia Chen | (TBD from CRM) | (resolve from CRM) |
-| Amara Okafor | (TBD from CRM) | (resolve from CRM) |
-
-Treat the CRM as the source of truth for exact email addresses — do not hardcode from this table.
-
----
-
-## Query Strategy
-
-### MCP-first approach (preferred)
-
-Use Twenty CRM MCP tools. Likely useful tools from the `twenty-mcp-server`:
-- A search/filter tool for opportunities filtered by `stage = "WON"` (or equivalent)
-- A people/contact lookup tool to resolve contact records linked to each opportunity
-
-### REST fallback
-
-If MCP is unavailable, use the REST API:
-
-```
-GET http://localhost:3000/rest/opportunities?filter=stage:WON
-Authorization: Bearer <TWENTY_API_KEY>
-```
-
-Then for each opportunity, resolve the contact via:
-
-```
-GET http://localhost:3000/rest/people/<contactId>
-Authorization: Bearer <TWENTY_API_KEY>
-```
-
-### Stage value
-
-The exact `stage` filter value may be `"WON"`, `"Won"`, or a UUID enum — try the MCP search first and inspect returned records to determine the correct string before filtering.
-
-### Gender filtering
-
-Twenty CRM may not have an explicit gender field. Filter women contacts by first name:
-- Match first names: `Sarah`, `Priya`, `Olivia`, `Amara`
-- If additional contacts appear in Won deals that don't match these names, exclude them
-
----
-
-## Output Format
-
-Write a JSON array to `demo/emails/recipients.json`:
-
-```json
-[
-  {"name": "Sarah Johnson", "email": "sarah.johnson@apextech.io"},
-  {"name": "Priya Patel",   "email": "priya.patel@<domain>"},
-  {"name": "Olivia Chen",   "email": "olivia.chen@<domain>"},
-  {"name": "Amara Okafor",  "email": "amara.okafor@<domain>"}
-]
-```
-
-This format is consumed directly by `send_email --batch demo/emails/recipients.json` in PRD 04.
-
----
+- **Preferred**: Twenty CRM MCP tools (`twenty-mcp-server`) — use `search_objects`, list people/companies/opportunities tools
+- **Fallback**: REST API at `http://localhost:3000` — endpoint `GET /rest/opportunities?filter=stage[eq]=WON` with `Authorization: Bearer $TWENTY_API_KEY` header
+- Auth: `TWENTY_API_KEY` env var
 
 ## Acceptance Criteria
 
-- [ ] Verify Twenty CRM is reachable — either confirm `twenty-mcp-server` MCP tools are available, or confirm `http://localhost:3000` responds to a GET request
-- [ ] Query all opportunities and identify those with a Won stage (try MCP search tool first; fall back to REST if needed)
-- [ ] Inspect at least one Won opportunity record to determine the correct stage filter value (`"WON"`, `"Won"`, or other)
-- [ ] Retrieve the linked contact/person record for each Won opportunity
-- [ ] Filter resolved contacts to women using the known first-name list: Sarah, Priya, Olivia, Amara
-- [ ] Confirm all four expected contacts are present with valid email addresses
-- [ ] Create `demo/emails/` directory if it does not exist
-- [ ] Write `demo/emails/recipients.json` as a JSON array of `{"name", "email"}` objects
-- [ ] Confirm the output file contains exactly 4 entries
+- [x] Verify `TWENTY_API_KEY` environment variable is set; log a warning and attempt connection anyway (the token may be embedded in the MCP config), but if CRM is unreachable exit with a clear error
+- [x] Query all opportunities with stage `WON` via MCP tools (preferred) or REST fallback at `GET http://localhost:3000/rest/opportunities?filter=stage[eq]=WON`
+- [x] For each WON opportunity, retrieve the linked point-of-contact person record (name, email address)
+- [x] Also retrieve the associated company name or deal name for each contact to use in personalized email copy
+- [x] Filter the full contact list to women clients — match by name against: Sarah Johnson, Priya Patel, Olivia Chen, Amara Okafor (the CRM seed data uses these exact names; do not rely on a gender field)
+- [x] Log a warning to stdout if fewer or more than four contacts are found — proceed with whichever contacts were actually identified
+- [x] Create the `demo/emails/` directory if it does not already exist
+- [x] Write the identified contacts to `demo/emails/recipients.json` as a JSON array — each element must include: `"name"` (full name), `"email"` (email address), `"company"` (company name), `"deal_name"` (opportunity/deal name or title)
 
----
+## Output Format
+
+`demo/emails/recipients.json` must be valid JSON matching this structure:
+
+```json
+[
+  {
+    "name": "Sarah Johnson",
+    "email": "sarah.johnson@example.com",
+    "company": "Acme Corp",
+    "deal_name": "Acme Corp — Q4 Expansion"
+  }
+]
+```
 
 ## Definition of Done
 
-`demo/emails/recipients.json` exists, is valid JSON, contains exactly four entries, and each entry has a non-empty `name` and a properly-formed email address. The file is ready for `send_email --batch` in PRD 04.
+`demo/emails/recipients.json` exists, is valid JSON, and contains between one and four contact records (ideally exactly four). Each record has non-empty `name`, `email`, `company`, and `deal_name` fields. The file is readable by the next PRD without any additional CRM access.

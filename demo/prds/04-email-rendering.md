@@ -2,103 +2,57 @@
 
 ## Overview
 
-Render four personalized HTML email files — one per woman contact — using the `telos_agent.tools.send_email` CLI tool. Each email has a personalized greeting, a shared subject line, and an embedded IWD header image. All output is local HTML files; nothing is actually sent.
+Read the contact list from `demo/emails/recipients.json` (produced by PRD 03) and render a personalized HTML email for each woman client using the `send_email` CLI tool. Emails are saved locally as HTML files — nothing is sent over the network.
 
-**Agent:** `coder`
-**Phase:** 3 (must run after both PRD 01 and PRD 03 complete)
-**Depends on:**
-- PRD 01 — `demo/site/assets/iwd-email-header.png` must exist
-- PRD 03 — `demo/emails/recipients.json` must exist
+## Subagent
 
----
+`coder`
+
+## Dependencies
+
+- **PRD 01 must complete first** — `demo/site/assets/iwd-email-header.png` must exist
+- **PRD 03 must complete first** — `demo/emails/recipients.json` must exist with contact records
 
 ## Tech Stack
 
-| Concern | Detail |
-|---|---|
-| Tool | `uv run python -m telos_agent.tools.send_email` |
-| Image embedding | Base64 data URI (embedded inline — no external URL needed) |
-| Output dir | `demo/emails/` (created automatically by the tool) |
-| Output filename | `{sanitized_email}.html` — special chars replaced with `_`, `@` and `.` preserved |
-| Batch mode | `--batch demo/emails/recipients.json` sends to all four recipients in one invocation |
+- CLI: `uv run python -m telos_agent.tools.send_email` (from the `agent/` directory or any directory where `telos_agent` is installed)
+- Batch mode: `--batch demo/emails/recipients.json` (if body is the same for all) **or** individual `--to` invocations (preferred for per-recipient personalization)
+- Output: `--output-dir demo/emails/` — the tool writes one `.html` file per recipient, named by email address
 
-The tool signature:
+## CLI Reference
 
+Single-recipient invocation:
 ```
 uv run python -m telos_agent.tools.send_email \
-  --batch demo/emails/recipients.json \
+  --to "First Last <email@example.com>" \
   --subject "Celebrating You This International Women's Day!" \
-  --body "<body text>" \
-  --image <path-to-iwd-email-header.png> \
+  --body "Dear First, ..." \
+  --image demo/site/assets/iwd-email-header.png \
   --output-dir demo/emails/
 ```
 
----
-
-## Email Content Spec
-
-### Subject
-
-```
-Celebrating You This International Women's Day!
-```
-
-### Body
-
-Write one body template, then personalize the first name for each recipient. The body should:
-- Open with `Dear {FirstName},` (use first name only — e.g., "Dear Sarah,")
-- Express genuine celebration of the recipient's achievements and leadership
-- Reference the International Women's Day theme (March 8th)
-- Include a warm sign-off from the Apex Dynamics team
-- Be 3–4 short paragraphs; conversational but professional in tone
-
-Because `send_email --batch` applies a single body string to all recipients, **use `--to` mode individually** (one call per recipient) if you need distinct first-name interpolation per email. Alternatively, write the body with a generic "Dear {name}," that works for all four — but ensure the actual first name is interpolated.
-
-Recommended approach: invoke `send_email --to` four times, once per recipient, each with a personalized `--body` that uses the recipient's first name.
-
-### Image path
-
-Pass the absolute path to avoid CWD ambiguity:
-
-```
---image /path/to/telos/demo/site/assets/iwd-email-header.png
-```
-
-Or confirm that the working directory when invoking the command is the repo root (`/path/to/telos`), then use:
-
-```
---image demo/site/assets/iwd-email-header.png
-```
-
----
-
-## Expected Output Files
-
-| Recipient | Expected filename |
-|---|---|
-| Sarah Johnson | `sarah.johnson@apextech.io.html` |
-| Priya Patel | `priya.patel@<domain>.html` |
-| Olivia Chen | `olivia.chen@<domain>.html` |
-| Amara Okafor | `amara.okafor@<domain>.html` |
-
-Filenames are derived by the tool from the email address: `re.sub(r'[^\w@.\-]', '_', email)`.
-
----
-
 ## Acceptance Criteria
 
-- [ ] Confirm `demo/emails/recipients.json` exists and contains 4 entries (output from PRD 03)
-- [ ] Confirm `demo/site/assets/iwd-email-header.png` exists (output from PRD 01)
-- [ ] Resolve the correct invocation path for `send_email` (confirm CWD or use absolute `--image` path)
-- [ ] Invoke `send_email` for Sarah Johnson with personalized body ("Dear Sarah,")
-- [ ] Invoke `send_email` for Priya Patel with personalized body ("Dear Priya,")
-- [ ] Invoke `send_email` for Olivia Chen with personalized body ("Dear Olivia,")
-- [ ] Invoke `send_email` for Amara Okafor with personalized body ("Dear Amara,")
-- [ ] Confirm four `.html` files exist in `demo/emails/`
-- [ ] Verify the email HTML for one recipient contains the correct first name in the greeting, the IWD subject line, and an embedded image (non-empty `<img>` src starting with `data:image/png;base64,`)
+- [x] Read and parse `demo/emails/recipients.json`; exit with a clear error if the file is missing or contains invalid JSON
+- [x] Verify `demo/site/assets/iwd-email-header.png` exists before rendering; exit with a clear error if it is missing
+- [x] Render a personalized HTML email for **Sarah Johnson** via the `send_email` CLI — body must open with *"Dear Sarah,"*
+- [x] Render a personalized HTML email for **Priya Patel** via the `send_email` CLI — body must open with *"Dear Priya,"*
+- [x] Render a personalized HTML email for **Olivia Chen** via the `send_email` CLI — body must open with *"Dear Olivia,"*
+- [x] Render a personalized HTML email for **Amara Okafor** via the `send_email` CLI — body must open with *"Dear Amara,"*
+- [x] Each email body must reference the recipient's company or deal name from `recipients.json` (e.g. *"your team at Acme Corp"*) — copy must not be identical across all four emails
+- [x] All four emails must use subject line: `"Celebrating You This International Women's Day!"`
+- [x] All four emails must include `demo/site/assets/iwd-email-header.png` as the `--image` argument
 
----
+## Email Copy Guidelines
+
+Each personalized body should:
+1. Open with `"Dear <FirstName>,"`
+2. Celebrate the recipient's specific business milestone (reference their company/deal from the JSON)
+3. Include a 1–2 sentence IWD campaign message: something warm and empowering about women in business
+4. Close with gratitude for the partnership and a sign-off from the Apex Dynamics team
+
+Keep each email to 3–5 short paragraphs. Tone: warm, professional, celebratory.
 
 ## Definition of Done
 
-Four HTML files exist in `demo/emails/`, one per recipient. Each file opens in a browser showing: the IWD header image rendered inline, a personalized greeting with the correct first name, the subject as the heading, and the Apex Dynamics footer. No broken images or placeholder text.
+Four HTML files exist in `demo/emails/`, one per recipient, named by email address (e.g. `sarah.johnson@example.com.html`). Opening any file in a browser shows a properly rendered email: IWD header image at top, personalized greeting, campaign body copy, and a styled layout matching the tool's built-in template. No recipient's email is a duplicate of another's body copy.

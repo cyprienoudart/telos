@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Sarah Johnson",
+    "email": "sarah.johnson@apextech.io",
+    "company": "Apex Technologies",
+    "deal_name": "Apex Tech \u2014 Enterprise Deal"
+  },
+  {
+    "name": "Priya Patel",
+    "email": "priya.patel@granitecap.com",
+    "company": "Granite Capital",
+    "deal_name": "Granite Capital \u2014 Portfolio Platform"
+  },
+  {
+    "name": "Olivia Chen",
+    "email": "olivia.chen@cascadefin.com",
+    "company": "Cascade Financial",
+    "deal_name": "Cascade Financial \u2014 Trading Dashboard"
+  },
+  {
+    "name": "Amara Okafor",
+    "email": "amara.okafor@bloomgrow.shop",
+    "company": "Bloom & Grow Retail",
+    "deal_name": "Bloom & Grow \u2014 Loyalty Program"
+  }
+]

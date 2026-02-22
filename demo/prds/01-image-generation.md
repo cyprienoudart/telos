@@ -2,71 +2,33 @@
 
 ## Overview
 
-Generate three visually consistent IWD-themed images using the `telos_agent.tools.image_gen` CLI tool (OpenRouter → Gemini 3 Pro Image). These images are a hard prerequisite for all downstream work: the landing page references `iwd-hero.png` and `iwd-social.png`, and the email tool embeds `iwd-email-header.png`.
+Generate three visually consistent PNG assets for the International Women's Day (IWD) campaign. These images are required by all downstream PRDs — no other work should begin until all three files exist and are verified.
 
-**Agent:** `image-generator`
-**Phase:** 1 (blocking — must complete before PRDs 02, 03, and 04 can begin)
-**Depends on:** nothing
+## Subagent
 
----
+`image-generator`
+
+## Dependencies
+
+None. This PRD executes first.
 
 ## Tech Stack
 
-| Concern | Detail |
-|---|---|
-| Tool | `uv run python -m telos_agent.tools.image_gen` |
-| Model | `google/gemini-3-pro-image-preview` (OpenRouter) |
-| Auth | `OPENROUTER_API_KEY` env var (check `agent/.env` or shell) |
-| Output dir | `demo/site/assets/` |
-| Supported flags | `--aspect-ratio` (`1:1`, `16:9`, etc.), `--size` (`1K`, `2K`, `4K`), `-o` (output path) |
-
-The tool creates parent directories automatically. It saves the response as a PNG at the path given by `-o`.
-
----
-
-## Shared Style Prefix
-
-**All three prompts must open with this exact string** to guarantee visual consistency:
-
-```
-modern flat illustration, purple #7B2D8B and gold #C9A84C palette, white background, clean professional design, International Women's Day 2026,
-```
-
-Append image-specific description after the comma.
-
----
-
-## Image Specifications
-
-| File | Aspect Ratio | Description suffix |
-|---|---|---|
-| `demo/site/assets/iwd-hero.png` | `16:9` | abstract hero banner celebrating women in business, bold geometric shapes, empowerment theme |
-| `demo/site/assets/iwd-social.png` | `1:1` | shareable social media graphic, central female silhouette or symbol, March 8 date detail |
-| `demo/site/assets/iwd-email-header.png` | `16:9` | warm congratulatory email header, soft gradient accents, celebratory floral or ribbon motif |
-
----
+- CLI: `uv run python -m telos_agent.tools.image_gen "<prompt>" -o <output-path>`
+- Model: `google/gemini-3-pro-image-preview` via OpenRouter (handled internally by the tool)
+- Auth: `OPENROUTER_API_KEY` env var
 
 ## Acceptance Criteria
 
-- [ ] Confirm `OPENROUTER_API_KEY` is available in the environment (check `agent/.env` or run `echo $OPENROUTER_API_KEY`)
-- [ ] Run `image_gen` for `iwd-hero.png` with `--aspect-ratio 16:9` and the shared style prefix
-- [ ] Run `image_gen` for `iwd-social.png` with `--aspect-ratio 1:1` and the shared style prefix
-- [ ] Run `image_gen` for `iwd-email-header.png` with `--aspect-ratio 16:9` and the shared style prefix
-- [ ] Confirm `demo/site/assets/iwd-hero.png` exists and is non-zero bytes
-- [ ] Confirm `demo/site/assets/iwd-social.png` exists and is non-zero bytes
-- [ ] Confirm `demo/site/assets/iwd-email-header.png` exists and is non-zero bytes
-- [ ] Visually inspect all three images (open or describe them) and confirm they share the purple/gold palette and professional style — re-generate any that look inconsistent before declaring done
-
----
-
-## Error Handling
-
-- If OpenRouter returns an error, retry once with a shorter, simpler prompt (remove the detailed description suffix, keep only the style prefix)
-- If the API is unreachable after retry, create placeholder PNGs using any available method (e.g., a 1×1 purple pixel) so downstream tasks are not fully blocked — note this clearly in progress output
-- Do not proceed to PRD 02/03 with missing image files; they are referenced by `<img>` tags and email embed
-
----
+- [x] Verify the `OPENROUTER_API_KEY` environment variable is set; exit immediately with a clear error message if it is missing — do not attempt image generation without it
+- [x] Create the `demo/site/assets/` directory if it does not already exist
+- [x] Generate the IWD hero banner using the image_gen CLI with prompt: *"International Women's Day hero banner, elegant abstract design, 16:9 landscape, deep purple and rich gold color palette on dark background, geometric floral motifs, no text, professional luxury feel"* — save to `demo/site/assets/iwd-hero.png`
+- [x] Generate the IWD social media image using the image_gen CLI with prompt: *"International Women's Day social graphic, 1:1 square format, bold purple and gold, celebratory confetti and abstract florals, empowering mood, no text, shareable professional aesthetic"* — save to `demo/site/assets/iwd-social.png`
+- [x] Generate the IWD email header using the image_gen CLI with prompt: *"International Women's Day email header banner, wide horizontal format, soft purple gradient fading left to right, warm gold accent line at bottom, abstract floral watercolor details, no text, suitable as email masthead"* — save to `demo/site/assets/iwd-email-header.png`
+- [x] Confirm `demo/site/assets/iwd-hero.png` exists and its file size is greater than zero bytes
+- [x] Confirm `demo/site/assets/iwd-social.png` exists and its file size is greater than zero bytes
+- [x] Confirm `demo/site/assets/iwd-email-header.png` exists and its file size is greater than zero bytes
 
 ## Definition of Done
 
-All three PNG files exist at their target paths, are visually consistent in palette and style, and have been visually confirmed before signaling completion to the orchestrator.
+All three PNG files are present in `demo/site/assets/`, each with a non-zero file size. A reviewer opening the files should see visually consistent IWD-themed imagery sharing the purple/gold palette. No placeholder or empty files. The `demo/emails/` directory is not modified by this PRD.
