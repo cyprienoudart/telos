@@ -7,8 +7,12 @@ interface for running the Telos workflow:
 """
 
 import json
+import logging
+import time
 from collections.abc import Callable
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 from telos_agent.claude import invoke_claude, invoke_claude_stream
 from telos_agent.interview import InterviewRunner
@@ -61,7 +65,13 @@ class TelosOrchestrator:
         to on_event, and returns the final result text (equivalent to
         ClaudeResult.stdout from the non-streaming path).
         """
+        t0 = time.monotonic()
+        logger.info("invoke_with_events: spawning claude subprocess...")
+        _tlog = lambda msg: open("/tmp/telos-build-timing.log", "a").write(f"[{time.strftime('%H:%M:%S')}] {msg}\n")
+        _tlog("invoke_with_events: spawning subprocess...")
         stream = invoke_claude_stream(**kwargs)
+        _tlog(f"invoke_with_events: subprocess spawned at {time.monotonic() - t0:.2f}s")
+        first_event = True
         result_text = ""
 
         for line in stream.lines:
@@ -78,9 +88,17 @@ class TelosOrchestrator:
 
             # Forward relevant events
             if evt_type in _STREAM_EVENTS:
+                if first_event:
+                    elapsed = time.monotonic() - t0
+                    logger.info("invoke_with_events: first event after %.2fs", elapsed)
+                    _tlog(f"invoke_with_events: FIRST EVENT at {elapsed:.2f}s (type={evt_type})")
+                    first_event = False
                 on_event(evt)
 
         stream.wait()
+        elapsed = time.monotonic() - t0
+        logger.info("invoke_with_events: done in %.2fs", elapsed)
+        _tlog(f"invoke_with_events: done in {elapsed:.2f}s")
         return result_text
 
     def generate_plan(
@@ -252,20 +270,29 @@ class TelosOrchestrator:
             context: Plain-text interview transcript from Ali.
             on_event: Optional callback for real-time trajectory streaming.
         """
+        t0 = time.monotonic()
+
         if on_event:
             on_event({"type": "phase", "phase": "planning", "message": "Generating project plan..."})
 
+        logger.info("plan_and_execute: starting generate_plan...")
         self.generate_plan(context, on_event=on_event)
+        logger.info("plan_and_execute: plan done in %.2fs", time.monotonic() - t0)
 
         if on_event:
             on_event({"type": "phase", "phase": "splitting", "message": "Splitting plan into PRDs..."})
 
+        logger.info("plan_and_execute: starting generate_prds...")
         self.generate_prds(on_event=on_event)
+        logger.info("plan_and_execute: PRDs done in %.2fs", time.monotonic() - t0)
 
         if on_event:
             on_event({"type": "phase", "phase": "building", "message": "Starting build loop..."})
 
-        return self.execute(on_event=on_event)
+        logger.info("plan_and_execute: starting execute...")
+        result = self.execute(on_event=on_event)
+        logger.info("plan_and_execute: total %.2fs", time.monotonic() - t0)
+        return result
 
     def run(
         self,

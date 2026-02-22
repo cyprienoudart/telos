@@ -208,7 +208,13 @@ def invoke_claude_stream(
         proc.stdin.close()
 
     def _line_generator():
-        for line in proc.stdout:
+        # Use readline() instead of `for line in proc.stdout` —
+        # the iterator uses a readahead buffer that delays line delivery,
+        # causing streaming events to arrive in batches instead of real-time.
+        while True:
+            line = proc.stdout.readline()
+            if not line:
+                break
             stripped = line.rstrip("\n")
             if stripped:
                 yield stripped

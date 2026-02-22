@@ -69,9 +69,37 @@ class DebugBuildStartRequest(BaseModel):
     model: str = Field("opus")
 
 
+class BuildConfirmRequest(BaseModel):
+    model: str = Field("opus")
+    max_iterations: int = Field(10, ge=1, le=50)
+
+
+class BuildEstimateRequest(BaseModel):
+    model: str = Field("opus")
+    max_iterations: int = Field(10, ge=1, le=50)
+
+
 class BuildStartResponse(BaseModel):
     build_id: str
     status: str  # "started"
+
+
+class PhaseEstimateSchema(BaseModel):
+    phase: str
+    input_tokens: int
+    output_tokens: int
+    model: str
+    cost_usd: float
+
+
+class CostEstimateResponse(BaseModel):
+    low_usd: float
+    typical_usd: float
+    high_usd: float
+    model: str
+    max_iterations: int
+    estimated_prd_count: int
+    breakdown: list[PhaseEstimateSchema]
 
 
 class BuildStatusResponse(BaseModel):
@@ -81,3 +109,27 @@ class BuildStatusResponse(BaseModel):
     total_iterations: int
     success: bool | None = None
     error: str | None = None
+
+
+# ── PRD Progress ─────────────────────────────────────────────────────────
+
+class PrdCheckboxItem(BaseModel):
+    text: str
+    checked: bool
+
+
+class PrdProgress(BaseModel):
+    filename: str       # "01-setup.md"
+    title: str          # first H1, or filename stem
+    items: list[PrdCheckboxItem]
+    total: int
+    done: int
+    percent: float      # 0.0–100.0
+
+
+class PrdProgressResponse(BaseModel):
+    build_id: str
+    prds: list[PrdProgress]
+    total_items: int
+    total_done: int
+    overall_percent: float

@@ -2,13 +2,16 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useChatContext } from "./ChatContext";
+import BuildCostTracker from "./BuildCostTracker";
 import BuildStream from "./BuildStream";
+import PrdProgressPanel from "./PrdProgressPanel";
 import ChatInputBar from "./ChatInputBar";
+import CostEstimate from "./CostEstimate";
 import VoiceOrb from "./VoiceOrb";
 import { useVoiceEngine } from "@/hooks/useVoiceEngine";
 
 export default function ChatInstance() {
-    const { activeChat, sendMessage } = useChatContext();
+    const { activeChat, sendMessage, changeEstimateModel, confirmBuild, declineBuild, estimateLoading } = useChatContext();
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [voiceModeActive, setVoiceModeActive] = useState(false);
 
@@ -81,7 +84,7 @@ export default function ChatInstance() {
             )}
 
             {/* Messages */}
-            <div className={`messages-area ${voiceModeActive ? "messages-area--compact" : ""} ${(activeChat.phase === "building" || activeChat.phase === "done") ? "messages-area--with-build" : ""}`}>
+            <div className={`messages-area ${voiceModeActive ? "messages-area--compact" : ""} ${(activeChat.phase === "planning" || activeChat.phase === "building" || activeChat.phase === "done") ? "messages-area--with-build" : ""}`}>
                 {activeChat.messages.map((msg) => (
                     <div
                         key={msg.id}
@@ -96,15 +99,43 @@ export default function ChatInstance() {
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Build stream — shown during building phase */}
-            {(activeChat.phase === "building" || activeChat.phase === "done") && (
-                <BuildStream
-                    trajectory={activeChat.trajectory}
+            {/* Cost estimate confirmation — shown before build */}
+            {activeChat.phase === "confirming" && activeChat.costEstimate && (
+                <div className="cost-estimate-wrapper">
+                    <CostEstimate
+                        estimate={activeChat.costEstimate}
+                        loading={estimateLoading}
+                        onModelChange={(model) => changeEstimateModel(activeChat.id, model)}
+                        onConfirm={() => confirmBuild(activeChat.id)}
+                        onDecline={() => declineBuild(activeChat.id)}
+                    />
+                </div>
+            )}
+
+            {/* Cost tracker — shown during build when estimate was accepted */}
+            {(activeChat.phase === "building" || activeChat.phase === "done") && activeChat.costEstimate && (
+                <BuildCostTracker
+                    estimate={activeChat.costEstimate}
+                    currentIteration={activeChat.buildIteration}
                     phase={activeChat.phase === "building" ? "building" : "done"}
+                    prdCount={activeChat.prdProgress?.prds.length}
                 />
             )}
 
-            {/* Input at bottom — hidden during build */}
+            {/* PRD progress — shown during build when PRDs exist */}
+            {(activeChat.phase === "building" || activeChat.phase === "done") && activeChat.prdProgress && (
+                <PrdProgressPanel progress={activeChat.prdProgress} />
+            )}
+
+            {/* Build stream — shown during planning, building, and done */}
+            {(activeChat.phase === "planning" || activeChat.phase === "building" || activeChat.phase === "done") && (
+                <BuildStream
+                    trajectory={activeChat.trajectory}
+                    phase={activeChat.phase === "done" ? "done" : "building"}
+                />
+            )}
+
+            {/* Input at bottom — hidden during build and confirming */}
             {!voiceModeActive && activeChat.phase === "conversation" && (
                 <div className="chat-instance__input">
                     <ChatInputBar onSend={handleSend} autoFocus placeholder="Follow up…" />
