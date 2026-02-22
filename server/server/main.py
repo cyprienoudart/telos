@@ -16,7 +16,7 @@ for pkg_dir in [str(_project_root), str(_project_root / "agent")]:
     if pkg_dir not in sys.path:
         sys.path.insert(0, pkg_dir)
 
-from server.routes import build, conversation
+from server.routes import build, context, conversation
 from server.services.build_runner import BuildRunner
 from server.services.session import SessionStore
 
@@ -59,6 +59,7 @@ app.add_middleware(
 )
 
 app.include_router(conversation.router)
+app.include_router(context.router)
 app.include_router(build.router)
 
 

@@ -7,6 +7,7 @@ questions, or signal that enough context has been gathered.
 
 Legacy API (ask_agent / add_user_answers) is preserved for backwards compat.
 """
+from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field

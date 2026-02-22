@@ -58,8 +58,8 @@ class RLQuestionGenerator:
 
         try:
             import torch
-            from transformers import GPT2LMHeadModel, GPT2Tokenizer
-            from peft import PeftModel
+            from transformers import GPT2LMHeadModel, AutoTokenizer
+            from peft import PeftModel, PeftConfig
 
             # Detect device
             if torch.backends.mps.is_available():
@@ -69,13 +69,20 @@ class RLQuestionGenerator:
             else:
                 self._llm_device = "cpu"
 
+            # Clean adapter config to handle PEFT version mismatches
+            try:
+                config = PeftConfig.from_pretrained(llm_path).to_dict()
+                config.pop("peft_type", None)
+            except Exception:
+                pass
+
             # Load base model + LoRA adapter
             base_model = GPT2LMHeadModel.from_pretrained("gpt2")
             self._llm_model = PeftModel.from_pretrained(base_model, llm_path)
             self._llm_model.eval()
             self._llm_model = self._llm_model.to(self._llm_device)
 
-            self._llm_tokenizer = GPT2Tokenizer.from_pretrained(llm_path)
+            self._llm_tokenizer = AutoTokenizer.from_pretrained(llm_path)
             if self._llm_tokenizer.pad_token is None:
                 self._llm_tokenizer.pad_token = self._llm_tokenizer.eos_token
 

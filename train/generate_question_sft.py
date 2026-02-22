@@ -24,21 +24,21 @@ MISSIONS_PATH = "train/data/missions.jsonl"
 # These become the ground-truth answers during fine-tuning.
 EXPERT_QUESTIONS = {
     "main_content_purpose": [
-        "What's the main purpose of this project — what problem does it solve?",
+        "What's the main purpose of this project? What problem does it solve?",
         "Why does this need to exist? What happens if you don't do it?",
     ],
     "target_audience": [
         "Who's this really for? Paint me a picture of your ideal user or customer.",
         "Who are you trying to reach, and what do they care about most?",
-        "Tell me about your audience — age, interests, what keeps them up at night.",
+        "Tell me about your audience: age, interests, what keeps them up at night.",
     ],
     "target_users": [
         "Who's going to actually use this day-to-day? What's their role?",
-        "Walk me through a typical user — what are they trying to accomplish?",
+        "Walk me through a typical user. What are they trying to accomplish?",
     ],
     "target_customers": [
         "Who's buying from you? What does a typical customer look like?",
-        "Describe your dream customer — who are they and why would they choose you?",
+        "Describe your dream customer: who are they and why would they choose you?",
     ],
     "target_market": [
         "What market are you going after? Local, national, global? Niche or broad?",
@@ -49,27 +49,27 @@ EXPERT_QUESTIONS = {
         "Are there any websites or brands whose look you love?",
     ],
     "design_direction": [
-        "Walk me through the mood — colors, textures, vibes?",
+        "Walk me through the mood: colors, textures, vibes?",
         "If this project were a brand, how would you describe its personality in 3 words?",
     ],
     "existing_branding": [
-        "Do you already have brand assets — logo, colors, fonts — or starting from scratch?",
+        "Do you already have brand assets (logo, colors, fonts) or starting from scratch?",
         "Is there an existing brand identity we should work within?",
     ],
     "color_preferences": [
         "Any colors that feel right for this? Or colors you want to avoid?",
-        "What palette would feel on-brand — warm, cool, bold, neutral?",
+        "What palette would feel on-brand: warm, cool, bold, neutral?",
     ],
     "core_features": [
-        "What are the must-have features — the things that make or break this project?",
+        "What are the must-have features, the things that make or break this project?",
         "If you could only have 3 features, which ones are non-negotiable?",
     ],
     "pages_structure": [
-        "What pages do you need? Home, About, Services, Contact — or more custom?",
-        "Walk me through the site structure — what sections are must-haves?",
+        "What pages do you need? Home, About, Services, Contact, or more custom?",
+        "Walk me through the site structure. What sections are must-haves?",
     ],
     "tech_platform": [
-        "Any preference on the tech side — WordPress, Shopify, custom code?",
+        "Any preference on the tech side: WordPress, Shopify, custom code?",
         "What's the technical setup? Existing platform or starting fresh?",
     ],
     "tech_stack": [
@@ -77,12 +77,8 @@ EXPERT_QUESTIONS = {
         "Any tech requirements or constraints I should know about?",
     ],
     "content_ready": [
-        "How's the content looking — text and images ready, or need to create everything?",
+        "How's the content looking? Text and images ready, or need to create everything?",
         "Is the copywriting done, or part of this project?",
-    ],
-    "timeline": [
-        "What's the timeline? Any hard deadlines?",
-        "When do you need this done? Is there flexibility?",
     ],
     "budget": [
         "What budget range are you working with? Even rough helps.",
@@ -96,27 +92,27 @@ EXPERT_QUESTIONS = {
         "What's the core message? Boil it down to one sentence.",
     ],
     "messaging_tone": [
-        "How should this sound — professional, casual, inspiring, playful?",
+        "How should this sound: professional, casual, inspiring, playful?",
     ],
     "brand_voice": [
-        "What tone should the writing have — formal, casual, witty?",
+        "What tone should the writing have: formal, casual, witty?",
     ],
     "brand_tone": [
         "What personality should come through in the messaging?",
     ],
     "campaign_goal": [
-        "What's the #1 goal — more sales, brand awareness, engagement?",
+        "What's the #1 goal: more sales, brand awareness, or engagement?",
         "If this campaign is wildly successful, what does that look like?",
     ],
     "campaign_channels": [
-        "Where should this reach people — email, social, ads, website?",
+        "Where should this reach people: email, social, ads, website?",
         "Which channels matter most for your audience?",
     ],
     "offer_promotion": [
-        "Is there a special offer tied to this — discount, free trial?",
+        "Is there a special offer tied to this, like a discount or free trial?",
     ],
     "offer_incentive": [
-        "What's the hook to get people to act — discount, free shipping?",
+        "What's the hook to get people to act: discount, free shipping?",
     ],
     "products_services": [
         "What are you selling? Walk me through your product lineup.",
@@ -141,19 +137,19 @@ EXPERT_QUESTIONS = {
         "What metrics matter most? Revenue, engagement, conversion?",
     ],
     "email_goals": [
-        "What should email marketing achieve — sales, engagement, retention?",
+        "What should email marketing achieve: sales, engagement, retention?",
     ],
     "email_types": [
-        "What types of emails — newsletters, automated sequences, promotions?",
+        "What types of emails: newsletters, automated sequences, promotions?",
     ],
     "email_platform": [
-        "Using an email platform already — Mailchimp, Klaviyo — or need one?",
+        "Using an email platform already (Mailchimp, Klaviyo) or need one?",
     ],
     "bot_purpose": [
-        "What should the chatbot do — FAQs, orders, support?",
+        "What should the chatbot do: FAQs, orders, support?",
     ],
     "video_purpose": [
-        "What's the goal of this video — promote, explain, educate?",
+        "What's the goal of this video: promote, explain, educate?",
     ],
     "current_problems": [
         "What's broken right now? What are users struggling with?",
@@ -162,22 +158,22 @@ EXPERT_QUESTIONS = {
         "What's the occasion or theme? Tell me the story behind this.",
     ],
     "pricing_strategy": [
-        "How are you pricing — fixed, tiers, subscriptions?",
+        "How are you pricing: fixed, tiers, subscriptions?",
     ],
     "pricing_model": [
-        "How will you charge — free trial, freemium, subscription?",
+        "How will you charge: free trial, freemium, subscription?",
     ],
     "visual_assets": [
-        "What kind of visual content — photos, graphics, videos?",
+        "What kind of visual content: photos, graphics, videos?",
     ],
     "visual_assets_needed": [
-        "What visuals do we need to create — hero images, product shots?",
+        "What visuals do we need to create: hero images, product shots?",
     ],
     "existing_audience_size": [
-        "How big is your current reach — email list, followers, customers?",
+        "How big is your current reach: email list, followers, customers?",
     ],
     "campaign_objectives": [
-        "What are you trying to achieve — revenue, signups, awareness?",
+        "What are you trying to achieve: revenue, signups, awareness?",
     ],
     "success_metrics": [
         "How will we measure if this worked?",
@@ -186,16 +182,16 @@ EXPERT_QUESTIONS = {
         "Is this a full redesign or specific pages and flows?",
     ],
     "content_type": [
-        "What content — blog posts, videos, social media, podcasts?",
+        "What content: blog posts, videos, social media, podcasts?",
     ],
     "automation_flows": [
-        "What automated sequences — welcome series, abandoned cart?",
+        "What automated sequences: welcome series, abandoned cart?",
     ],
     "segmentation": [
-        "How should we segment your audience — behavior, interests?",
+        "How should we segment your audience: behavior, interests?",
     ],
     "sending_frequency": [
-        "How often do you want to email — daily, weekly, monthly?",
+        "How often do you want to email: daily, weekly, monthly?",
     ],
 }
 
@@ -263,7 +259,7 @@ def generate_training_data():
             if not questions:
                 desc = top_unknown["description"]
                 questions = [
-                    f"Tell me about {desc.lower()} — what are you thinking?",
+                    f"Tell me about {desc.lower()}. What are you thinking?",
                     f"What's your plan for {desc.lower()}?",
                 ]
 
@@ -274,7 +270,7 @@ def generate_training_data():
                 second = unknown_elements[1]
                 desc1 = top_unknown["description"].lower()
                 desc2 = second["description"].lower()
-                question = f"Let's cover two things — {desc1}, and {desc2}. What are your thoughts on both?"
+                question = f"Let's cover two things: {desc1}, and {desc2}. What are your thoughts on both?"
 
             # Build simulated history for some examples
             history = None

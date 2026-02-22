@@ -5,6 +5,7 @@ interface for running the Telos workflow:
 
     interview (transcript rounds) → plan.md → prds/ → execute (Ralph loop)
 """
+from __future__ import annotations
 
 import json
 from pathlib import Path

@@ -36,9 +36,13 @@ async def pre_answer_elements(
         import os
         os.environ.setdefault("CONTEXT_DIR", context_dir)
 
-    # Lazy import to avoid chromadb import at server startup
+    # Lazy import — bypass telos_agent.mcp.gemini.__init__ which needs the
+    # ``mcp`` package (not always installed).  Import the pipeline module directly.
     try:
-        from telos_agent.mcp.gemini.pipeline import _is_idk, answer_question
+        import importlib
+        _pipeline = importlib.import_module("telos_agent.mcp.gemini.pipeline")
+        answer_question = _pipeline.answer_question
+        _is_idk = _pipeline._is_idk
     except Exception:
         logger.warning("Gemini RAG pipeline not available, skipping pre-answering", exc_info=True)
         return {}

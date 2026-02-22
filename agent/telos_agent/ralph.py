@@ -14,6 +14,7 @@ Works through a list of PRDs in prds/ directory, not a single file.
 Named after the "Huntley pattern" — fresh instance per iteration,
 state persists via files (progress.txt, git history, AGENTS.md).
 """
+from __future__ import annotations
 
 import json
 import shutil

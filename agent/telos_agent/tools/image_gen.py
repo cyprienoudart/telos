@@ -7,6 +7,7 @@ Usage:
     uv run python -m telos_agent.tools.image_gen "A sunset over mountains" -o sunset.png
     uv run python -m telos_agent.tools.image_gen "Logo for a tech startup" -o logo.png --aspect-ratio 1:1 --size 2K
 """
+from __future__ import annotations
 
 import argparse
 import base64

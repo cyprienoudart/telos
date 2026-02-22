@@ -4,6 +4,7 @@ Builds MCP server configuration JSON on the fly, replacing the static
 config/mcp-servers.json template approach. Each phase of the workflow
 requests only the servers it needs via boolean flags.
 """
+from __future__ import annotations
 
 import json
 import os
