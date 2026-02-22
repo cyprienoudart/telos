@@ -1,0 +1,1162 @@
+{
+  "web_development": {
+    "main_content_purpose": [
+      "What's the main purpose of this \u2014 what problem does it solve or goal does it achieve?",
+      "Why does this need to exist? What happens if you don't do it?"
+    ],
+    "target_audience": [
+      "Who's this really for? Paint me a picture of your ideal user or customer.",
+      "If you described your perfect customer to a friend, what would you say?",
+      "Who are you trying to reach, and what do they care about most?",
+      "Tell me about your audience \u2014 age, interests, what keeps them up at night."
+    ],
+    "pages_structure": [
+      "What pages do you need? Home, About, Services, Contact \u2014 or something more custom?",
+      "Walk me through the site structure \u2014 what sections or pages are must-haves?"
+    ],
+    "core_features": [
+      "What are the must-have features \u2014 the things that make or break this project?",
+      "If you could only have 3 features, which ones are non-negotiable?",
+      "What functionality is essential for this to work for your users?"
+    ],
+    "design_style": [
+      "What vibe are you going for visually? Think modern, minimal, bold, retro \u2014 anything inspire you?",
+      "If you showed someone this project, what feeling should they get at first glance?",
+      "Are there any websites, apps, or brands whose look you love? That helps me nail the direction.",
+      "Do you lean more towards clean and simple, or rich and detailed?"
+    ],
+    "existing_branding": [
+      "Do you already have brand assets \u2014 logo, color palette, fonts \u2014 or are we building from scratch?",
+      "Is there an existing brand identity we should work within, or is this a fresh start?",
+      "Do you have a style guide or brand book, or should we define the visual identity as part of this?"
+    ],
+    "tech_platform": [
+      "Any preference on the tech side \u2014 WordPress, Shopify, custom code, something else?",
+      "What's the technical setup? Are you on an existing platform or starting fresh?",
+      "Do you have a preference for the tech stack, or should I recommend based on your needs?"
+    ],
+    "content_ready": [
+      "How's the content looking \u2014 do you have text and images ready, or do we need to create everything?",
+      "Is the copywriting done, or is that something we need to build as part of this project?"
+    ],
+    "responsiveness": [
+      "What about mobile and tablet support requirements? This will help me shape the plan.",
+      "Let's talk about mobile and tablet support requirements \u2014 any thoughts?",
+      "Have you considered mobile and tablet support requirements yet?"
+    ],
+    "integrations": [
+      "What about third-party tools, apis, payment gateways? This will help me shape the plan.",
+      "Let's talk about third-party tools, apis, payment gateways \u2014 any thoughts?",
+      "Have you considered third-party tools, apis, payment gateways yet?"
+    ],
+    "seo_requirements": [
+      "What about search engine optimization needs? This will help me shape the plan.",
+      "Let's talk about search engine optimization needs \u2014 any thoughts?",
+      "Have you considered search engine optimization needs yet?"
+    ],
+    "timeline": [
+      "What's the timeline looking like? Any hard deadlines I should know about?",
+      "When do you need this done? Is there flexibility, or is the date locked in?",
+      "How urgent is this \u2014 are we talking days, weeks, or months?"
+    ],
+    "budget_range": [
+      "Do you have a budget in mind for this project?",
+      "What's the investment range you're comfortable with?"
+    ],
+    "domain_hosting": [
+      "What about domain name and hosting setup? This will help me shape the plan.",
+      "Let's talk about domain name and hosting setup \u2014 any thoughts?",
+      "Have you considered domain name and hosting setup yet?"
+    ],
+    "multilingual": [
+      "What about multiple language support needed? This will help me shape the plan.",
+      "Let's talk about multiple language support needed \u2014 any thoughts?",
+      "Have you considered multiple language support needed yet?"
+    ],
+    "accessibility": [
+      "What about accessibility standards compliance? This will help me shape the plan.",
+      "Let's talk about accessibility standards compliance \u2014 any thoughts?",
+      "Have you considered accessibility standards compliance yet?"
+    ],
+    "analytics_tracking": [
+      "What about analytics and tracking tools needed? This will help me shape the plan.",
+      "Let's talk about analytics and tracking tools needed \u2014 any thoughts?",
+      "Have you considered analytics and tracking tools needed yet?"
+    ],
+    "maintenance_plan": [
+      "What about post-launch maintenance approach? This will help me shape the plan.",
+      "Let's talk about post-launch maintenance approach \u2014 any thoughts?",
+      "Have you considered post-launch maintenance approach yet?"
+    ]
+  },
+  "marketing_campaign": {
+    "campaign_goal": [
+      "What's the #1 goal here \u2014 more sales, brand awareness, customer engagement?",
+      "If this campaign is wildly successful, what does that look like?"
+    ],
+    "target_audience": [
+      "Who's this really for? Paint me a picture of your ideal user or customer.",
+      "If you described your perfect customer to a friend, what would you say?",
+      "Who are you trying to reach, and what do they care about most?",
+      "Tell me about your audience \u2014 age, interests, what keeps them up at night."
+    ],
+    "campaign_channels": [
+      "Where should this reach people \u2014 email, social media, paid ads, your website, all of the above?",
+      "Which channels matter most for your audience? Where do they spend their time?"
+    ],
+    "key_message": [
+      "If someone remembers just one thing about this project, what should it be?",
+      "What's the core message? Boil it down to one sentence.",
+      "What do you want people to feel or understand after interacting with this?"
+    ],
+    "offer_promotion": [
+      "Is there a special offer or promotion tied to this \u2014 discount, free trial, limited-time deal?",
+      "Any incentive to drive action? Discounts, bundles, early access?"
+    ],
+    "existing_audience_size": [
+      "How big is your current reach \u2014 email list, social followers, customer base?",
+      "Give me a sense of scale \u2014 how many people can you reach today through your existing channels?"
+    ],
+    "brand_tone": [
+      "What personality should come through in the messaging \u2014 warm, bold, serious, fun?",
+      "Describe the voice \u2014 if your brand were a person, how would they talk?"
+    ],
+    "visual_assets": [
+      "What kind of visual content do you need \u2014 photos, graphics, video clips, animations?",
+      "Do you have existing imagery we can work with, or does everything need to be created?"
+    ],
+    "campaign_duration": [
+      "How long should this campaign run \u2014 a one-time push or an ongoing sequence?"
+    ],
+    "success_metrics": [
+      "How will we measure if the UX improvements actually work? Conversion rate, support tickets, task completion?"
+    ],
+    "budget": [
+      "What budget range are you working with? Even a rough idea helps me scope things right.",
+      "Any budget constraints? I want to make sure my recommendations are realistic."
+    ],
+    "ab_testing": [
+      "What about a/b testing strategy for messaging? This will help me shape the plan.",
+      "Let's talk about a/b testing strategy for messaging \u2014 any thoughts?",
+      "Have you considered a/b testing strategy for messaging yet?"
+    ],
+    "competitor_context": [
+      "What about what competitors are doing? This will help me shape the plan.",
+      "Let's talk about what competitors are doing \u2014 any thoughts?",
+      "Have you considered what competitors are doing yet?"
+    ],
+    "follow_up_plan": [
+      "What about post-campaign follow-up strategy? This will help me shape the plan.",
+      "Let's talk about post-campaign follow-up strategy \u2014 any thoughts?",
+      "Have you considered post-campaign follow-up strategy yet?"
+    ],
+    "legal_compliance": [
+      "What about gdpr, can-spam, regulatory compliance? This will help me shape the plan.",
+      "Let's talk about gdpr, can-spam, regulatory compliance \u2014 any thoughts?",
+      "Have you considered gdpr, can-spam, regulatory compliance yet?"
+    ]
+  },
+  "design_branding": {
+    "brand_purpose": [
+      "Tell me about what the brand stands for and its mission \u2014 this is really important for the project.",
+      "Let's dig into what the brand stands for and its mission \u2014 what are you thinking?",
+      "I need to understand what the brand stands for and its mission \u2014 can you walk me through it?"
+    ],
+    "target_market": [
+      "What market are you going after? Local, national, global? Niche or broad?",
+      "Who's your ideal buyer and where do they hang out \u2014 online and offline?"
+    ],
+    "brand_personality": [
+      "Tell me about adjectives that describe the brand feel \u2014 this is really important for the project.",
+      "Let's dig into adjectives that describe the brand feel \u2014 what are you thinking?",
+      "I need to understand adjectives that describe the brand feel \u2014 can you walk me through it?"
+    ],
+    "deliverables": [
+      "Let's get specific \u2014 what exactly do you need delivered at the end of this?",
+      "What are the concrete outputs? Website pages, email templates, graphics, documents?",
+      "If you made a checklist of everything you need, what would be on it?"
+    ],
+    "existing_assets": [
+      "Tell me about any existing logo, colors, or materials \u2014 this is really important for the project.",
+      "Let's dig into any existing logo, colors, or materials \u2014 what are you thinking?",
+      "I need to understand any existing logo, colors, or materials \u2014 can you walk me through it?"
+    ],
+    "color_preferences": [
+      "Any colors that feel right for this? Or colors you absolutely want to avoid?",
+      "What palette would feel on-brand \u2014 warm earth tones, cool blues, bold neons, elegant neutrals?"
+    ],
+    "industry_context": [
+      "Tell me about industry and competitive landscape \u2014 this is really important for the project.",
+      "Let's dig into industry and competitive landscape \u2014 what are you thinking?",
+      "I need to understand industry and competitive landscape \u2014 can you walk me through it?"
+    ],
+    "usage_contexts": [
+      "What about where the brand will appear (web, print, signage)? This will help me shape the plan.",
+      "Let's talk about where the brand will appear (web, print, signage) \u2014 any thoughts?",
+      "Have you considered where the brand will appear (web, print, signage) yet?"
+    ],
+    "typography_preferences": [
+      "What about font style preferences? This will help me shape the plan.",
+      "Let's talk about font style preferences \u2014 any thoughts?",
+      "Have you considered font style preferences yet?"
+    ],
+    "style_references": [
+      "What about brands or designs they admire? This will help me shape the plan.",
+      "Let's talk about brands or designs they admire \u2014 any thoughts?",
+      "Have you considered brands or designs they admire yet?"
+    ],
+    "brand_values": [
+      "What about core values the brand should communicate? This will help me shape the plan.",
+      "Let's talk about core values the brand should communicate \u2014 any thoughts?",
+      "Have you considered core values the brand should communicate yet?"
+    ],
+    "timeline": [
+      "What's the timeline looking like? Any hard deadlines I should know about?",
+      "When do you need this done? Is there flexibility, or is the date locked in?",
+      "How urgent is this \u2014 are we talking days, weeks, or months?"
+    ],
+    "budget": [
+      "What budget range are you working with? Even a rough idea helps me scope things right.",
+      "Any budget constraints? I want to make sure my recommendations are realistic."
+    ],
+    "approval_process": [
+      "What about who approves and how many rounds? This will help me shape the plan.",
+      "Let's talk about who approves and how many rounds \u2014 any thoughts?",
+      "Have you considered who approves and how many rounds yet?"
+    ],
+    "brand_story": [
+      "What about origin story or narrative? This will help me shape the plan.",
+      "Let's talk about origin story or narrative \u2014 any thoughts?",
+      "Have you considered origin story or narrative yet?"
+    ],
+    "competitor_brands": [
+      "What about competitor brand analysis? This will help me shape the plan.",
+      "Let's talk about competitor brand analysis \u2014 any thoughts?",
+      "Have you considered competitor brand analysis yet?"
+    ]
+  },
+  "content_creation": {
+    "content_type": [
+      "Tell me about blog posts, videos, social media, podcasts, etc. \u2014 this is really important for the project.",
+      "Let's dig into blog posts, videos, social media, podcasts, etc. \u2014 what are you thinking?",
+      "I need to understand blog posts, videos, social media, podcasts, etc. \u2014 can you walk me through it?"
+    ],
+    "content_goal": [
+      "Tell me about educate, sell, entertain, build authority \u2014 this is really important for the project.",
+      "Let's dig into educate, sell, entertain, build authority \u2014 what are you thinking?",
+      "I need to understand educate, sell, entertain, build authority \u2014 can you walk me through it?"
+    ],
+    "target_audience": [
+      "Who's this really for? Paint me a picture of your ideal user or customer.",
+      "If you described your perfect customer to a friend, what would you say?",
+      "Who are you trying to reach, and what do they care about most?",
+      "Tell me about your audience \u2014 age, interests, what keeps them up at night."
+    ],
+    "topics_themes": [
+      "Tell me about subject matter and key themes \u2014 this is really important for the project.",
+      "Let's dig into subject matter and key themes \u2014 what are you thinking?",
+      "I need to understand subject matter and key themes \u2014 can you walk me through it?"
+    ],
+    "content_volume": [
+      "Tell me about how much content and how often \u2014 this is really important for the project.",
+      "Let's dig into how much content and how often \u2014 what are you thinking?",
+      "I need to understand how much content and how often \u2014 can you walk me through it?"
+    ],
+    "brand_voice": [
+      "What tone should the writing have \u2014 formal, casual, witty, inspirational?",
+      "How do you talk to your audience? Like a friend, a mentor, or a trusted advisor?"
+    ],
+    "distribution_channels": [
+      "Tell me about where content will be published \u2014 this is really important for the project.",
+      "Let's dig into where content will be published \u2014 what are you thinking?",
+      "I need to understand where content will be published \u2014 can you walk me through it?"
+    ],
+    "existing_content": [
+      "What about content that already exists? This will help me shape the plan.",
+      "Let's talk about content that already exists \u2014 any thoughts?",
+      "Have you considered content that already exists yet?"
+    ],
+    "seo_keywords": [
+      "What about keywords to target? This will help me shape the plan.",
+      "Let's talk about keywords to target \u2014 any thoughts?",
+      "Have you considered keywords to target yet?"
+    ],
+    "visual_needs": [
+      "What about images, graphics, video production? This will help me shape the plan.",
+      "Let's talk about images, graphics, video production \u2014 any thoughts?",
+      "Have you considered images, graphics, video production yet?"
+    ],
+    "content_calendar": [
+      "What about publishing schedule and cadence? This will help me shape the plan.",
+      "Let's talk about publishing schedule and cadence \u2014 any thoughts?",
+      "Have you considered publishing schedule and cadence yet?"
+    ],
+    "timeline": [
+      "What's the timeline looking like? Any hard deadlines I should know about?",
+      "When do you need this done? Is there flexibility, or is the date locked in?",
+      "How urgent is this \u2014 are we talking days, weeks, or months?"
+    ],
+    "call_to_action": [
+      "What about what action readers should take? This will help me shape the plan.",
+      "Let's talk about what action readers should take \u2014 any thoughts?",
+      "Have you considered what action readers should take yet?"
+    ],
+    "competitor_content": [
+      "What about what competitors are publishing? This will help me shape the plan.",
+      "Let's talk about what competitors are publishing \u2014 any thoughts?",
+      "Have you considered what competitors are publishing yet?"
+    ],
+    "repurposing_strategy": [
+      "What about how to repurpose content across channels? This will help me shape the plan.",
+      "Let's talk about how to repurpose content across channels \u2014 any thoughts?",
+      "Have you considered how to repurpose content across channels yet?"
+    ]
+  },
+  "ecommerce": {
+    "products_services": [
+      "What are you selling? Walk me through your product or service lineup.",
+      "Tell me about what you offer \u2014 products, services, packages?"
+    ],
+    "target_customers": [
+      "Who's buying from you? What does a typical customer look like?",
+      "Describe your dream customer \u2014 who are they and why would they choose you?"
+    ],
+    "product_catalog_size": [
+      "Tell me about number of products and categories \u2014 this is really important for the project.",
+      "Let's dig into number of products and categories \u2014 what are you thinking?",
+      "I need to understand number of products and categories \u2014 can you walk me through it?"
+    ],
+    "pricing_strategy": [
+      "How are you pricing things? Fixed prices, tiers, subscriptions?"
+    ],
+    "payment_methods": [
+      "Tell me about payment gateways and options \u2014 this is really important for the project.",
+      "Let's dig into payment gateways and options \u2014 what are you thinking?",
+      "I need to understand payment gateways and options \u2014 can you walk me through it?"
+    ],
+    "shipping_logistics": [
+      "Tell me about shipping methods, regions, costs \u2014 this is really important for the project.",
+      "Let's dig into shipping methods, regions, costs \u2014 what are you thinking?",
+      "I need to understand shipping methods, regions, costs \u2014 can you walk me through it?"
+    ],
+    "platform_preference": [
+      "Do you have a platform in mind \u2014 Shopify, WooCommerce, custom \u2014 or are you open to suggestions?"
+    ],
+    "design_style": [
+      "What vibe are you going for visually? Think modern, minimal, bold, retro \u2014 anything inspire you?",
+      "If you showed someone this project, what feeling should they get at first glance?",
+      "Are there any websites, apps, or brands whose look you love? That helps me nail the direction.",
+      "Do you lean more towards clean and simple, or rich and detailed?"
+    ],
+    "existing_branding": [
+      "Do you already have brand assets \u2014 logo, color palette, fonts \u2014 or are we building from scratch?",
+      "Is there an existing brand identity we should work within, or is this a fresh start?",
+      "Do you have a style guide or brand book, or should we define the visual identity as part of this?"
+    ],
+    "inventory_management": [
+      "What about stock tracking and management? This will help me shape the plan.",
+      "Let's talk about stock tracking and management \u2014 any thoughts?",
+      "Have you considered stock tracking and management yet?"
+    ],
+    "legal_requirements": [
+      "What about tax, compliance, terms of service? This will help me shape the plan.",
+      "Let's talk about tax, compliance, terms of service \u2014 any thoughts?",
+      "Have you considered tax, compliance, terms of service yet?"
+    ],
+    "marketing_integration": [
+      "What about email, social, ads integration? This will help me shape the plan.",
+      "Let's talk about email, social, ads integration \u2014 any thoughts?",
+      "Have you considered email, social, ads integration yet?"
+    ],
+    "return_policy": [
+      "What about returns and refund policy? This will help me shape the plan.",
+      "Let's talk about returns and refund policy \u2014 any thoughts?",
+      "Have you considered returns and refund policy yet?"
+    ],
+    "customer_support": [
+      "What about customer service channels? This will help me shape the plan.",
+      "Let's talk about customer service channels \u2014 any thoughts?",
+      "Have you considered customer service channels yet?"
+    ],
+    "analytics": [
+      "What about tracking and reporting needs? This will help me shape the plan.",
+      "Let's talk about tracking and reporting needs \u2014 any thoughts?",
+      "Have you considered tracking and reporting needs yet?"
+    ],
+    "timeline": [
+      "What's the timeline looking like? Any hard deadlines I should know about?",
+      "When do you need this done? Is there flexibility, or is the date locked in?",
+      "How urgent is this \u2014 are we talking days, weeks, or months?"
+    ],
+    "budget": [
+      "What budget range are you working with? Even a rough idea helps me scope things right.",
+      "Any budget constraints? I want to make sure my recommendations are realistic."
+    ],
+    "loyalty_program": [
+      "What about customer rewards or loyalty system? This will help me shape the plan.",
+      "Let's talk about customer rewards or loyalty system \u2014 any thoughts?",
+      "Have you considered customer rewards or loyalty system yet?"
+    ]
+  },
+  "mobile_app": {
+    "app_purpose": [
+      "What problem does this app solve? What's the core use case?",
+      "In one sentence, why would someone download this app?"
+    ],
+    "target_users": [
+      "Who's going to actually use this day-to-day? What's their role?",
+      "Walk me through a typical user \u2014 what are they trying to accomplish?"
+    ],
+    "core_features": [
+      "What are the must-have features \u2014 the things that make or break this project?",
+      "If you could only have 3 features, which ones are non-negotiable?",
+      "What functionality is essential for this to work for your users?"
+    ],
+    "platform": [
+      "Tell me about ios, android, or cross-platform \u2014 this is really important for the project.",
+      "Let's dig into ios, android, or cross-platform \u2014 what are you thinking?",
+      "I need to understand ios, android, or cross-platform \u2014 can you walk me through it?"
+    ],
+    "user_auth": [
+      "Tell me about login, registration, user accounts \u2014 this is really important for the project.",
+      "Let's dig into login, registration, user accounts \u2014 what are you thinking?",
+      "I need to understand login, registration, user accounts \u2014 can you walk me through it?"
+    ],
+    "data_storage": [
+      "Tell me about what data is stored and where \u2014 this is really important for the project.",
+      "Let's dig into what data is stored and where \u2014 what are you thinking?",
+      "I need to understand what data is stored and where \u2014 can you walk me through it?"
+    ],
+    "design_style": [
+      "What vibe are you going for visually? Think modern, minimal, bold, retro \u2014 anything inspire you?",
+      "If you showed someone this project, what feeling should they get at first glance?",
+      "Are there any websites, apps, or brands whose look you love? That helps me nail the direction.",
+      "Do you lean more towards clean and simple, or rich and detailed?"
+    ],
+    "offline_capability": [
+      "What about does it need to work offline? This will help me shape the plan.",
+      "Let's talk about does it need to work offline \u2014 any thoughts?",
+      "Have you considered does it need to work offline yet?"
+    ],
+    "integrations": [
+      "What about apis, services, third-party tools? This will help me shape the plan.",
+      "Let's talk about apis, services, third-party tools \u2014 any thoughts?",
+      "Have you considered apis, services, third-party tools yet?"
+    ],
+    "notifications": [
+      "What about push notifications requirements? This will help me shape the plan.",
+      "Let's talk about push notifications requirements \u2014 any thoughts?",
+      "Have you considered push notifications requirements yet?"
+    ],
+    "monetization": [
+      "What about free, paid, freemium, ads? This will help me shape the plan.",
+      "Let's talk about free, paid, freemium, ads \u2014 any thoughts?",
+      "Have you considered free, paid, freemium, ads yet?"
+    ],
+    "existing_backend": [
+      "What about existing api or backend to connect to? This will help me shape the plan.",
+      "Let's talk about existing api or backend to connect to \u2014 any thoughts?",
+      "Have you considered existing api or backend to connect to yet?"
+    ],
+    "user_onboarding": [
+      "What about first-time user experience? This will help me shape the plan.",
+      "Let's talk about first-time user experience \u2014 any thoughts?",
+      "Have you considered first-time user experience yet?"
+    ],
+    "performance_requirements": [
+      "What about speed, battery, data usage constraints? This will help me shape the plan.",
+      "Let's talk about speed, battery, data usage constraints \u2014 any thoughts?",
+      "Have you considered speed, battery, data usage constraints yet?"
+    ],
+    "timeline": [
+      "What's the timeline looking like? Any hard deadlines I should know about?",
+      "When do you need this done? Is there flexibility, or is the date locked in?",
+      "How urgent is this \u2014 are we talking days, weeks, or months?"
+    ],
+    "budget": [
+      "What budget range are you working with? Even a rough idea helps me scope things right.",
+      "Any budget constraints? I want to make sure my recommendations are realistic."
+    ],
+    "app_store_presence": [
+      "What about app store listing, screenshots, description? This will help me shape the plan.",
+      "Let's talk about app store listing, screenshots, description \u2014 any thoughts?",
+      "Have you considered app store listing, screenshots, description yet?"
+    ],
+    "analytics_tracking": [
+      "What about in-app analytics and crash reporting? This will help me shape the plan.",
+      "Let's talk about in-app analytics and crash reporting \u2014 any thoughts?",
+      "Have you considered in-app analytics and crash reporting yet?"
+    ]
+  },
+  "data_analytics": {
+    "data_sources": [
+      "Where does the data come from? What systems, APIs, or databases feed into this?"
+    ],
+    "key_metrics": [
+      "What metrics matter most? Revenue, engagement, conversion, retention?"
+    ],
+    "target_users": [
+      "Who's going to actually use this day-to-day? What's their role?",
+      "Walk me through a typical user \u2014 what are they trying to accomplish?"
+    ],
+    "visualization_types": [
+      "Tell me about charts, tables, maps, etc. \u2014 this is really important for the project.",
+      "Let's dig into charts, tables, maps, etc. \u2014 what are you thinking?",
+      "I need to understand charts, tables, maps, etc. \u2014 can you walk me through it?"
+    ],
+    "real_time_needs": [
+      "Tell me about real-time vs batch data refresh \u2014 this is really important for the project.",
+      "Let's dig into real-time vs batch data refresh \u2014 what are you thinking?",
+      "I need to understand real-time vs batch data refresh \u2014 can you walk me through it?"
+    ],
+    "data_volume": [
+      "What about how much data and how fast it grows? This will help me shape the plan.",
+      "Let's talk about how much data and how fast it grows \u2014 any thoughts?",
+      "Have you considered how much data and how fast it grows yet?"
+    ],
+    "filtering_drilldown": [
+      "What about interactive filters and drill-down needs? This will help me shape the plan.",
+      "Let's talk about interactive filters and drill-down needs \u2014 any thoughts?",
+      "Have you considered interactive filters and drill-down needs yet?"
+    ],
+    "access_control": [
+      "What about who can see what data? This will help me shape the plan.",
+      "Let's talk about who can see what data \u2014 any thoughts?",
+      "Have you considered who can see what data yet?"
+    ],
+    "export_sharing": [
+      "What about export to pdf, email reports, sharing? This will help me shape the plan.",
+      "Let's talk about export to pdf, email reports, sharing \u2014 any thoughts?",
+      "Have you considered export to pdf, email reports, sharing yet?"
+    ],
+    "tech_stack": [
+      "What tech are you using or planning to use? Frontend, backend, database?",
+      "Any tech requirements or constraints I should know about?"
+    ],
+    "design_style": [
+      "What vibe are you going for visually? Think modern, minimal, bold, retro \u2014 anything inspire you?",
+      "If you showed someone this project, what feeling should they get at first glance?",
+      "Are there any websites, apps, or brands whose look you love? That helps me nail the direction.",
+      "Do you lean more towards clean and simple, or rich and detailed?"
+    ],
+    "alerting": [
+      "What about automated alerts and thresholds? This will help me shape the plan.",
+      "Let's talk about automated alerts and thresholds \u2014 any thoughts?",
+      "Have you considered automated alerts and thresholds yet?"
+    ],
+    "timeline": [
+      "What's the timeline looking like? Any hard deadlines I should know about?",
+      "When do you need this done? Is there flexibility, or is the date locked in?",
+      "How urgent is this \u2014 are we talking days, weeks, or months?"
+    ],
+    "data_quality": [
+      "What about data cleaning and validation needs? This will help me shape the plan.",
+      "Let's talk about data cleaning and validation needs \u2014 any thoughts?",
+      "Have you considered data cleaning and validation needs yet?"
+    ],
+    "mobile_access": [
+      "What about mobile-friendly dashboard needed? This will help me shape the plan.",
+      "Let's talk about mobile-friendly dashboard needed \u2014 any thoughts?",
+      "Have you considered mobile-friendly dashboard needed yet?"
+    ]
+  },
+  "event_campaign": {
+    "event_theme": [
+      "What's the occasion or theme? Tell me the story behind this campaign.",
+      "What event or moment are we building around?"
+    ],
+    "campaign_objectives": [
+      "What are you trying to achieve \u2014 more revenue, more signups, more awareness?",
+      "What does success look like for you? How will you know this worked?"
+    ],
+    "target_audience": [
+      "Who's this really for? Paint me a picture of your ideal user or customer.",
+      "If you described your perfect customer to a friend, what would you say?",
+      "Who are you trying to reach, and what do they care about most?",
+      "Tell me about your audience \u2014 age, interests, what keeps them up at night."
+    ],
+    "deliverables": [
+      "Let's get specific \u2014 what exactly do you need delivered at the end of this?",
+      "What are the concrete outputs? Website pages, email templates, graphics, documents?",
+      "If you made a checklist of everything you need, what would be on it?"
+    ],
+    "existing_platform": [
+      "What are you currently running on? What platform or tools do you use today?",
+      "Tell me about your current setup \u2014 what's working, what's not?"
+    ],
+    "design_direction": [
+      "Walk me through the mood \u2014 what colors, textures, or vibes are you imagining?",
+      "If this project were a brand, how would you describe its personality in 3 words?",
+      "Any visual references you love? Even outside your industry \u2014 restaurants, fashion brands, anything."
+    ],
+    "visual_assets_needed": [
+      "What visuals do we need to create? Photos, illustrations, icons, AI-generated images?",
+      "Will we be using stock photography, custom shoots, or should I plan for AI-generated visuals?",
+      "How image-heavy is this going to be? Just a few hero shots, or lots of visual content?"
+    ],
+    "messaging_tone": [
+      "How should this sound \u2014 professional, casual, inspiring, playful, urgent?",
+      "If this project could talk, what's its personality? Corporate and polished, or friendly and approachable?"
+    ],
+    "promotion_channel": [
+      "How are you planning to get the word out \u2014 email blasts, social posts, paid ads, in-store?"
+    ],
+    "offer_incentive": [
+      "What's the hook to get people to act \u2014 a discount code, free shipping, a gift?",
+      "Are you running a promotion with this, or is it more of an awareness play?"
+    ],
+    "audience_size": [
+      "How many people are we trying to reach? What's your current audience size?",
+      "What's the scale we're working with \u2014 hundreds, thousands, tens of thousands?"
+    ],
+    "campaign_dates": [
+      "When does this need to go live? Any key dates we need to hit?",
+      "Are there specific dates tied to this \u2014 a launch, event, or seasonal window?"
+    ],
+    "budget": [
+      "What budget range are you working with? Even a rough idea helps me scope things right.",
+      "Any budget constraints? I want to make sure my recommendations are realistic."
+    ],
+    "success_metrics": [
+      "How will we measure if the UX improvements actually work? Conversion rate, support tickets, task completion?"
+    ],
+    "post_campaign_plan": [
+      "What about what happens after the campaign ends? This will help me shape the plan.",
+      "Let's talk about what happens after the campaign ends \u2014 any thoughts?",
+      "Have you considered what happens after the campaign ends yet?"
+    ]
+  },
+  "saas_product": {
+    "problem_solution": [
+      "What specific problem does this SaaS solve, and who has that problem?"
+    ],
+    "target_users": [
+      "Who's going to actually use this day-to-day? What's their role?",
+      "Walk me through a typical user \u2014 what are they trying to accomplish?"
+    ],
+    "core_features": [
+      "What are the must-have features \u2014 the things that make or break this project?",
+      "If you could only have 3 features, which ones are non-negotiable?",
+      "What functionality is essential for this to work for your users?"
+    ],
+    "pricing_model": [
+      "How will you charge \u2014 free trial, freemium, flat subscription, usage-based?"
+    ],
+    "user_auth_roles": [
+      "What kind of user management do you need \u2014 simple login, team accounts, admin roles?"
+    ],
+    "tech_stack": [
+      "What tech are you using or planning to use? Frontend, backend, database?",
+      "Any tech requirements or constraints I should know about?"
+    ],
+    "data_model": [
+      "What are the core data entities? Users, projects, tasks, transactions?"
+    ],
+    "integrations": [
+      "What about third-party apis and services? This will help me shape the plan.",
+      "Let's talk about third-party apis and services \u2014 any thoughts?",
+      "Have you considered third-party apis and services yet?"
+    ],
+    "design_style": [
+      "What vibe are you going for visually? Think modern, minimal, bold, retro \u2014 anything inspire you?",
+      "If you showed someone this project, what feeling should they get at first glance?",
+      "Are there any websites, apps, or brands whose look you love? That helps me nail the direction.",
+      "Do you lean more towards clean and simple, or rich and detailed?"
+    ],
+    "onboarding_flow": [
+      "How should new users get started \u2014 guided wizard, free exploration, video tutorials?"
+    ],
+    "billing_system": [
+      "What about payment processing and invoicing? This will help me shape the plan.",
+      "Let's talk about payment processing and invoicing \u2014 any thoughts?",
+      "Have you considered payment processing and invoicing yet?"
+    ],
+    "existing_competition": [
+      "What about competitors and differentiation? This will help me shape the plan.",
+      "Let's talk about competitors and differentiation \u2014 any thoughts?",
+      "Have you considered competitors and differentiation yet?"
+    ],
+    "scalability": [
+      "What about expected user scale and growth? This will help me shape the plan.",
+      "Let's talk about expected user scale and growth \u2014 any thoughts?",
+      "Have you considered expected user scale and growth yet?"
+    ],
+    "security_compliance": [
+      "What about security requirements, gdpr, soc2? This will help me shape the plan.",
+      "Let's talk about security requirements, gdpr, soc2 \u2014 any thoughts?",
+      "Have you considered security requirements, gdpr, soc2 yet?"
+    ],
+    "timeline": [
+      "What's the timeline looking like? Any hard deadlines I should know about?",
+      "When do you need this done? Is there flexibility, or is the date locked in?",
+      "How urgent is this \u2014 are we talking days, weeks, or months?"
+    ],
+    "team_resources": [
+      "What about development team and skills available? This will help me shape the plan.",
+      "Let's talk about development team and skills available \u2014 any thoughts?",
+      "Have you considered development team and skills available yet?"
+    ],
+    "analytics_monitoring": [
+      "What about product analytics and monitoring? This will help me shape the plan.",
+      "Let's talk about product analytics and monitoring \u2014 any thoughts?",
+      "Have you considered product analytics and monitoring yet?"
+    ],
+    "customer_support": [
+      "What about support channels and tooling? This will help me shape the plan.",
+      "Let's talk about support channels and tooling \u2014 any thoughts?",
+      "Have you considered support channels and tooling yet?"
+    ]
+  },
+  "social_media": {
+    "business_goals": [
+      "Tell me about what social media should achieve for the business \u2014 this is really important for the project.",
+      "Let's dig into what social media should achieve for the business \u2014 what are you thinking?",
+      "I need to understand what social media should achieve for the business \u2014 can you walk me through it?"
+    ],
+    "target_audience": [
+      "Who's this really for? Paint me a picture of your ideal user or customer.",
+      "If you described your perfect customer to a friend, what would you say?",
+      "Who are you trying to reach, and what do they care about most?",
+      "Tell me about your audience \u2014 age, interests, what keeps them up at night."
+    ],
+    "platforms": [
+      "Tell me about which social media platforms to use \u2014 this is really important for the project.",
+      "Let's dig into which social media platforms to use \u2014 what are you thinking?",
+      "I need to understand which social media platforms to use \u2014 can you walk me through it?"
+    ],
+    "content_pillars": [
+      "Tell me about main content themes and categories \u2014 this is really important for the project.",
+      "Let's dig into main content themes and categories \u2014 what are you thinking?",
+      "I need to understand main content themes and categories \u2014 can you walk me through it?"
+    ],
+    "posting_frequency": [
+      "Tell me about how often to post per platform \u2014 this is really important for the project.",
+      "Let's dig into how often to post per platform \u2014 what are you thinking?",
+      "I need to understand how often to post per platform \u2014 can you walk me through it?"
+    ],
+    "brand_voice": [
+      "What tone should the writing have \u2014 formal, casual, witty, inspirational?",
+      "How do you talk to your audience? Like a friend, a mentor, or a trusted advisor?"
+    ],
+    "visual_style": [
+      "What about photo style, graphics, video format? This will help me shape the plan.",
+      "Let's talk about photo style, graphics, video format \u2014 any thoughts?",
+      "Have you considered photo style, graphics, video format yet?"
+    ],
+    "existing_presence": [
+      "What about current social accounts and follower counts? This will help me shape the plan.",
+      "Let's talk about current social accounts and follower counts \u2014 any thoughts?",
+      "Have you considered current social accounts and follower counts yet?"
+    ],
+    "competitor_accounts": [
+      "What about competitor social media analysis? This will help me shape the plan.",
+      "Let's talk about competitor social media analysis \u2014 any thoughts?",
+      "Have you considered competitor social media analysis yet?"
+    ],
+    "engagement_strategy": [
+      "What about how to engage with community? This will help me shape the plan.",
+      "Let's talk about how to engage with community \u2014 any thoughts?",
+      "Have you considered how to engage with community yet?"
+    ],
+    "paid_ads_budget": [
+      "What about budget for paid social advertising? This will help me shape the plan.",
+      "Let's talk about budget for paid social advertising \u2014 any thoughts?",
+      "Have you considered budget for paid social advertising yet?"
+    ],
+    "influencer_strategy": [
+      "What about influencer partnerships? This will help me shape the plan.",
+      "Let's talk about influencer partnerships \u2014 any thoughts?",
+      "Have you considered influencer partnerships yet?"
+    ],
+    "analytics_tools": [
+      "What about social media analytics and reporting? This will help me shape the plan.",
+      "Let's talk about social media analytics and reporting \u2014 any thoughts?",
+      "Have you considered social media analytics and reporting yet?"
+    ],
+    "content_creation_resources": [
+      "What about in-house vs outsourced content? This will help me shape the plan.",
+      "Let's talk about in-house vs outsourced content \u2014 any thoughts?",
+      "Have you considered in-house vs outsourced content yet?"
+    ],
+    "crisis_management": [
+      "What about how to handle negative feedback? This will help me shape the plan.",
+      "Let's talk about how to handle negative feedback \u2014 any thoughts?",
+      "Have you considered how to handle negative feedback yet?"
+    ],
+    "timeline": [
+      "What's the timeline looking like? Any hard deadlines I should know about?",
+      "When do you need this done? Is there flexibility, or is the date locked in?",
+      "How urgent is this \u2014 are we talking days, weeks, or months?"
+    ]
+  },
+  "api_backend": {
+    "service_purpose": [
+      "Tell me about what the api/service does \u2014 this is really important for the project.",
+      "Let's dig into what the api/service does \u2014 what are you thinking?",
+      "I need to understand what the api/service does \u2014 can you walk me through it?"
+    ],
+    "consumers": [
+      "Tell me about who or what will consume this api \u2014 this is really important for the project.",
+      "Let's dig into who or what will consume this api \u2014 what are you thinking?",
+      "I need to understand who or what will consume this api \u2014 can you walk me through it?"
+    ],
+    "core_endpoints": [
+      "Tell me about main api endpoints and operations \u2014 this is really important for the project.",
+      "Let's dig into main api endpoints and operations \u2014 what are you thinking?",
+      "I need to understand main api endpoints and operations \u2014 can you walk me through it?"
+    ],
+    "data_model": [
+      "What are the core data entities? Users, projects, tasks, transactions?"
+    ],
+    "authentication": [
+      "Tell me about auth method: api keys, oauth, jwt \u2014 this is really important for the project.",
+      "Let's dig into auth method: api keys, oauth, jwt \u2014 what are you thinking?",
+      "I need to understand auth method: api keys, oauth, jwt \u2014 can you walk me through it?"
+    ],
+    "tech_stack": [
+      "What tech are you using or planning to use? Frontend, backend, database?",
+      "Any tech requirements or constraints I should know about?"
+    ],
+    "rate_limiting": [
+      "What about rate limits and throttling? This will help me shape the plan.",
+      "Let's talk about rate limits and throttling \u2014 any thoughts?",
+      "Have you considered rate limits and throttling yet?"
+    ],
+    "existing_systems": [
+      "What about systems this needs to integrate with? This will help me shape the plan.",
+      "Let's talk about systems this needs to integrate with \u2014 any thoughts?",
+      "Have you considered systems this needs to integrate with yet?"
+    ],
+    "data_volume": [
+      "What about expected request volume and data size? This will help me shape the plan.",
+      "Let's talk about expected request volume and data size \u2014 any thoughts?",
+      "Have you considered expected request volume and data size yet?"
+    ],
+    "error_handling": [
+      "What about error response format and logging? This will help me shape the plan.",
+      "Let's talk about error response format and logging \u2014 any thoughts?",
+      "Have you considered error response format and logging yet?"
+    ],
+    "documentation": [
+      "What about api documentation requirements? This will help me shape the plan.",
+      "Let's talk about api documentation requirements \u2014 any thoughts?",
+      "Have you considered api documentation requirements yet?"
+    ],
+    "hosting_infra": [
+      "What about cloud provider, serverless, containers? This will help me shape the plan.",
+      "Let's talk about cloud provider, serverless, containers \u2014 any thoughts?",
+      "Have you considered cloud provider, serverless, containers yet?"
+    ],
+    "monitoring": [
+      "What about monitoring and alerting needs? This will help me shape the plan.",
+      "Let's talk about monitoring and alerting needs \u2014 any thoughts?",
+      "Have you considered monitoring and alerting needs yet?"
+    ],
+    "versioning": [
+      "What about api versioning strategy? This will help me shape the plan.",
+      "Let's talk about api versioning strategy \u2014 any thoughts?",
+      "Have you considered api versioning strategy yet?"
+    ],
+    "security": [
+      "What about security requirements and encryption? This will help me shape the plan.",
+      "Let's talk about security requirements and encryption \u2014 any thoughts?",
+      "Have you considered security requirements and encryption yet?"
+    ],
+    "timeline": [
+      "What's the timeline looking like? Any hard deadlines I should know about?",
+      "When do you need this done? Is there flexibility, or is the date locked in?",
+      "How urgent is this \u2014 are we talking days, weeks, or months?"
+    ],
+    "testing_strategy": [
+      "What about testing approach and ci/cd? This will help me shape the plan.",
+      "Let's talk about testing approach and ci/cd \u2014 any thoughts?",
+      "Have you considered testing approach and ci/cd yet?"
+    ]
+  },
+  "video_production": {
+    "video_purpose": [
+      "What's the goal of this video \u2014 promote, explain, educate, or inspire?"
+    ],
+    "target_audience": [
+      "Who's this really for? Paint me a picture of your ideal user or customer.",
+      "If you described your perfect customer to a friend, what would you say?",
+      "Who are you trying to reach, and what do they care about most?",
+      "Tell me about your audience \u2014 age, interests, what keeps them up at night."
+    ],
+    "key_message": [
+      "If someone remembers just one thing about this project, what should it be?",
+      "What's the core message? Boil it down to one sentence.",
+      "What do you want people to feel or understand after interacting with this?"
+    ],
+    "video_length": [
+      "How long should the video be? 15-second social clip, 2-minute explainer, or longer?"
+    ],
+    "video_style": [
+      "What style \u2014 live action, animation, motion graphics, screen recording, mix?"
+    ],
+    "script_content": [
+      "Do you have a script or talking points, or do we need to write that too?"
+    ],
+    "brand_guidelines": [
+      "What about colors, fonts, logo usage? This will help me shape the plan.",
+      "Let's talk about colors, fonts, logo usage \u2014 any thoughts?",
+      "Have you considered colors, fonts, logo usage yet?"
+    ],
+    "distribution_platform": [
+      "Where will this video be published \u2014 YouTube, TikTok, your website, ads?"
+    ],
+    "talent_requirements": [
+      "What about actors, voiceover, presenter? This will help me shape the plan.",
+      "Let's talk about actors, voiceover, presenter \u2014 any thoughts?",
+      "Have you considered actors, voiceover, presenter yet?"
+    ],
+    "music_sound": [
+      "What about background music and sound effects? This will help me shape the plan.",
+      "Let's talk about background music and sound effects \u2014 any thoughts?",
+      "Have you considered background music and sound effects yet?"
+    ],
+    "location_setting": [
+      "What about filming location or virtual background? This will help me shape the plan.",
+      "Let's talk about filming location or virtual background \u2014 any thoughts?",
+      "Have you considered filming location or virtual background yet?"
+    ],
+    "call_to_action": [
+      "What about what viewers should do after watching? This will help me shape the plan.",
+      "Let's talk about what viewers should do after watching \u2014 any thoughts?",
+      "Have you considered what viewers should do after watching yet?"
+    ],
+    "timeline": [
+      "What's the timeline looking like? Any hard deadlines I should know about?",
+      "When do you need this done? Is there flexibility, or is the date locked in?",
+      "How urgent is this \u2014 are we talking days, weeks, or months?"
+    ],
+    "budget": [
+      "What budget range are you working with? Even a rough idea helps me scope things right.",
+      "Any budget constraints? I want to make sure my recommendations are realistic."
+    ],
+    "existing_footage": [
+      "What about existing video or photo assets? This will help me shape the plan.",
+      "Let's talk about existing video or photo assets \u2014 any thoughts?",
+      "Have you considered existing video or photo assets yet?"
+    ],
+    "subtitles_captions": [
+      "What about subtitle and caption requirements? This will help me shape the plan.",
+      "Let's talk about subtitle and caption requirements \u2014 any thoughts?",
+      "Have you considered subtitle and caption requirements yet?"
+    ],
+    "versions_formats": [
+      "What about different cuts for different platforms? This will help me shape the plan.",
+      "Let's talk about different cuts for different platforms \u2014 any thoughts?",
+      "Have you considered different cuts for different platforms yet?"
+    ]
+  },
+  "email_marketing": {
+    "email_goals": [
+      "What should email marketing achieve for you \u2014 sales, engagement, retention, nurturing?"
+    ],
+    "target_subscribers": [
+      "Who should be on your email list? How are you planning to grow it?"
+    ],
+    "email_types": [
+      "What types of emails do you need \u2014 newsletters, automated sequences, promotions, transactional?"
+    ],
+    "sending_frequency": [
+      "How often do you want to email your list \u2014 daily, weekly, monthly?"
+    ],
+    "email_platform": [
+      "Are you using an email platform already \u2014 Mailchimp, Klaviyo, ConvertKit \u2014 or do we need to pick one?"
+    ],
+    "content_strategy": [
+      "What kind of content goes in the emails? Educational, promotional, mixed?"
+    ],
+    "design_template": [
+      "Do you need email templates designed, or do you have existing ones to work with?"
+    ],
+    "segmentation": [
+      "How should we segment your audience \u2014 by behavior, interests, purchase history?"
+    ],
+    "automation_flows": [
+      "What automated sequences do you need \u2014 welcome series, abandoned cart, re-engagement?"
+    ],
+    "lead_magnet": [
+      "What about how to capture email addresses? This will help me shape the plan.",
+      "Let's talk about how to capture email addresses \u2014 any thoughts?",
+      "Have you considered how to capture email addresses yet?"
+    ],
+    "personalization": [
+      "What about dynamic content and personalization? This will help me shape the plan.",
+      "Let's talk about dynamic content and personalization \u2014 any thoughts?",
+      "Have you considered dynamic content and personalization yet?"
+    ],
+    "existing_list": [
+      "What about current email list size and quality? This will help me shape the plan.",
+      "Let's talk about current email list size and quality \u2014 any thoughts?",
+      "Have you considered current email list size and quality yet?"
+    ],
+    "compliance": [
+      "What about gdpr, can-spam, unsubscribe handling? This will help me shape the plan.",
+      "Let's talk about gdpr, can-spam, unsubscribe handling \u2014 any thoughts?",
+      "Have you considered gdpr, can-spam, unsubscribe handling yet?"
+    ],
+    "success_metrics": [
+      "How will we measure if the UX improvements actually work? Conversion rate, support tickets, task completion?"
+    ],
+    "integration": [
+      "What about integration with crm, website, store? This will help me shape the plan.",
+      "Let's talk about integration with crm, website, store \u2014 any thoughts?",
+      "Have you considered integration with crm, website, store yet?"
+    ],
+    "budget": [
+      "What budget range are you working with? Even a rough idea helps me scope things right.",
+      "Any budget constraints? I want to make sure my recommendations are realistic."
+    ]
+  },
+  "chatbot_ai": {
+    "bot_purpose": [
+      "What should the chatbot do \u2014 answer FAQs, handle orders, provide support?"
+    ],
+    "use_cases": [
+      "Walk me through 3 typical conversations this bot should handle."
+    ],
+    "target_users": [
+      "Who's going to actually use this day-to-day? What's their role?",
+      "Walk me through a typical user \u2014 what are they trying to accomplish?"
+    ],
+    "knowledge_base": [
+      "What information does the bot need access to \u2014 product catalog, FAQs, policies?"
+    ],
+    "tone_personality": [
+      "What should the bot's personality be \u2014 professional, friendly, witty?"
+    ],
+    "platform_deployment": [
+      "Where should the bot live \u2014 your website, WhatsApp, Slack, Discord?"
+    ],
+    "ai_model": [
+      "Do you have a preference for the AI backbone \u2014 GPT, Claude, open-source?"
+    ],
+    "fallback_handling": [
+      "What about what happens when bot can't answer? This will help me shape the plan.",
+      "Let's talk about what happens when bot can't answer \u2014 any thoughts?",
+      "Have you considered what happens when bot can't answer yet?"
+    ],
+    "integration_data": [
+      "What about systems to connect to for data? This will help me shape the plan.",
+      "Let's talk about systems to connect to for data \u2014 any thoughts?",
+      "Have you considered systems to connect to for data yet?"
+    ],
+    "conversation_flow": [
+      "What about guided vs free-form conversation? This will help me shape the plan.",
+      "Let's talk about guided vs free-form conversation \u2014 any thoughts?",
+      "Have you considered guided vs free-form conversation yet?"
+    ],
+    "multilingual": [
+      "What about multiple language support? This will help me shape the plan.",
+      "Let's talk about multiple language support \u2014 any thoughts?",
+      "Have you considered multiple language support yet?"
+    ],
+    "analytics": [
+      "What about conversation analytics and insights? This will help me shape the plan.",
+      "Let's talk about conversation analytics and insights \u2014 any thoughts?",
+      "Have you considered conversation analytics and insights yet?"
+    ],
+    "human_handoff": [
+      "What about escalation to human support? This will help me shape the plan.",
+      "Let's talk about escalation to human support \u2014 any thoughts?",
+      "Have you considered escalation to human support yet?"
+    ],
+    "training_data": [
+      "What about custom training data or fine-tuning? This will help me shape the plan.",
+      "Let's talk about custom training data or fine-tuning \u2014 any thoughts?",
+      "Have you considered custom training data or fine-tuning yet?"
+    ],
+    "timeline": [
+      "What's the timeline looking like? Any hard deadlines I should know about?",
+      "When do you need this done? Is there flexibility, or is the date locked in?",
+      "How urgent is this \u2014 are we talking days, weeks, or months?"
+    ],
+    "budget": [
+      "What budget range are you working with? Even a rough idea helps me scope things right.",
+      "Any budget constraints? I want to make sure my recommendations are realistic."
+    ],
+    "privacy_security": [
+      "What about data privacy and security? This will help me shape the plan.",
+      "Let's talk about data privacy and security \u2014 any thoughts?",
+      "Have you considered data privacy and security yet?"
+    ]
+  },
+  "ux_redesign": {
+    "current_problems": [
+      "What's broken right now? What are users complaining about or struggling with?"
+    ],
+    "target_users": [
+      "Who's going to actually use this day-to-day? What's their role?",
+      "Walk me through a typical user \u2014 what are they trying to accomplish?"
+    ],
+    "success_metrics": [
+      "How will we measure if the UX improvements actually work? Conversion rate, support tickets, task completion?"
+    ],
+    "scope": [
+      "Is this a full redesign or are we focusing on specific pages or user flows?"
+    ],
+    "user_research": [
+      "Do you have any user research, analytics data, or feedback we can start from?"
+    ],
+    "design_system": [
+      "Tell me about existing design system or component library \u2014 this is really important for the project.",
+      "Let's dig into existing design system or component library \u2014 what are you thinking?",
+      "I need to understand existing design system or component library \u2014 can you walk me through it?"
+    ],
+    "key_user_flows": [
+      "What are the critical user journeys \u2014 signup, checkout, search, onboarding?"
+    ],
+    "accessibility": [
+      "What about accessibility requirements? This will help me shape the plan.",
+      "Let's talk about accessibility requirements \u2014 any thoughts?",
+      "Have you considered accessibility requirements yet?"
+    ],
+    "mobile_responsive": [
+      "What about mobile-first or responsive needs? This will help me shape the plan.",
+      "Let's talk about mobile-first or responsive needs \u2014 any thoughts?",
+      "Have you considered mobile-first or responsive needs yet?"
+    ],
+    "competitor_analysis": [
+      "What about competitor ux benchmarking? This will help me shape the plan.",
+      "Let's talk about competitor ux benchmarking \u2014 any thoughts?",
+      "Have you considered competitor ux benchmarking yet?"
+    ],
+    "design_direction": [
+      "Walk me through the mood \u2014 what colors, textures, or vibes are you imagining?",
+      "If this project were a brand, how would you describe its personality in 3 words?",
+      "Any visual references you love? Even outside your industry \u2014 restaurants, fashion brands, anything."
+    ],
+    "tech_constraints": [
+      "What about technical limitations to work within? This will help me shape the plan.",
+      "Let's talk about technical limitations to work within \u2014 any thoughts?",
+      "Have you considered technical limitations to work within yet?"
+    ],
+    "stakeholder_input": [
+      "What about key stakeholders and their priorities? This will help me shape the plan.",
+      "Let's talk about key stakeholders and their priorities \u2014 any thoughts?",
+      "Have you considered key stakeholders and their priorities yet?"
+    ],
+    "timeline": [
+      "What's the timeline looking like? Any hard deadlines I should know about?",
+      "When do you need this done? Is there flexibility, or is the date locked in?",
+      "How urgent is this \u2014 are we talking days, weeks, or months?"
+    ],
+    "budget": [
+      "What budget range are you working with? Even a rough idea helps me scope things right.",
+      "Any budget constraints? I want to make sure my recommendations are realistic."
+    ],
+    "ab_testing": [
+      "What about a/b testing plan for changes? This will help me shape the plan.",
+      "Let's talk about a/b testing plan for changes \u2014 any thoughts?",
+      "Have you considered a/b testing plan for changes yet?"
+    ],
+    "documentation": [
+      "What about design documentation and handoff? This will help me shape the plan.",
+      "Let's talk about design documentation and handoff \u2014 any thoughts?",
+      "Have you considered design documentation and handoff yet?"
+    ]
+  }
+}
