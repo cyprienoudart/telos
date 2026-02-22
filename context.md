@@ -1,58 +1,49 @@
 # Project Brief
 
 ## Mission
-i want to do a mail promotion for valentines day
+hi
 
 ## What We Know
 
-### Target Audience
-i want u to send 2000 emails to random people to promote valentines day
-
-### Offer & Promotion
-i want u to send 2000 emails to random people to promote valentines day
-
-### Timeline & Budget
-2000
-do it tommorow
-
-### Content & Messaging
-make babies its valentines and create everything
-
-### Additional Details
-do it tommorow
-thats great
-
 ### Project Scope
-Id like to make money from the sales and this should correspond with the branding and the whole culture of the entreprise
-Sales, sales and sales
+ok i want u to creat me a mail campagn and to update my website for valentines day
+
+### Technical Setup
+just use the github link for the website and create a mail exemple that i can send straight to everyone
 
 ### Design & Visuals
-Mood centred around love, the colors should be based on velentines style with a touch of purple. This should respect general guidelines
+Has existing branding assets
+
+### Content & Messaging
+surprise me with the content but make something proffesional to bring me clients
+
+### Timeline & Budget
+5-10K — we're flexible on that scale, depending on what's included in the package
 
 ## What We Still Need
-- What competitors are doing
-- Post-campaign follow-up strategy
-- GDPR, CAN-SPAM, regulatory compliance
+- What the website is fundamentally for
+- Who will visit and use this website
+- Visual direction, mood, aesthetics
+- Mobile and tablet support requirements
+- Deadline or timeline constraints
+- Multiple language support needed
+- Accessibility standards compliance
+- Analytics and tracking tools needed
+- Post-launch maintenance approach
 
 ## Conversation Log
 
-**Q1:** Tell me about who you're trying to reach — describe your ideal customer, and how big is your current audience?
-**A1:** i want u to send 2000 emails to random people to promote valentines day
+**Q1:** Let's define what you actually need delivered — what are all the concrete pieces that need to get done?
+**A1:** ok i want u to creat me a mail campagn and to update my website for valentines day
 
-**Q2:** What's the core message, and do you already have content ready — or do we need to create everything?
-**A2:** make babies its valentines and create everything
+**Q2:** What's the technical situation — what platform are you on, and are there tools or integrations we need to account for?
+**A2:** just use the github link for the website and create a mail exemple that i can send straight to everyone
 
-**Q3:** What's the timeline pressure and budget reality? I want to set realistic expectations.
-**A3:** do it tommorow
+**Q3:** Let's talk about the look and feel — what visual style are you going for, and do you have existing brand assets (logo, colors, fonts) we should use?
+**A3:** i want something for a valentines campagne so use this as the main theme and just change the existing theme on the website
 
-**Q4:** If you wrote a shopping list of everything this project needs to produce, what's on it?
-**A4:** Id like to make money from the sales and this should correspond with the branding and the whole culture of the entreprise
+**Q4:** What's the core message, and do you already have content ready — or do we need to create everything?
+**A4:** surprise me with the content but make something proffesional to bring me clients
 
-**Q5:** What's the #1 goal here — more sales, brand awareness, customer engagement?
-**A5:** Sales, sales and sales
-
-**Q6:** Walk me through the visual direction — mood, colors, and whether you have brand guidelines already or we're creating them.
-**A6:** Mood centred around love, the colors should be based on velentines style with a touch of purple. This should respect general guidelines
-
-**Q7:** Let's talk about a/b testing strategy for messaging — any thoughts?
-**A7:** thats great
+**Q5:** Let's talk logistics — what's the timeline, and do you have a budget range in mind?
+**A5:** just do it today pls.

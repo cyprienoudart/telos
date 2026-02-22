@@ -45,8 +45,21 @@ class ConversationLoop:
         self.elements: list[dict] = []
         self.clusters: list[dict] = []
         self.conversation_history: list[dict] = []
-        self.turn_count = 0
+        self.turn_count: int = 0
         self.categories: list[str] = []
+        self.mission_task: str = ""
+
+    def _compute_thresholds(self):
+        """Dynamic coverage + max turns based on project complexity."""
+        n = len(self.elements)
+        if n <= 10:
+            return 0.85, 6
+        elif n <= 20:
+            return 0.90, 10
+        elif n <= 30:
+            return 0.92, 12
+        else:
+            return 0.95, 15
 
     def start(self, user_text: str, attached_files: Optional[list[str]] = None) -> dict:
         """
@@ -63,17 +76,29 @@ class ConversationLoop:
                 "initial_coverage": float,
                 "first_question": str | None,
                 "done": bool,
+                "c1_source": str,
             }
         """
-        # Step 0: Parse user input (supports multi-task)
+        # Step 0: Parse user input — still used for pre-answered extraction + mission
         parsed = self.parser.parse(user_text, attached_files)
-        self.categories = parsed.get("categories", [parsed["category"]])
+        pre_answered = parsed["pre_answered"]
+        self.mission_task = parsed.get("mission", user_text[:200])
 
-        # C1: Identify elements with pre-filled answers (merged from all categories)
-        self.elements = self.sft_model.identify_elements_multi(
-            categories=self.categories,
-            pre_answered=parsed["pre_answered"],
-        )
+        # C1: Try LLM-based identification first, fall back to keyword + lookup
+        c1_source = "lookup"
+        llm_result = self.sft_model.identify_from_text(user_text, pre_answered)
+
+        if llm_result is not None:
+            # LLM succeeded — use its categories and elements
+            self.categories, self.elements = llm_result
+            c1_source = "llm"
+        else:
+            # Fallback: use InputParser categories + SFT lookup
+            self.categories = parsed.get("categories", [parsed["category"]])
+            self.elements = self.sft_model.identify_elements_multi(
+                categories=self.categories,
+                pre_answered=pre_answered,
+            )
 
         # C2: Cluster elements
         self.clusters = self.clusterer.cluster(self.elements)
@@ -98,23 +123,25 @@ class ConversationLoop:
 
         # Check if we already have enough
         coverage = self.sft_model.get_coverage(self.elements)
-        pre_answered = len([e for e in self.elements if e["status"] == "answered"])
+        pre_answered_count = len([e for e in self.elements if e["status"] == "answered"])
 
         result = {
             "mission": parsed["mission"],
-            "category": parsed["category"],
+            "category": self.categories[0] if self.categories else "web_development",
             "categories": self.categories,
-            "pre_answered_count": pre_answered,
+            "pre_answered_count": pre_answered_count,
             "total_elements": len(self.elements),
             "initial_coverage": coverage,
             "first_question": None,
-            "done": coverage >= self.COVERAGE_THRESHOLD,
+            "done": coverage >= self._compute_thresholds()[0],
+            "c1_source": c1_source,
         }
 
         # Generate first question if not done
         if not result["done"]:
             candidates = self.question_gen.generate_candidates(
-                self.elements, self.clusters, self.conversation_history
+                self.elements, self.clusters, self.conversation_history,
+                mission_task=self.mission_task,
             )
             best = self.question_gen.select_best(candidates)
             if best:
@@ -199,10 +226,11 @@ class ConversationLoop:
         # Re-cluster with updated elements
         self.clusters = self.clusterer.cluster(self.elements)
 
-        # Check stopping conditions
+        # Check stopping conditions (dynamic thresholds)
+        cov_threshold, max_turns = self._compute_thresholds()
         done = (
-            coverage >= self.COVERAGE_THRESHOLD
-            or self.turn_count >= self.MAX_TURNS
+            coverage >= cov_threshold
+            or self.turn_count >= max_turns
             or not self.sft_model.get_undefined_elements(self.elements)
         )
 
@@ -218,7 +246,8 @@ class ConversationLoop:
         # Generate next question if not done
         if not done:
             candidates = self.question_gen.generate_candidates(
-                self.elements, self.clusters, self.conversation_history
+                self.elements, self.clusters, self.conversation_history,
+                mission_task=self.mission_task,
             )
             best = self.question_gen.select_best(candidates)
             if best:

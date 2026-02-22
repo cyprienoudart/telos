@@ -1,11 +1,15 @@
 """
-Qwen Answer Extractor (Component 4) — Parses user answers and updates elements.
-For hackathon: uses keyword matching + heuristic extraction.
-For production: would use Alibaba Qwen2.5 for NLU.
+Answer Extractor (Component 4) — Parses user answers and updates elements.
+
+Primary: Uses a fine-tuned GPT-2 + LoRA model for structured extraction.
+Fallback: Uses keyword matching + heuristic extraction if LLM unavailable.
 """
 from __future__ import annotations
 
+import json
+import os
 import re
+from typing import Optional
 
 
 class QwenExtractor:
@@ -14,14 +18,103 @@ class QwenExtractor:
     1. Extract structured facts
     2. Match facts to elements → mark as answered
     3. Provide content for context.md update
-    
-    Named after the Alibaba Qwen model that would power this in production.
+
+    Primary path: Fine-tuned GPT-2 + LoRA extractor LLM.
+    Fallback path: Regex/keyword extractors (kept for resilience).
     """
+
+    def __init__(self, model_dir: str = "ali/trained_models"):
+        """Load the extraction LLM if available."""
+        self._llm_model = None
+        self._llm_tokenizer = None
+        self._llm_device = "cpu"
+
+        self._load_extractor_llm(model_dir)
+
+    @staticmethod
+    def _clean_adapter_config(llm_path: str):
+        """Strip fields unknown to older PEFT versions from adapter_config.json."""
+        config_path = os.path.join(llm_path, "adapter_config.json")
+        if not os.path.exists(config_path):
+            return
+        # Only keep fields that PEFT <=0.14 already knows
+        KNOWN_FIELDS = {
+            "alpha_pattern", "auto_mapping", "base_model_name_or_path",
+            "bias", "fan_in_fan_out", "inference_mode", "init_lora_weights",
+            "layer_replication", "layers_pattern", "layers_to_transform",
+            "loftq_config", "lora_alpha", "lora_dropout", "megatron_config",
+            "megatron_core", "modules_to_save", "peft_type", "r",
+            "rank_pattern", "revision", "target_modules", "task_type",
+            "use_dora", "use_rslora",
+            # Newer but harmless fields
+            "corda_config", "eva_config", "exclude_modules",
+            "target_parameters", "trainable_token_indices", "use_qalora",
+            "lora_bias", "qalora_group_size",
+        }
+        try:
+            with open(config_path, "r") as f:
+                cfg = json.load(f)
+            unknown = set(cfg.keys()) - KNOWN_FIELDS
+            if unknown:
+                for key in unknown:
+                    del cfg[key]
+                with open(config_path, "w") as f:
+                    json.dump(cfg, f, indent=2)
+        except Exception:
+            pass  # Best-effort cleanup
+
+    def _load_extractor_llm(self, model_dir: str):
+        """Load the fine-tuned GPT-2 extraction model."""
+        llm_path = os.path.join(model_dir, "extractor_llm")
+        if not os.path.exists(llm_path):
+            return
+
+        try:
+            import torch
+            from transformers import GPT2LMHeadModel, AutoTokenizer
+            from peft import PeftModel
+
+            # Clean adapter config for PEFT version compatibility
+            self._clean_adapter_config(llm_path)
+
+            # Detect device
+            if torch.backends.mps.is_available():
+                self._llm_device = "mps"
+            elif torch.cuda.is_available():
+                self._llm_device = "cuda"
+            else:
+                self._llm_device = "cpu"
+
+            # Load base model + LoRA adapter
+            base_model = GPT2LMHeadModel.from_pretrained("gpt2")
+            self._llm_model = PeftModel.from_pretrained(base_model, llm_path)
+            self._llm_model.eval()
+            self._llm_model = self._llm_model.to(self._llm_device)
+
+            self._llm_tokenizer = AutoTokenizer.from_pretrained(llm_path)
+            if self._llm_tokenizer.pad_token is None:
+                self._llm_tokenizer.pad_token = self._llm_tokenizer.eos_token
+
+            print("   🧠 Loaded fine-tuned extractor LLM (GPT-2 + LoRA)")
+
+        except Exception as e:
+            print(f"   ⚠️ Could not load extractor LLM: {e}")
+            self._llm_model = None
+            self._llm_tokenizer = None
+
+    @property
+    def has_llm(self) -> bool:
+        """Check if the extractor LLM is loaded."""
+        return self._llm_model is not None
+
+    # ─── Main extraction entry point ─────────────────────────────
 
     def extract(self, user_answer: str, targeted_elements: list[str],
                 all_elements: list[dict]) -> dict:
         """
         Extract information from a user's answer.
+
+        Tries the fine-tuned LLM first, falls back to regex if unavailable.
 
         Args:
             user_answer: The raw text of the user's response
@@ -31,28 +124,248 @@ class QwenExtractor:
         Returns:
             {
                 "resolved_elements": {name: value},
-                "bonus_elements": {name: value},  # extras not targeted but found
-                "summary": str,  # clean prose for context.md
+                "bonus_elements": {name: value},
+                "summary": str,
+                "source": "llm" | "regex",
             }
         """
+        # Try LLM extraction first
+        if self._llm_model is not None:
+            llm_result = self._extract_with_llm(
+                user_answer, targeted_elements, all_elements
+            )
+            if llm_result is not None:
+                return llm_result
+
+        # Fallback: regex/keyword extraction
+        return self._extract_with_regex(user_answer, targeted_elements, all_elements)
+
+    # ─── LLM extraction path ─────────────────────────────────────
+
+    def _extract_with_llm(self, user_answer: str, targeted_elements: list[str],
+                          all_elements: list[dict]) -> Optional[dict]:
+        """Use the fine-tuned LLM to extract structured info from the answer."""
+        try:
+            import torch
+
+            # Build prompt in the same format as training data
+            undefined_elements = [
+                e for e in all_elements
+                if e["status"] == "undefined" and e["name"] not in targeted_elements
+            ]
+
+            prompt = self._build_llm_prompt(
+                user_answer, targeted_elements, undefined_elements
+            )
+
+            # Generate
+            inputs = self._llm_tokenizer(
+                prompt, return_tensors="pt"
+            ).to(self._llm_device)
+
+            with torch.no_grad():
+                output = self._llm_model.generate(
+                    **inputs,
+                    max_new_tokens=100,
+                    do_sample=True,
+                    temperature=0.5,  # Lower temp for more precise extraction
+                    top_p=0.9,
+                    repetition_penalty=1.2,
+                    pad_token_id=self._llm_tokenizer.eos_token_id,
+                )
+
+            generated = self._llm_tokenizer.decode(
+                output[0], skip_special_tokens=True
+            )
+
+            # Extract the part after [EXTRACT]
+            if "[EXTRACT]" in generated:
+                extraction_text = generated.split("[EXTRACT]")[-1].strip()
+            else:
+                extraction_text = generated[len(prompt):].strip()
+
+            # Clean up — take first meaningful line
+            extraction_text = extraction_text.split("\n")[0].strip()
+            extraction_text = extraction_text.split("[")[0].strip()
+
+            # Parse the structured output
+            resolved, bonus = self._parse_llm_output(
+                extraction_text, targeted_elements, all_elements
+            )
+
+            # If the LLM didn't parse anything but user gave a substantive answer,
+            # fall back to regex extraction for targeted + bonus elements.
+            # But first, skip non-answers like "I don't know", "not sure", etc.
+            if not self._is_non_answer(user_answer):
+                if not resolved:
+                    # LLM couldn't parse — try regex for targets only
+                    for elem_name in targeted_elements:
+                        value = self._extract_value_for_element(elem_name, user_answer)
+                        if value:
+                            resolved[elem_name] = value
+                    # If regex also found nothing, assign full answer to targets
+                    if not resolved and len(user_answer.strip()) > 20:
+                        for elem_name in targeted_elements:
+                            resolved[elem_name] = user_answer.strip()
+                # Always try bonus extraction via regex
+                if not bonus:
+                    for elem in all_elements:
+                        if elem["name"] in targeted_elements or elem["name"] in resolved:
+                            continue
+                        if elem["status"] == "answered":
+                            continue
+                        value = self._extract_value_for_element(elem["name"], user_answer)
+                        if value:
+                            bonus[elem["name"]] = value
+
+            summary = self._generate_summary(user_answer, resolved, bonus)
+
+            return {
+                "resolved_elements": resolved,
+                "bonus_elements": bonus,
+                "summary": summary,
+                "source": "llm",
+            }
+
+        except Exception as e:
+            print(f"   ⚠️ LLM extraction failed: {e}")
+            return None
+
+    def _build_llm_prompt(self, answer: str, targets: list[str],
+                          undefined_elements: list[dict]) -> str:
+        """Build the input prompt for the extractor LLM."""
+        lines = []
+        lines.append(f"[ANSWER] {answer}")
+
+        targets_str = ", ".join(t.replace("_", " ") for t in targets)
+        lines.append(f"[TARGETS] {targets_str}")
+
+        if undefined_elements:
+            undef_str = ", ".join(
+                f"{e['name'].replace('_', ' ')} ({e.get('description', '')[:40]})"
+                for e in undefined_elements[:10]
+            )
+            lines.append(f"[UNDEFINED] {undef_str}")
+
+        lines.append("[EXTRACT]")
+        return " ".join(lines)
+
+    def _parse_llm_output(self, extraction_text: str,
+                          targeted_elements: list[str],
+                          all_elements: list[dict]) -> tuple[dict, dict]:
+        """Parse the structured LLM output into resolved and bonus dicts."""
+        resolved = {}
+        bonus = {}
+
+        # Valid element names for validation
+        all_names = {e["name"] for e in all_elements}
+        target_set = set(targeted_elements)
+
+        # Expected format: "resolved: elem=value, elem=value | bonus: elem=value"
+        parts = extraction_text.split("|")
+
+        for part in parts:
+            part = part.strip()
+
+            is_bonus = part.lower().startswith("bonus:")
+            is_resolved = part.lower().startswith("resolved:")
+
+            if is_resolved:
+                content = part.split(":", 1)[1].strip()
+            elif is_bonus:
+                content = part.split(":", 1)[1].strip()
+            else:
+                content = part.strip()
+
+            if content.lower() == "none" or not content:
+                continue
+
+            # Parse "elem name=value, elem name=value"
+            assignments = self._split_assignments(content)
+
+            for elem_key, value in assignments.items():
+                # Convert "elem name" back to "elem_name"
+                elem_name = elem_key.strip().replace(" ", "_")
+
+                # Find the closest matching element name
+                matched_name = self._match_element_name(elem_name, all_names)
+                if not matched_name:
+                    continue
+
+                if is_bonus or (matched_name not in target_set and not is_resolved):
+                    bonus[matched_name] = value.strip()
+                else:
+                    resolved[matched_name] = value.strip()
+
+        return resolved, bonus
+
+    def _split_assignments(self, content: str) -> dict[str, str]:
+        """Split 'elem=value, elem=value' into a dict, handling commas in values."""
+        result = {}
+
+        # Try splitting by comma first, but be careful with values containing commas
+        # Pattern: "element name=some value"
+        # We look for "word word=..." patterns
+        segments = re.split(r',\s*(?=[a-z][a-z ]*=)', content)
+
+        for segment in segments:
+            segment = segment.strip()
+            if "=" not in segment:
+                continue
+
+            key, _, value = segment.partition("=")
+            key = key.strip()
+            value = value.strip()
+
+            if key and value:
+                result[key] = value
+
+        return result
+
+    def _match_element_name(self, candidate: str, valid_names: set[str]) -> Optional[str]:
+        """Find the closest matching element name from the valid set."""
+        # Exact match
+        if candidate in valid_names:
+            return candidate
+
+        # Try with underscores
+        underscore_version = candidate.replace(" ", "_")
+        if underscore_version in valid_names:
+            return underscore_version
+
+        # Fuzzy: check if candidate is a substring or contains a valid name
+        for name in valid_names:
+            name_words = set(name.split("_"))
+            candidate_words = set(candidate.split("_"))
+            # At least 2 word overlap for longer names, or exact for short ones
+            overlap = name_words & candidate_words
+            if len(overlap) >= min(2, len(name_words)):
+                return name
+
+        return None
+
+    # ─── Regex fallback extraction path ──────────────────────────
+
+    def _extract_with_regex(self, user_answer: str, targeted_elements: list[str],
+                            all_elements: list[dict]) -> dict:
+        """Regex/keyword extraction — the original fallback method."""
         answer_lower = user_answer.lower().strip()
         resolved = {}
         bonus = {}
 
-        # 1. Resolve targeted elements — the question was about these
+        # 1. Resolve targeted elements
         for elem_name in targeted_elements:
             value = self._extract_value_for_element(elem_name, user_answer)
             if value:
                 resolved[elem_name] = value
 
-        # If user gave a substantive answer, assume targeted elements are answered
-        # even if we can't extract a clean value
-        if len(answer_lower) > 10:
+        # If user gave a substantive, non-evasive answer, assign remaining targets
+        if not self._is_non_answer(user_answer) and len(answer_lower) > 20:
             for elem_name in targeted_elements:
                 if elem_name not in resolved:
                     resolved[elem_name] = user_answer.strip()
 
-        # 2. Check for bonus extractions — info about non-targeted elements
+        # 2. Check for bonus extractions
         for elem in all_elements:
             if elem["name"] in targeted_elements:
                 continue
@@ -62,13 +375,13 @@ class QwenExtractor:
             if value:
                 bonus[elem["name"]] = value
 
-        # 3. Generate clean summary for context.md
         summary = self._generate_summary(user_answer, resolved, bonus)
 
         return {
             "resolved_elements": resolved,
             "bonus_elements": bonus,
             "summary": summary,
+            "source": "regex",
         }
 
     def _extract_value_for_element(self, element_name: str, text: str) -> str | None:
@@ -126,7 +439,6 @@ class QwenExtractor:
             "photo-realistic", "abstract", "artistic",
         ]
         found = [s for s in styles if s in text_lower]
-        # Also look for color mentions as part of design
         colors = self._extract_colors(text, text_lower)
         parts = found.copy()
         if colors:
@@ -158,15 +470,12 @@ class QwenExtractor:
         return None
 
     def _extract_audience(self, text: str, text_lower: str) -> str | None:
-        # This is usually a free-form answer, extract the full response
-        # if it seems to be about audience
         audience_words = [
             "customer", "user", "audience", "people", "women", "men",
             "families", "professional", "business", "local", "global",
             "age", "young", "old", "millenni", "gen z",
         ]
         if any(w in text_lower for w in audience_words):
-            # Return a cleaned version
             return text.strip()
         return None
 
@@ -180,7 +489,6 @@ class QwenExtractor:
         match = re.search(r'(\d+%?\s*(?:off|discount|sale|code|coupon|free|gift))', text_lower)
         if match:
             return match.group(0).strip()
-        # Check for explicit mentions
         offer_words = ["discount", "promo", "coupon", "free shipping", "special offer", "deal"]
         for w in offer_words:
             if w in text_lower:
@@ -237,15 +545,34 @@ class QwenExtractor:
         ]
         found = [w for w in visual_words if w in text_lower]
         if found:
-            # Try to get a number
             num_match = re.search(r'(\d+)[\s\-]+(?:image|photo|illustration|graphic)', text_lower)
             count = num_match.group(1) if num_match else "several"
             return f"{count} {', '.join(found)}"
         return None
 
+    @staticmethod
+    def _is_non_answer(text: str) -> bool:
+        """Detect when a user explicitly declines to answer or gives no info."""
+        lower = text.lower().strip()
+        non_answer_phrases = [
+            "not sure", "don't know", "no idea", "i don't know",
+            "haven't decided", "haven't thought", "let me think",
+            "i'll get back", "skip", "pass", "next question",
+            "no preference", "no opinion", "whatever you think",
+            "i'm not sure", "im not sure", "idk", "dunno",
+            "can't say", "can't decide", "hard to say",
+            "not yet", "still thinking", "need to think",
+            "maybe later", "come back to this", "i'll decide later",
+        ]
+        # If the answer is very short AND matches a non-answer pattern
+        if len(lower) < 60:
+            for phrase in non_answer_phrases:
+                if phrase in lower:
+                    return True
+        return False
+
     def _generate_summary(self, answer: str, resolved: dict, bonus: dict) -> str:
         """Generate a clean prose summary for context.md."""
-        # Just return the cleaned answer — context_manager handles formatting
         return answer.strip()
 
     def update_elements(self, elements: list[dict],
