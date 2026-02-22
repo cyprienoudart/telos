@@ -13,9 +13,12 @@ Public API
 from __future__ import annotations
 
 import hashlib
+import logging
 
 import chromadb
 from fastembed import TextEmbedding
+
+logger = logging.getLogger(__name__)
 
 import config
 from chunker import build_all_chunks, context_hash
@@ -85,8 +88,10 @@ def _get_context_collection() -> chromadb.Collection:
         if col.metadata.get("content_hash") == h:
             return col                   # index still valid — reuse it
         client.delete_collection(name)   # files changed — rebuild
+    except ValueError:
+        pass  # collection does not exist yet — will be created below
     except Exception:
-        pass
+        logger.warning("Unexpected error checking context collection %r", name, exc_info=True)
 
     chunks = build_all_chunks() + multimodal.build_multimodal_chunks()
     col    = client.create_collection(
@@ -153,8 +158,10 @@ def _get_cache_collection() -> chromadb.Collection:
         if col.metadata.get("content_hash") == h:
             return col
         client.delete_collection(name)   # files changed — stale answers
+    except ValueError:
+        pass  # collection does not exist yet — will be created below
     except Exception:
-        pass
+        logger.warning("Unexpected error checking cache collection %r", name, exc_info=True)
 
     return client.create_collection(
         name,

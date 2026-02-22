@@ -73,13 +73,36 @@ def _get_vision_client() -> openai.OpenAI:
 
 
 def _vision_call(mime: str, b64_data: str) -> str:
-    """Send a base64-encoded file to the vision model and return the description."""
+    """Send a base64-encoded image to the vision model and return the description."""
     response = _get_vision_client().chat.completions.create(
         model=config.VISION_MODEL,
         messages=[{
             "role": "user",
             "content": [
                 {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64_data}"}},
+                {"type": "text", "text": _VISION_PROMPT},
+            ],
+        }],
+        max_tokens=config.MAX_TOKENS_VISION,
+        temperature=0.1,
+    )
+    return response.choices[0].message.content or "(no description returned)"
+
+
+def _file_call(filename: str, b64_data: str) -> str:
+    """Send a base64-encoded file (e.g. PDF) via OpenRouter's file content type."""
+    response = _get_vision_client().chat.completions.create(
+        model=config.VISION_MODEL,
+        messages=[{
+            "role": "user",
+            "content": [
+                {
+                    "type": "file",
+                    "file": {
+                        "filename": filename,
+                        "file_data": f"data:application/pdf;base64,{b64_data}",
+                    },
+                },
                 {"type": "text", "text": _VISION_PROMPT},
             ],
         }],
@@ -106,25 +129,28 @@ def _describe_image(path: Path) -> str:
 def _describe_pdf(path: Path) -> str:
     """
     Extract text from *path* with pypdf.
-    Pages with fewer than _PDF_PAGE_MIN_WORDS words are described by the
-    vision model (they are likely scanned/image pages).
-    If the whole PDF yields no usable text, send the entire file to vision.
+    Pages with fewer than _PDF_PAGE_MIN_WORDS words are flagged as image
+    pages. If any image pages exist, the whole PDF is sent to the vision
+    model via the file content type. Text pages are included as-is.
+    If pypdf fails entirely, the whole file is sent to vision as fallback.
     """
     try:
         import pypdf
         reader     = pypdf.PdfReader(str(path))
-        page_texts = []
+        page_texts: list[str] = []
+        has_image_pages = False
 
         for i, page in enumerate(reader.pages):
             text = (page.extract_text() or "").strip()
             if len(text.split()) >= _PDF_PAGE_MIN_WORDS:
                 page_texts.append(f"[Page {i + 1}]\n{text}")
             else:
-                # Image-heavy page — describe with vision
-                b64 = base64.standard_b64encode(path.read_bytes()).decode()
-                desc = _vision_call("application/pdf", b64)
-                page_texts.append(f"[Page {i + 1} — image]\n{desc}")
-                break   # one vision call covers the whole PDF if it's image-based
+                has_image_pages = True
+
+        if has_image_pages:
+            b64 = base64.standard_b64encode(path.read_bytes()).decode()
+            desc = _file_call(path.name, b64)
+            page_texts.append(f"[Image pages — vision]\n{desc}")
 
         if page_texts:
             return "\n\n".join(page_texts)
@@ -133,7 +159,7 @@ def _describe_pdf(path: Path) -> str:
 
     # Fallback: send the whole file to vision
     b64 = base64.standard_b64encode(path.read_bytes()).decode()
-    return _vision_call("application/pdf", b64)
+    return _file_call(path.name, b64)
 
 
 # ---------------------------------------------------------------------------
