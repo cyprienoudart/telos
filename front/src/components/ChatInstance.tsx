@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useChatContext } from "./ChatContext";
 import type { Message } from "./ChatContext";
+import BuildStream from "./BuildStream";
 import ChatInputBar from "./ChatInputBar";
 import VoiceOrb from "./VoiceOrb";
 import { useVoiceEngine } from "@/hooks/useVoiceEngine";
@@ -130,7 +131,7 @@ export default function ChatInstance() {
             )}
 
             {/* Messages */}
-            <div className={`messages-area ${voiceModeActive ? "messages-area--compact" : ""}`}>
+            <div className={`messages-area ${voiceModeActive ? "messages-area--compact" : ""} ${(activeChat.phase === "building" || activeChat.phase === "done") ? "messages-area--with-build" : ""}`}>
                 {activeChat.messages.map((msg) => (
                     <div
                         key={msg.id}
@@ -146,8 +147,16 @@ export default function ChatInstance() {
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Input at bottom */}
-            {!voiceModeActive && (
+            {/* Build stream — shown during building phase */}
+            {(activeChat.phase === "building" || activeChat.phase === "done") && (
+                <BuildStream
+                    trajectory={activeChat.trajectory}
+                    phase={activeChat.phase === "building" ? "building" : "done"}
+                />
+            )}
+
+            {/* Input at bottom — hidden during build */}
+            {!voiceModeActive && activeChat.phase === "conversation" && (
                 <div className="chat-instance__input">
                     <ChatInputBar onSend={handleSend} autoFocus placeholder="Follow up…" />
                 </div>

@@ -9,6 +9,7 @@ from __future__ import annotations
 import logging
 import threading
 import uuid
+from collections import deque
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -24,6 +25,7 @@ class BuildState:
     success: bool | None = None
     error: str | None = None
     progress_path: Path | None = None
+    event_queue: deque = field(default_factory=deque)  # thread-safe trajectory events
 
 
 class BuildRunner:
@@ -82,10 +84,18 @@ class BuildRunner:
                 max_iterations=max_iterations,
                 model=model,
             )
-            result = orch.plan_and_execute(transcript)
+
+            def _on_event(evt: dict) -> None:
+                """Push trajectory events to the thread-safe deque."""
+                # Update iteration counter from iteration_start events
+                if evt.get("type") == "iteration_start":
+                    state.iteration = evt.get("iteration", state.iteration)
+                state.event_queue.append(evt)
+
+            result = orch.plan_and_execute(transcript, on_event=_on_event)
             state.status = "completed"
             state.success = result.success
-            state.iteration = len(result.iterations)
+            state.iteration = result.iterations
         except Exception as exc:
             logger.exception("Build %s failed", state.id)
             state.status = "failed"

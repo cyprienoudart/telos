@@ -19,11 +19,12 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 
-from telos_agent.claude import invoke_claude
+from telos_agent.claude import invoke_claude, invoke_claude_stream
 from telos_agent.mcp_config import generate_mcp_config
 
 
@@ -52,6 +53,9 @@ class RalphLoop:
     """Iterative execution loop that delegates work through Claude Code."""
 
     PROMISE_MARKER = "<promise>COMPLETE</promise>"
+
+    # NDJSON event types we forward to the frontend
+    _STREAM_EVENTS = {"assistant", "tool_use", "tool_result", "result", "system"}
 
     def __init__(
         self,
@@ -90,11 +94,12 @@ class RalphLoop:
         self._last_denial_reason: str | None = None
         self._iteration_results: list[IterationResult] = []
 
-    def run(self) -> RalphResult:
+    def run(self, on_event: Callable[[dict], None] | None = None) -> RalphResult:
         """Execute the Ralph loop until completion or max iterations.
 
-        Reads PRDs from the prds/ directory in the project. If a legacy
-        prd.md exists and prds/ doesn't, it continues to work.
+        Args:
+            on_event: Optional callback for streaming trajectory events.
+                      If provided, uses streaming invocation of Claude.
         """
         # Ensure progress.txt exists
         if not self.progress_path.exists():
@@ -111,7 +116,10 @@ class RalphLoop:
                 print(f"  Denial streak: {self._denial_streak}")
             print(f"{'='*60}\n")
 
-            result = self._run_iteration(iteration)
+            if on_event is not None:
+                result = self._run_iteration_stream(iteration, on_event)
+            else:
+                result = self._run_iteration(iteration)
 
             if result is not None:
                 result.iteration_results = list(self._iteration_results)
@@ -245,6 +253,151 @@ class RalphLoop:
                 verdict=verdict,
             ))
             print(f"  Approved but not all items complete yet")
+
+        return None  # Continue
+
+    def _run_iteration_stream(
+        self,
+        iteration: int,
+        on_event: Callable[[dict], None],
+    ) -> RalphResult | None:
+        """Run a single iteration with streaming output.
+
+        Like _run_iteration but uses invoke_claude_stream() and pushes
+        parsed NDJSON events to on_event in real time.
+        """
+        timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+
+        # 1–3: Same setup as non-streaming
+        self._copy_agent_definitions()
+
+        mcp_config_path = generate_mcp_config(
+            agent_dir=self.agent_dir,
+            project_dir=self.project_dir,
+            context_dir=self.context_dir,
+            include_gemini=True,
+            include_reviewer=True,
+        )
+
+        if self.verdict_path.exists():
+            self.verdict_path.unlink()
+
+        build_prompt = self.build_prompt.read_text()
+        if self._denial_streak >= 3:
+            build_prompt += self._escalation_suffix()
+
+        # 5. Invoke Claude Code (streaming)
+        stream = invoke_claude_stream(
+            prompt=build_prompt,
+            working_dir=self.project_dir,
+            system_prompt_file=self.orchestrator_prompt,
+            mcp_config=mcp_config_path,
+            strict_mcp=True,
+            model=self.model,
+            pipe_stdin=True,
+        )
+
+        # Emit iteration start event
+        on_event({
+            "type": "iteration_start",
+            "iteration": iteration,
+            "max_iterations": self.max_iterations,
+            "model": self.model,
+        })
+
+        # Collect full stdout for promise marker check
+        stdout_parts: list[str] = []
+
+        for line in stream.lines:
+            try:
+                evt = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+
+            # Collect text for promise check
+            evt_type = evt.get("type", "")
+            if evt_type == "assistant" and isinstance(evt.get("message"), dict):
+                for block in evt["message"].get("content", []):
+                    if isinstance(block, dict) and block.get("type") == "text":
+                        stdout_parts.append(block.get("text", ""))
+            elif evt_type == "result" and isinstance(evt.get("result"), str):
+                stdout_parts.append(evt["result"])
+
+            # Forward relevant events
+            if evt_type in self._STREAM_EVENTS:
+                on_event(evt)
+
+        # Wait for process to finish
+        try:
+            returncode = stream.wait(timeout=self.timeout)
+        except subprocess.TimeoutExpired:
+            stream.process.kill()
+            details = f"Claude process timed out after {self.timeout}s"
+            self._append_progress(iteration, "timeout", details)
+            self._iteration_results.append(IterationResult(
+                iteration=iteration,
+                status="timeout",
+                details=details,
+                timestamp=timestamp,
+            ))
+            on_event({"type": "iteration_end", "iteration": iteration, "status": "timeout"})
+            return None
+
+        if returncode != 0:
+            stderr = stream.process.stderr.read() if stream.process.stderr else ""
+            details = f"Claude exited with code {returncode}: {stderr[:500]}"
+            self._append_progress(iteration, "error", details)
+            self._iteration_results.append(IterationResult(
+                iteration=iteration,
+                status="error",
+                details=details,
+                timestamp=timestamp,
+            ))
+            on_event({"type": "iteration_end", "iteration": iteration, "status": "error"})
+            return None
+
+        # 6–7: Same verdict / promise logic as non-streaming
+        full_stdout = "".join(stdout_parts)
+        has_promise = self.PROMISE_MARKER in full_stdout
+        verdict = self._read_verdict()
+
+        if verdict and verdict.get("approved") and has_promise:
+            self._denial_streak = 0
+            details = verdict.get("summary", "All items complete")
+            self._append_progress(iteration, "approved", details)
+            self._iteration_results.append(IterationResult(
+                iteration=iteration, status="approved",
+                details=details, timestamp=timestamp, verdict=verdict,
+            ))
+            on_event({"type": "iteration_end", "iteration": iteration, "status": "approved"})
+            return RalphResult(success=True, iterations=iteration, final_verdict=verdict)
+
+        if verdict and not verdict.get("approved"):
+            reason = verdict.get("reason", "No reason provided")
+            self._denial_streak += 1
+            self._last_denial_reason = reason
+            self._append_progress(iteration, "denied", reason)
+            self._iteration_results.append(IterationResult(
+                iteration=iteration, status="denied",
+                details=reason, timestamp=timestamp, verdict=verdict,
+            ))
+            on_event({"type": "iteration_end", "iteration": iteration, "status": "denied", "reason": reason})
+        elif not verdict:
+            self._append_progress(iteration, "no-verdict", "Reviewer did not produce a verdict")
+            self._iteration_results.append(IterationResult(
+                iteration=iteration, status="no-verdict",
+                details="Reviewer did not produce a verdict", timestamp=timestamp,
+            ))
+            on_event({"type": "iteration_end", "iteration": iteration, "status": "no-verdict"})
+        else:
+            self._denial_streak = 0
+            details = verdict.get("summary", "Partial progress")
+            self._append_progress(iteration, "approved-partial", details)
+            self._iteration_results.append(IterationResult(
+                iteration=iteration, status="approved-partial",
+                details=details, timestamp=timestamp, verdict=verdict,
+            ))
+            on_event({"type": "iteration_end", "iteration": iteration, "status": "approved-partial"})
 
         return None  # Continue
 

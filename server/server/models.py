@@ -13,7 +13,7 @@ class ConversationStartRequest(BaseModel):
     message: str = Field(..., min_length=1, description="User's initial project description")
     context_dir: Optional[str] = Field(None, description="Path to context files for RAG pre-answering")
     additional_context: Optional[str] = Field(None, description="Gemini-extracted text from uploaded files")
-    github_url: Optional[str] = Field(None, description="GitHub repository URL provided by the user")
+    github_url: Optional[str] = Field(None, description="GitHub repo URL to clone as project context")
     files_dir: Optional[str] = Field(None, description="Temp dir with uploaded files to copy into session")
 
 
@@ -27,6 +27,8 @@ class ConversationStartResponse(BaseModel):
     initial_coverage: float
     first_question: Optional[str]
     done: bool
+    repo_url: str | None = None
+    repo_dir: str | None = None
 
 
 class ConversationAnswerRequest(BaseModel):
@@ -57,8 +59,17 @@ class ConversationStatusResponse(BaseModel):
 
 class BuildStartRequest(BaseModel):
     session_id: str = Field(..., description="Session ID from completed conversation")
-    project_dir: str = Field(..., description="Target directory for the built project")
+    project_dir: Optional[str] = Field(None, description="Target directory for the built project")
     context_dir: Optional[str] = Field(None, description="Path to context files for Gemini MCP")
+    max_iterations: int = Field(10, ge=1, le=50)
+    model: str = Field("opus")
+
+
+class DebugBuildStartRequest(BaseModel):
+    """Skip Ali interview — use a pre-baked fixture file to start the build."""
+    fixture_path: str | None = Field(None, description="Path to context fixture (defaults to test/fixtures/debug_context.md)")
+    project_dir: str | None = Field(None, description="Build target directory (defaults to /tmp/telos-debug-build)")
+    context_dir: str | None = Field(None, description="Context dir for Gemini MCP")
     max_iterations: int = Field(10, ge=1, le=50)
     model: str = Field("opus")
 

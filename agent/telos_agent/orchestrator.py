@@ -8,12 +8,16 @@ interface for running the Telos workflow:
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from pathlib import Path
 
-from telos_agent.claude import invoke_claude
+from telos_agent.claude import invoke_claude, invoke_claude_stream
 from telos_agent.interview import InterviewRunner
 from telos_agent.mcp_config import generate_mcp_config
 from telos_agent.ralph import IterationResult, RalphLoop, RalphResult
+
+# Event types forwarded from stream-json to on_event
+_STREAM_EVENTS = {"assistant", "tool_use", "tool_result", "result", "system"}
 
 
 class TelosOrchestrator:
@@ -47,7 +51,44 @@ class TelosOrchestrator:
             context_dir=self.context_dir,
         )
 
-    def generate_plan(self, interview_context: str) -> Path:
+    def _invoke_with_events(
+        self,
+        on_event: Callable[[dict], None],
+        **kwargs,
+    ) -> str:
+        """Invoke Claude with streaming, forwarding trajectory events.
+
+        Wraps invoke_claude_stream(), parses NDJSON, pushes relevant events
+        to on_event, and returns the final result text (equivalent to
+        ClaudeResult.stdout from the non-streaming path).
+        """
+        stream = invoke_claude_stream(**kwargs)
+        result_text = ""
+
+        for line in stream.lines:
+            try:
+                evt = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+
+            evt_type = evt.get("type", "")
+
+            # Capture the final result text for callers that need it
+            if evt_type == "result" and isinstance(evt.get("result"), str):
+                result_text = evt["result"]
+
+            # Forward relevant events
+            if evt_type in _STREAM_EVENTS:
+                on_event(evt)
+
+        stream.wait()
+        return result_text
+
+    def generate_plan(
+        self,
+        interview_context: str,
+        on_event: Callable[[dict], None] | None = None,
+    ) -> Path:
         """Generate a project plan from interview context.
 
         Uses Claude with Gemini MCP to synthesize the interview transcript
@@ -55,6 +96,7 @@ class TelosOrchestrator:
 
         Args:
             interview_context: Plain-text interview transcript from Ali.
+            on_event: Optional callback for real-time trajectory streaming.
 
         Returns:
             Path to the generated plan.md in the project directory.
@@ -87,7 +129,7 @@ class TelosOrchestrator:
             "Output ONLY the plan content in markdown format, nothing else."
         )
 
-        result = invoke_claude(
+        claude_kwargs = dict(
             prompt=prompt,
             working_dir=self.project_dir,
             mcp_config=mcp_config_path,
@@ -95,15 +137,26 @@ class TelosOrchestrator:
             model="sonnet",
         )
 
+        if on_event:
+            result_text = self._invoke_with_events(on_event, **claude_kwargs)
+        else:
+            result_text = invoke_claude(**claude_kwargs).stdout
+
         plan_path = self.project_dir / "plan.md"
-        plan_path.write_text(result.stdout)
+        plan_path.write_text(result_text)
         return plan_path
 
-    def generate_prds(self) -> Path:
+    def generate_prds(
+        self,
+        on_event: Callable[[dict], None] | None = None,
+    ) -> Path:
         """Generate multiple PRDs from plan.md.
 
         Reads the plan, invokes Claude with Gemini MCP and write tools to
         create individual PRD files in prds/ directory (01-xxx.md, 02-xxx.md, etc.).
+
+        Args:
+            on_event: Optional callback for real-time trajectory streaming.
 
         Returns:
             Path to the prds/ directory.
@@ -149,7 +202,7 @@ class TelosOrchestrator:
             "output a summary listing the files you created."
         )
 
-        invoke_claude(
+        claude_kwargs = dict(
             prompt=prompt,
             working_dir=self.project_dir,
             mcp_config=mcp_config_path,
@@ -161,6 +214,11 @@ class TelosOrchestrator:
             model="sonnet",
         )
 
+        if on_event:
+            self._invoke_with_events(on_event, **claude_kwargs)
+        else:
+            invoke_claude(**claude_kwargs)
+
         # Post-check: verify PRDs were created
         prd_files = sorted(prds_dir.glob("*.md"))
         if not prd_files:
@@ -168,8 +226,12 @@ class TelosOrchestrator:
 
         return prds_dir
 
-    def execute(self) -> RalphResult:
-        """Execute the Ralph loop to implement all PRDs in prds/."""
+    def execute(self, on_event: Callable[[dict], None] | None = None) -> RalphResult:
+        """Execute the Ralph loop to implement all PRDs in prds/.
+
+        Args:
+            on_event: Optional callback for real-time trajectory streaming.
+        """
         loop = RalphLoop(
             project_dir=self.project_dir,
             agent_dir=self.agent_dir,
@@ -178,17 +240,33 @@ class TelosOrchestrator:
             model=self.model,
             timeout=self.timeout,
         )
-        return loop.run()
+        return loop.run(on_event=on_event)
 
-    def plan_and_execute(self, context: str) -> RalphResult:
+    def plan_and_execute(
+        self,
+        context: str,
+        on_event: Callable[[dict], None] | None = None,
+    ) -> RalphResult:
         """Convenience wrapper: generate plan → generate PRDs → execute.
 
         Args:
             context: Plain-text interview transcript from Ali.
+            on_event: Optional callback for real-time trajectory streaming.
         """
-        self.generate_plan(context)
-        self.generate_prds()
-        return self.execute()
+        if on_event:
+            on_event({"type": "phase", "phase": "planning", "message": "Generating project plan..."})
+
+        self.generate_plan(context, on_event=on_event)
+
+        if on_event:
+            on_event({"type": "phase", "phase": "splitting", "message": "Splitting plan into PRDs..."})
+
+        self.generate_prds(on_event=on_event)
+
+        if on_event:
+            on_event({"type": "phase", "phase": "building", "message": "Starting build loop..."})
+
+        return self.execute(on_event=on_event)
 
     def run(
         self,

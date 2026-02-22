@@ -2,6 +2,8 @@ CLAUDE.md
 .env
 .DS_Store
 docs/
+front/.next/
+front/node_modules/
 
 # ── Python ────────────────────────────────────────────────────────────────────
 **/__pycache__/

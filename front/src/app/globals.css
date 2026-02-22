@@ -404,6 +404,78 @@ button {
   }
 }
 
+/* GitHub repo link / input */
+.repo-link {
+  margin-top: 14px;
+  background: none;
+  border: none;
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition), background var(--transition);
+}
+
+.repo-link:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.repo-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  width: 100%;
+  max-width: 680px;
+  padding: 0 24px;
+  animation: fadeInUp 0.25s ease;
+}
+
+.repo-input {
+  flex: 1;
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--text-primary);
+  background: var(--bg-input);
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.repo-input:focus {
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow-sm);
+}
+
+.repo-input::placeholder {
+  color: var(--text-hint);
+}
+
+.repo-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-hint);
+  font-size: 18px;
+  cursor: pointer;
+  transition: color var(--transition), background var(--transition);
+}
+
+.repo-clear:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
 /* Hint text */
 .chat-hint {
   text-align: center;
@@ -868,6 +940,15 @@ button {
   color: var(--text-primary);
 }
 
+.sidebar__reset-btn {
+  color: #ef4444;
+}
+
+.sidebar__reset-btn:hover {
+  background: rgba(239, 68, 68, 0.08);
+  color: #dc2626;
+}
+
 /* ========================================
    TOP BAR (in chat instance)
    ======================================== */
@@ -1007,6 +1088,375 @@ button {
 }
 
 /* ========================================
+   DEBUG BUILD BUTTON
+   ======================================== */
+
+.debug-build-btn {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  padding: 8px 16px;
+  background: #1e1e2e;
+  color: #cba6f7;
+  border: 1px solid #45475a;
+  border-radius: var(--radius-sm);
+  font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  z-index: 50;
+  opacity: 0.6;
+}
+
+.debug-build-btn:hover {
+  opacity: 1;
+  background: #313244;
+  border-color: #cba6f7;
+  box-shadow: 0 0 12px rgba(203, 166, 247, 0.15);
+}
+
+/* ========================================
+   BUILD STREAM — Dark embedded terminal
+   ======================================== */
+
+.messages-area--with-build {
+  flex: 0 0 auto;
+  max-height: 30vh;
+  min-height: 100px;
+}
+
+.bs-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+  background: #0d1117;
+  border-top: 1px solid #21262d;
+  overflow: hidden;
+}
+
+.bs-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #161b22;
+  border-bottom: 1px solid #21262d;
+  flex-shrink: 0;
+}
+
+.bs-header-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.bs-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3fb950;
+  animation: bsPulse 2s ease-in-out infinite;
+}
+
+@keyframes bsPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.bs-scroll-btn {
+  margin-left: auto;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #58a6ff;
+  background: rgba(56, 139, 253, 0.1);
+  border: 1px solid rgba(56, 139, 253, 0.3);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: var(--font);
+}
+
+.bs-scroll-btn:hover {
+  background: rgba(56, 139, 253, 0.2);
+}
+
+.bs-log {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+  font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.bs-log::-webkit-scrollbar {
+  width: 6px;
+}
+
+.bs-log::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.bs-log::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 3px;
+}
+
+.bs-log::-webkit-scrollbar-thumb:hover {
+  background: #484f58;
+}
+
+/* Empty state */
+.bs-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 100%;
+  color: #484f58;
+  font-size: 13px;
+  font-family: var(--font);
+}
+
+.bs-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #30363d;
+  border-top-color: #58a6ff;
+  border-radius: 50%;
+  animation: bsSpin 0.8s linear infinite;
+}
+
+@keyframes bsSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Phase indicators (planning, splitting PRDs, etc.) */
+.bs-phase {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+  padding: 10px 14px;
+  background: rgba(88, 166, 255, 0.06);
+  border: 1px solid rgba(88, 166, 255, 0.15);
+  border-radius: 8px;
+  animation: bsFadeIn 0.2s ease;
+}
+
+.bs-phase-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #58a6ff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-right: 8px;
+  font-family: var(--font);
+}
+
+.bs-phase-message {
+  font-size: 13px;
+  color: #8b949e;
+  font-family: var(--font);
+}
+
+/* Iteration headers */
+.bs-iteration-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid #21262d;
+}
+
+.bs-iteration-header:first-child {
+  margin-top: 0;
+}
+
+.bs-iteration-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #f0f6fc;
+  background: #30363d;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: var(--font);
+}
+
+.bs-iteration-model {
+  font-size: 11px;
+  color: #484f58;
+  font-family: var(--font);
+}
+
+/* Iteration footers */
+.bs-iteration-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 16px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font);
+  background: #161b22;
+}
+
+.bs-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bs-status--approved {
+  color: #3fb950;
+  border: 1px solid rgba(63, 185, 80, 0.2);
+}
+
+.bs-status--approved .bs-status-dot {
+  background: #3fb950;
+}
+
+.bs-status--denied {
+  color: #f85149;
+  border: 1px solid rgba(248, 81, 73, 0.2);
+}
+
+.bs-status--denied .bs-status-dot {
+  background: #f85149;
+}
+
+.bs-status--neutral {
+  color: #d29922;
+  border: 1px solid rgba(210, 153, 34, 0.2);
+}
+
+.bs-status--neutral .bs-status-dot {
+  background: #d29922;
+}
+
+.bs-status-reason {
+  color: #8b949e;
+  font-weight: 400;
+}
+
+/* Text blocks */
+.bs-text {
+  color: #c9d1d9;
+  white-space: pre-wrap;
+  word-break: break-word;
+  padding: 2px 0;
+  animation: bsFadeIn 0.15s ease;
+}
+
+@keyframes bsFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Tool pills */
+.bs-tool-pill-wrapper {
+  margin: 4px 0;
+  animation: bsFadeIn 0.15s ease;
+}
+
+.bs-tool-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.bs-tool-pill:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.bs-tool-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bs-tool-name {
+  font-weight: 600;
+}
+
+.bs-tool-path {
+  color: #8b949e;
+  font-weight: 400;
+  max-width: 400px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bs-tool-chevron {
+  font-size: 10px;
+  transition: transform 0.15s;
+  opacity: 0.5;
+}
+
+.bs-tool-chevron--open {
+  transform: rotate(180deg);
+}
+
+/* Tool detail (expanded) */
+.bs-tool-detail {
+  margin: 2px 0 4px 12px;
+  padding: 6px 10px;
+  border-left: 2px solid #21262d;
+  animation: bsFadeIn 0.15s ease;
+}
+
+.bs-tool-section {
+  margin-bottom: 6px;
+}
+
+.bs-tool-section:last-child {
+  margin-bottom: 0;
+}
+
+.bs-tool-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #484f58;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+  font-family: var(--font);
+}
+
+.bs-tool-pre {
+  color: #8b949e;
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 300px;
+  overflow-y: auto;
+  margin: 0;
+}
+
+/* ========================================
    RESPONSIVE
    ======================================== */
 
@@ -1029,5 +1479,9 @@ button {
 
   .chat-input-wrapper {
     padding: 0 16px;
+  }
+
+  .bs-tool-path {
+    max-width: 200px;
   }
 }

@@ -29,6 +29,21 @@ class ClaudeResult:
         return json.loads(self.stdout)
 
 
+@dataclass
+class StreamResult:
+    """Wraps a stream generator with access to the final return code.
+
+    Unlike a Generator return value (only accessible via StopIteration.value),
+    this gives callers direct access to the subprocess for exit code and cleanup.
+    """
+    lines: Generator[str, None, None]
+    process: subprocess.Popen
+
+    def wait(self, timeout: int | None = None) -> int:
+        self.process.wait(timeout=timeout)
+        return self.process.returncode
+
+
 def _build_command(
     prompt: str | None,
     working_dir: Path,
@@ -151,13 +166,12 @@ def invoke_claude_stream(
     model: str | None = None,
     max_turns: int | None = None,
     pipe_stdin: bool = False,
-    timeout: int | None = None,
     skip_permissions: bool = True,
-) -> Generator[str, None, int]:
-    """Invoke claude CLI with stream-json output, yielding lines.
+) -> StreamResult:
+    """Invoke claude CLI with stream-json output, returning a StreamResult.
 
-    Yields each line of stream-json output as it arrives.
-    Returns the process return code after completion.
+    The StreamResult contains a line generator and the subprocess handle.
+    Callers iterate .lines for NDJSON output, then call .wait() for exit code.
     """
     cmd = _build_command(
         prompt=prompt,
@@ -171,6 +185,9 @@ def invoke_claude_stream(
         max_turns=max_turns,
         pipe_stdin=pipe_stdin,
     )
+
+    # --verbose is required for stream-json with -p to emit full trajectory
+    cmd.append("--verbose")
 
     if skip_permissions:
         cmd.append("--dangerously-skip-permissions")
@@ -191,8 +208,10 @@ def invoke_claude_stream(
         proc.stdin.write(prompt)
         proc.stdin.close()
 
-    for line in proc.stdout:
-        yield line.rstrip("\n")
+    def _line_generator():
+        for line in proc.stdout:
+            stripped = line.rstrip("\n")
+            if stripped:
+                yield stripped
 
-    proc.wait(timeout=timeout)
-    return proc.returncode
+    return StreamResult(lines=_line_generator(), process=proc)

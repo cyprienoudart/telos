@@ -5,7 +5,7 @@ import ChatInputBar from "./ChatInputBar";
 import { useChatContext } from "./ChatContext";
 
 export default function ChatHome() {
-    const { createChat } = useChatContext();
+    const { createChat, debugBuild } = useChatContext();
     const [files, setFiles] = useState<File[]>([]);
     const [githubUrl, setGithubUrl] = useState("");
     const [isProcessing, setIsProcessing] = useState(false);
@@ -125,6 +125,14 @@ export default function ChatHome() {
             )}
 
             {!isProcessing && <p className="chat-hint">Create your first project</p>}
+
+            <button
+                className="debug-build-btn"
+                onClick={debugBuild}
+                title="Skip interview — use test/fixtures/debug_context.md"
+            >
+                Debug Build
+            </button>
         </div>
     );
 }

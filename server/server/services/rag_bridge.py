@@ -47,16 +47,13 @@ async def pre_answer_elements(
         logger.warning("Gemini RAG pipeline not available, skipping pre-answering", exc_info=True)
         return {}
 
-    async def _query_one(desc: str) -> tuple[str, str | None]:
+    answers: dict[str, str] = {}
+    for desc in unknown_descriptions:
         try:
             result = await asyncio.to_thread(answer_question, desc)
             if isinstance(result, str) and not _is_idk(result):
-                return (desc, result)
+                answers[desc] = result
         except Exception:
             logger.warning("RAG query failed for: %s", desc[:80], exc_info=True)
-        return (desc, None)
 
-    tasks = [_query_one(desc) for desc in unknown_descriptions]
-    results = await asyncio.gather(*tasks)
-
-    return {desc: answer for desc, answer in results if answer is not None}
+    return answers
