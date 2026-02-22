@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "gemini-context": {
+      "command": "uv",
+      "args": ["--directory", "{agent_dir}", "run", "python", "-m", "telos_agent.mcp.gemini"],
+      "env": {
+        "CONTEXT_DIR": "{context_dir}"
+      }
+    },
+    "reviewer": {
+      "command": "uv",
+      "args": ["--directory", "{agent_dir}", "run", "python", "-m", "telos_agent.mcp.reviewer"],
+      "env": {
+        "VERDICT_PATH": "{project_dir}/verdict.json"
+      }
+    }
+  }
+}
