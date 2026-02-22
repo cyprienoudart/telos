@@ -1,5 +1,5 @@
 """
-All tuneable constants for gemini-context-mcp.
+All tuneable constants for the Gemini context MCP server.
 Override any value via the corresponding environment variable.
 """
 
@@ -10,8 +10,14 @@ from pathlib import Path
 # Context store root
 # ---------------------------------------------------------------------------
 
-# Mutable: tests/benchmark.py reassigns this to switch between projects.
+# Mutable via set_base_dir(). Tests/benchmark use that to switch projects.
 BASE_DIR: Path = Path(os.environ.get("CONTEXT_DIR", "./context")).resolve()
+
+
+def set_base_dir(path: str | Path) -> None:
+    """Override BASE_DIR at runtime (e.g. for benchmarks or tests)."""
+    global BASE_DIR
+    BASE_DIR = Path(path).resolve()
 
 # ---------------------------------------------------------------------------
 # File-type filters

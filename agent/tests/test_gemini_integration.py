@@ -1,15 +1,15 @@
 """
-Integration test for the gemini-context-mcp stack.
+Integration test for the Gemini context MCP pipeline.
 
-Tests both public tools by importing from server.py directly — no running
+Tests both public tools by importing from the package directly — no running
 server needed. Covers the complete path:
 
-    server tool → agent → context loader → OpenRouter → response
+    server tool → pipeline → context loader → OpenRouter → response
 
 Requires OPENROUTER_API_KEY in .env.
-Run from gemini-context-mcp/:
+Run from agent/:
 
-    python tests/test_integration.py
+    python tests/test_gemini_integration.py
 """
 
 from __future__ import annotations
@@ -18,10 +18,11 @@ import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Ensure the package root is on sys.path for standalone invocation.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(Path(__file__).parent.parent / ".env")
 
 
 # ── helpers ────────────────────────────────────────────────────────────────────
@@ -47,7 +48,7 @@ def section(title: str) -> None:
 
 # ── import server tools ────────────────────────────────────────────────────────
 
-from server import answer_question, summarize
+from telos_agent.mcp.gemini.server import answer_question, summarize
 
 
 # ── Test 1: summarize() ───────────────────────────────────────────────────────
@@ -159,22 +160,22 @@ check("admits it doesn't know",    any(kw in a3.lower() for kw in
 
 section("6 · direct Python import  (no MCP layer)")
 
-import agent as _agent
+from telos_agent.mcp.gemini import pipeline
 
 t0 = time.perf_counter()
-direct_summary = _agent.summarize()
+direct_summary = pipeline.summarize()
 elapsed6 = time.perf_counter() - t0
 
 t0 = time.perf_counter()
-direct_answer = _agent.answer_question("Who is on the on-call rotation this week?")
+direct_answer = pipeline.answer_question("Who is on the on-call rotation this week?")
 elapsed7 = time.perf_counter() - t0
 
-print(f"\n  agent.summarize()       → {elapsed6*1000:.0f} ms (cached)")
-print(f"  agent.answer_question() → {elapsed7:.1f} s")
+print(f"\n  pipeline.summarize()       → {elapsed6*1000:.0f} ms (cached)")
+print(f"  pipeline.answer_question() → {elapsed7:.1f} s")
 print(f"  answer: {direct_answer[:200]}\n")
 
-check("agent.summarize() returns string",       isinstance(direct_summary, str))
-check("agent.answer_question() returns string", isinstance(direct_answer, str))
+check("pipeline.summarize() returns string",       isinstance(direct_summary, str))
+check("pipeline.answer_question() returns string", isinstance(direct_answer, str))
 check("answer mentions a team member",          any(n in direct_answer for n in
                                                     ["Lucas", "Priya", "Tomás", "Sam", "Maya"]),
       f"got: {direct_answer[:120]}")

@@ -13,13 +13,17 @@ Public API
 from __future__ import annotations
 
 import hashlib
+import logging
 
 import chromadb
+from chromadb.errors import NotFoundError
 from fastembed import TextEmbedding
 
-import config
-from chunker import build_all_chunks, context_hash
-import multimodal
+logger = logging.getLogger(__name__)
+
+from . import settings
+from .chunker import build_all_chunks, context_hash
+from . import multimodal
 
 
 # ---------------------------------------------------------------------------
@@ -32,7 +36,7 @@ _embed_model: TextEmbedding | None = None
 def _get_embed_model() -> TextEmbedding:
     global _embed_model
     if _embed_model is None:
-        _embed_model = TextEmbedding(config.EMBED_MODEL)
+        _embed_model = TextEmbedding(settings.EMBED_MODEL)
     return _embed_model
 
 
@@ -51,14 +55,14 @@ _chroma_client: chromadb.PersistentClient | None = None
 def _get_chroma_client() -> chromadb.PersistentClient:
     global _chroma_client
     if _chroma_client is None:
-        config.CHROMA_DIR.mkdir(parents=True, exist_ok=True)
-        _chroma_client = chromadb.PersistentClient(path=str(config.CHROMA_DIR))
+        settings.CHROMA_DIR.mkdir(parents=True, exist_ok=True)
+        _chroma_client = chromadb.PersistentClient(path=str(settings.CHROMA_DIR))
     return _chroma_client
 
 
 def _project_id() -> str:
-    """Short hash of config.BASE_DIR used to namespace collections per project."""
-    return hashlib.md5(str(config.BASE_DIR).encode()).hexdigest()[:12]
+    """Short hash of settings.BASE_DIR used to namespace collections per project."""
+    return hashlib.md5(str(settings.BASE_DIR).encode()).hexdigest()[:12]
 
 
 # ---------------------------------------------------------------------------
@@ -85,8 +89,10 @@ def _get_context_collection() -> chromadb.Collection:
         if col.metadata.get("content_hash") == h:
             return col                   # index still valid — reuse it
         client.delete_collection(name)   # files changed — rebuild
+    except (ValueError, NotFoundError):
+        pass  # collection does not exist yet — will be created below
     except Exception:
-        pass
+        logger.warning("Unexpected error checking context collection %r", name, exc_info=True)
 
     chunks = build_all_chunks() + multimodal.build_multimodal_chunks()
     col    = client.create_collection(
@@ -118,7 +124,7 @@ def warm_index() -> None:
 
 def retrieve(query: str, query_emb: list[float] | None = None) -> str:
     """
-    Return the top config.SEARCH_TOP_K chunks for *query* as a context string.
+    Return the top settings.SEARCH_TOP_K chunks for *query* as a context string.
     Pass *query_emb* to skip re-embedding when already computed by the caller.
     """
     col = _get_context_collection()
@@ -128,7 +134,7 @@ def retrieve(query: str, query_emb: list[float] | None = None) -> str:
         query_emb = embed_texts([query])[0]
     results = col.query(
         query_embeddings=[query_emb],
-        n_results=min(config.SEARCH_TOP_K, col.count()),
+        n_results=min(settings.SEARCH_TOP_K, col.count()),
         include=["documents"],
     )
     return "\n\n---\n\n".join(results["documents"][0])
@@ -153,8 +159,10 @@ def _get_cache_collection() -> chromadb.Collection:
         if col.metadata.get("content_hash") == h:
             return col
         client.delete_collection(name)   # files changed — stale answers
+    except (ValueError, NotFoundError):
+        pass  # collection does not exist yet — will be created below
     except Exception:
-        pass
+        logger.warning("Unexpected error checking cache collection %r", name, exc_info=True)
 
     return client.create_collection(
         name,
@@ -165,7 +173,7 @@ def _get_cache_collection() -> chromadb.Collection:
 def cache_lookup(query_emb: list[float]) -> str | None:
     """
     Return a stored answer if a similar-enough query exists, else None.
-    Similarity threshold: config.CACHE_SIMILARITY (cosine).
+    Similarity threshold: settings.CACHE_SIMILARITY (cosine).
     """
     cache = _get_cache_collection()
     if cache.count() == 0:
@@ -176,7 +184,7 @@ def cache_lookup(query_emb: list[float]) -> str | None:
         include=["documents", "distances"],
     )
     # ChromaDB cosine space: distance = 1 - similarity, so 0 = identical.
-    if hit["distances"][0][0] <= (1.0 - config.CACHE_SIMILARITY):
+    if hit["distances"][0][0] <= (1.0 - settings.CACHE_SIMILARITY):
         return hit["documents"][0][0]
     return None
 

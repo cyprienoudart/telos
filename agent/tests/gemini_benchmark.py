@@ -1,30 +1,31 @@
 """
 Benchmark the FastEmbed → ChromaDB → LLM pipeline across projects of different sizes.
 
-For each project, runs 12 generic questions through the full answer_question()
+For each project, runs 14 generic questions through the full answer_question()
 pipeline and prints every answer so you can assess quality alongside timing.
 
 Usage:
-    python tests/benchmark.py
+    python tests/gemini_benchmark.py
 """
 
 from __future__ import annotations
 
+import os
 import sys
 import textwrap
 import time
 from pathlib import Path
 from statistics import mean
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Ensure the package root is on sys.path for standalone invocation.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(Path(__file__).parent.parent / ".env")
 
-import agent   # noqa: E402 — needs load_dotenv first
-import config  # noqa: E402
-import store   # noqa: E402
-import chunker # noqa: E402
+from telos_agent.mcp.gemini import pipeline, settings
+from telos_agent.mcp.gemini import store
+from telos_agent.mcp.gemini import chunker
 
 # ---------------------------------------------------------------------------
 # Tee stdout → file
@@ -57,12 +58,27 @@ print(f"  (output also saved to {_OUTPUT_FILE})")
 # ---------------------------------------------------------------------------
 # Projects to benchmark
 # ---------------------------------------------------------------------------
+# Set BENCHMARK_PROJECTS as colon-separated "label=path" pairs, e.g.:
+#   BENCHMARK_PROJECTS="my-app=/path/to/app:other=/path/to/other"
+# Falls back to the bundled context/ sample data.
 
-PROJECTS: list[tuple[str, Path]] = [
-    ("telos/context  (tiny)",   Path("C:/Users/Kora/Dev/telos/gemini-context-mcp/context")),
-    ("telegram-voice-ai-bot",   Path("C:/Users/Kora/Dev/telegram-voice-ai-bot")),
-    ("ai-teachers-old",         Path("C:/Users/Kora/Dev/ai-teachers-old")),
-]
+_DEFAULT_CONTEXT = Path(__file__).parent.parent / "context"
+
+
+def _parse_projects() -> list[tuple[str, Path]]:
+    raw = os.environ.get("BENCHMARK_PROJECTS", "").strip()
+    if not raw:
+        return [("context (bundled sample)", _DEFAULT_CONTEXT)]
+    projects: list[tuple[str, Path]] = []
+    for entry in raw.split(":"):
+        if "=" not in entry:
+            continue
+        label, path_str = entry.split("=", 1)
+        projects.append((label.strip(), Path(path_str.strip())))
+    return projects or [("context (bundled sample)", _DEFAULT_CONTEXT)]
+
+
+PROJECTS = _parse_projects()
 
 # ---------------------------------------------------------------------------
 # Questions (generic — work across any codebase)
@@ -127,7 +143,7 @@ for label, project_path in PROJECTS:
         print(f"  [SKIP] path does not exist")
         continue
 
-    config.BASE_DIR = project_path.resolve()
+    settings.set_base_dir(project_path)
 
     # ── Corpus stats ────────────────────────────────────────────────────────
     print("  Scanning corpus...", end="", flush=True)
@@ -150,7 +166,7 @@ for label, project_path in PROJECTS:
     for i, q in enumerate(QUESTIONS):
         print(f"  Q{i+1:>2}: {q}")
         t0 = time.perf_counter()
-        answer = agent.answer_question(q)
+        answer = pipeline.answer_question(q)
         elapsed = time.perf_counter() - t0
         llm_times.append(elapsed)
         print(f"   A: {_wrap(answer)}")

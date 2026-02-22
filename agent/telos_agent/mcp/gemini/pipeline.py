@@ -7,7 +7,7 @@ Context agent — public API.
 answer_question() pipeline
 --------------------------
   1. Embed query with FastEmbed (store.embed_texts).
-  2. Semantic cache lookup  → instant return on hit (≥ 0.85 cosine similarity).
+  2. Semantic cache lookup  → instant return on hit (>= 0.85 cosine similarity).
   3. Dense retrieval        → top 3 chunks from ChromaDB (store.retrieve).
   4. LLM call               → answer in 1-5 plain-English sentences.
   5. Store answer in semantic cache.
@@ -25,9 +25,9 @@ import os
 import openai
 from dotenv import load_dotenv
 
-import config
-from chunker import Chunk, build_all_chunks, context_hash
-from store import cache_lookup, cache_store, embed_texts, retrieve
+from . import settings
+from .chunker import Chunk, build_all_chunks, context_hash
+from .store import cache_lookup, cache_store, embed_texts, retrieve
 
 load_dotenv()
 
@@ -48,7 +48,7 @@ def _get_client() -> openai.OpenAI:
                 "OPENROUTER_API_KEY is not set. Copy .env.example → .env and add your key."
             )
         _client = openai.OpenAI(
-            base_url=config.LLM_BASE_URL,
+            base_url=settings.LLM_BASE_URL,
             api_key=api_key,
             default_headers={"X-Title": "gemini-context-mcp"},
         )
@@ -58,7 +58,7 @@ def _get_client() -> openai.OpenAI:
 def _llm(prompt: str, max_tokens: int, temperature: float) -> str:
     """Single-turn LLM call via OpenRouter. Returns the response text."""
     response = _get_client().chat.completions.create(
-        model=config.LLM_MODEL,
+        model=settings.LLM_MODEL,
         messages=[{"role": "user", "content": prompt}],
         max_tokens=max_tokens,
         temperature=temperature,
@@ -78,6 +78,9 @@ def summarize() -> str:
     """
     Produce a 15-bullet plain-English overview of the entire context store.
     Written for a non-technical reader. Cached in memory until files change.
+
+    Note: uses only the first chunk per file, so very large files may not
+    be fully represented in the summary.
     """
     global _summary_cache, _summary_hash
 
@@ -104,7 +107,7 @@ def summarize() -> str:
         f"Knowledge base:\n{context}\n\n"
         "Your 15-bullet summary:"
     )
-    _summary_cache = _llm(prompt, config.MAX_TOKENS_SUMMARY, temperature=0.3) \
+    _summary_cache = _llm(prompt, settings.MAX_TOKENS_SUMMARY, temperature=0.3) \
                      or "(no summary returned)"
     _summary_hash  = h
     return _summary_cache
@@ -140,7 +143,7 @@ def answer_question(query: str) -> str:
         f"Question: {query}\n\n"
         "Answer:"
     )
-    answer = _llm(prompt, config.MAX_TOKENS_ANSWER, temperature=0.2) \
+    answer = _llm(prompt, settings.MAX_TOKENS_ANSWER, temperature=0.2) \
              or "I couldn't find an answer to that."
 
     cache_store(query, query_emb, answer)

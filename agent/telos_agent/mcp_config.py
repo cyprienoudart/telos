@@ -42,6 +42,7 @@ def generate_mcp_config(
             ],
             "env": {
                 "CONTEXT_DIR": ctx,
+                "OPENROUTER_API_KEY": os.environ.get("OPENROUTER_API_KEY", ""),
             },
         }
 

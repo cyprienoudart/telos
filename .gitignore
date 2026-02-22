@@ -1,7 +1,7 @@
 CLAUDE.md
 .env
 .DS_Store
-/docs
+docs/
 
 # ── Python ────────────────────────────────────────────────────────────────────
 **/__pycache__/
@@ -15,7 +15,3 @@ CLAUDE.md
 **/build/
 **/.mypy_cache/
 **/.ruff_cache/
-
-# ── Secrets / env files ───────────────────────────────────────────────────────
-gemini-context-mcp/.env
-gemini-context-mcp/.env.example
