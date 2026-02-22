@@ -1,24 +1,29 @@
 """
 RL Question Generator (Component 3) — Generates candidate questions and selects the best.
 
-Uses a fine-tuned GPT-2 LLM (with LoRA) to generate context-aware questions.
-Falls back to expert templates if the LLM is not available.
+Primary: Uses an API-based LLM (OpenRouter) to generate context-aware questions.
+Secondary: Uses a fine-tuned GPT-2 LLM (with LoRA) if available locally.
+Fallback: Uses expert-crafted template bank if no LLM is available.
 Scores candidates using PPO reward logic with trained weights.
 """
 from __future__ import annotations
 
 import json
+import logging
 import os
 import random
 from typing import Optional
+
+log = logging.getLogger(__name__)
 
 
 class RLQuestionGenerator:
     """
     Component 3: Generate N candidate questions, score them, pick the best.
 
-    Primary: Uses a fine-tuned GPT-2 model to generate questions based on context.
-    Fallback: Uses expert-crafted template bank if the LLM is not available.
+    Primary: Uses OpenRouter API to generate questions from a capable LLM.
+    Secondary: Uses a fine-tuned GPT-2 model if available locally.
+    Fallback: Uses expert-crafted template bank if no LLM is available.
 
     The reward function favors questions that:
     - Target high-importance undefined elements
@@ -34,8 +39,12 @@ class RLQuestionGenerator:
         self._llm_device = "cpu"
         self._trained_templates = None
         self._reward_weights = None
+        self._api_client = None
 
-        # Try loading fine-tuned question LLM
+        # Try loading API-based LLM client (primary)
+        self._init_api_client()
+
+        # Try loading fine-tuned question LLM (secondary)
         self._load_question_llm(model_dir)
 
         # Try loading trained question templates (fallback)
@@ -49,6 +58,38 @@ class RLQuestionGenerator:
         if os.path.exists(weights_path):
             with open(weights_path, "r") as f:
                 self._reward_weights = json.load(f)
+
+    def _init_api_client(self):
+        """Initialize the OpenRouter API client for question generation."""
+        # Load .env files (agent/.env has the key)
+        try:
+            from dotenv import load_dotenv
+            load_dotenv()
+            # Also try agent/.env relative to project root
+            agent_env = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                "agent", ".env",
+            )
+            if os.path.exists(agent_env):
+                load_dotenv(agent_env)
+        except ImportError:
+            pass
+
+        api_key = os.environ.get("OPENROUTER_API_KEY")
+        if not api_key:
+            log.info("OPENROUTER_API_KEY not set — API question generation disabled")
+            return
+
+        try:
+            import openai
+            self._api_client = openai.OpenAI(
+                base_url="https://openrouter.ai/api/v1",
+                api_key=api_key,
+            )
+            log.info("Initialized API-based question generator (OpenRouter)")
+        except Exception as e:
+            log.warning("Could not init API question generator: %s", e)
+            self._api_client = None
 
     def _load_question_llm(self, model_dir: str):
         """Load the fine-tuned GPT-2 question-generation model."""
@@ -85,6 +126,101 @@ class RLQuestionGenerator:
             print(f"   ⚠️ Could not load question LLM: {e}")
             self._llm_model = None
             self._llm_tokenizer = None
+
+    def _generate_api_question(self, mission_task: str,
+                               known_elements: list[dict],
+                               unknown_elements: list[dict],
+                               conversation_history: list[dict] = None,
+                               focus_elements: list[dict] = None) -> Optional[str]:
+        """Use the OpenRouter API to generate a context-aware question.
+
+        Args:
+            mission_task: What the user wants to build.
+            known_elements: Elements already answered.
+            unknown_elements: Elements still undefined (sorted by importance).
+            conversation_history: Previous Q&A turns.
+            focus_elements: Specific elements to focus on (subset of unknown).
+        """
+        if self._api_client is None:
+            return None
+
+        try:
+            targets = focus_elements or unknown_elements[:3]
+            target_descriptions = "\n".join(
+                f"- {e['name'].replace('_', ' ')}: {e.get('description', '')}"
+                for e in targets
+            )
+
+            known_summary = ""
+            if known_elements:
+                known_summary = "Already known:\n" + "\n".join(
+                    f"- {e['name'].replace('_', ' ')}: {e.get('value', '')[:80]}"
+                    for e in known_elements[:6]
+                )
+
+            history_text = ""
+            if conversation_history:
+                recent = conversation_history[-3:]
+                history_text = "Recent conversation:\n" + "\n".join(
+                    f"Q: {t.get('question', '')}\nA: {t.get('answer', '')[:100]}"
+                    for t in recent
+                )
+
+            system_prompt = (
+                "You are Ali, an expert AI project consultant conducting a discovery "
+                "interview. You ask natural, conversational questions to understand "
+                "what the user needs for their project. Your tone is friendly, "
+                "direct, and professional — like a senior consultant who respects "
+                "the client's time.\n\n"
+                "Rules:\n"
+                "- Ask exactly ONE question\n"
+                "- Be specific and actionable, not generic\n"
+                "- Sound human — avoid corporate jargon\n"
+                "- If multiple topics need info, combine them into one natural question\n"
+                "- Never repeat a question that was already asked\n"
+                "- Return ONLY the question text, nothing else"
+            )
+
+            user_prompt = (
+                f"Project: {mission_task}\n\n"
+                f"{known_summary}\n\n"
+                f"I need to learn about:\n{target_descriptions}\n\n"
+                f"{history_text}\n\n"
+                "Generate the next interview question."
+            )
+
+            response = self._api_client.chat.completions.create(
+                model=os.environ.get(
+                    "ALI_QUESTION_MODEL", "google/gemini-2.0-flash-001"
+                ),
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                max_tokens=150,
+                temperature=0.8,
+            )
+
+            question = response.choices[0].message.content.strip()
+
+            # Clean up — remove quotes if the model wrapped it
+            if question.startswith('"') and question.endswith('"'):
+                question = question[1:-1]
+            if question.startswith("'") and question.endswith("'"):
+                question = question[1:-1]
+
+            # Ensure it ends with ?
+            if question and not question.endswith("?"):
+                question = question.rstrip(".!,") + "?"
+
+            if len(question) < 10:
+                return None
+
+            return question
+
+        except Exception as e:
+            log.warning("API question generation failed: %s", e)
+            return None
 
     def _generate_llm_question(self, mission_task: str,
                                 known_elements: list[dict],
@@ -357,7 +493,10 @@ class RLQuestionGenerator:
         """
         Generate N candidate questions targeting different elements/clusters.
 
-        Uses the fine-tuned LLM as primary generator, with template fallback.
+        Strategy priority:
+        1. API-based LLM (OpenRouter) — best quality, context-aware
+        2. Local fine-tuned GPT-2 + LoRA — if available
+        3. Template fallback — only if both LLMs unavailable
 
         Returns list of candidates, each with:
         {
@@ -365,7 +504,7 @@ class RLQuestionGenerator:
             "targets": [element_names],
             "cluster": str,
             "score": float (reward score),
-            "source": "llm" | "template"
+            "source": "api" | "llm" | "template"
         }
         """
         candidates = []
@@ -377,14 +516,57 @@ class RLQuestionGenerator:
         unknown_elements = [e for e in elements if e["status"] == "undefined"]
         unknown_elements.sort(key=lambda e: e["score"], reverse=True)
 
-        # ───── Strategy 1: LLM-generated questions ─────────────
+        # Filter out already-asked elements
+        fresh_unknown = [e for e in unknown_elements if e["name"] not in asked_topics]
+        if not fresh_unknown:
+            fresh_unknown = unknown_elements  # all asked, allow re-targeting
+
+        # ───── Strategy 1: API-based LLM questions (primary) ───
+        if self._api_client is not None and fresh_unknown:
+            # Generate 2-3 API questions targeting different element groups
+            element_groups = []
+            # Group 1: top priority elements
+            element_groups.append(fresh_unknown[:3])
+            # Group 2: mid-priority elements (if enough remain)
+            if len(fresh_unknown) > 3:
+                element_groups.append(fresh_unknown[3:6])
+            # Group 3: mix of high + low priority for variety
+            if len(fresh_unknown) > 5:
+                mixed = [fresh_unknown[0]] + fresh_unknown[-2:]
+                element_groups.append(mixed)
+
+            for focus_group in element_groups:
+                api_question = self._generate_api_question(
+                    mission_task=mission_task or "Project",
+                    known_elements=known_elements,
+                    unknown_elements=fresh_unknown,
+                    conversation_history=conversation_history,
+                    focus_elements=focus_group,
+                )
+
+                if api_question:
+                    targets = self._match_question_to_elements(
+                        api_question, unknown_elements
+                    )
+                    if targets:
+                        score = self._score_candidate(
+                            targets=targets,
+                            is_cluster=len(targets) > 1,
+                            conversation_history=conversation_history,
+                        )
+                        candidates.append({
+                            "question": api_question,
+                            "targets": [e["name"] for e in targets],
+                            "cluster": None,
+                            "score": score + 20,  # API bonus — best quality
+                            "source": "api",
+                        })
+
+        # ───── Strategy 2: Local LLM-generated questions ───────
         if self._llm_model is not None and unknown_elements:
-            # Generate 2-3 LLM questions with slightly different contexts
             for i in range(3):
-                # Vary the unknown list slightly to get diverse questions
                 shuffled_unknown = unknown_elements.copy()
                 if i > 0:
-                    # After first, shuffle to get variety
                     top = shuffled_unknown[:2]
                     rest = shuffled_unknown[2:]
                     random.shuffle(rest)
@@ -398,7 +580,6 @@ class RLQuestionGenerator:
                 )
 
                 if llm_question:
-                    # Determine which elements this question targets
                     targets = self._match_question_to_elements(
                         llm_question, unknown_elements
                     )
@@ -412,63 +593,65 @@ class RLQuestionGenerator:
                             "question": llm_question,
                             "targets": [e["name"] for e in targets],
                             "cluster": None,
-                            "score": score + 15,  # LLM bonus — prefer over templates
+                            "score": score + 15,  # LLM bonus
                             "source": "llm",
                         })
 
-        # ───── Strategy 2: Cluster-level template questions ────
-        for cluster in clusters:
-            if cluster["all_answered"]:
-                continue
-            if cluster["cluster_name"] in asked_topics:
-                continue
+        # ───── Strategy 3: Template fallback (only if no LLM candidates) ─
+        if not candidates:
+            # Cluster-level template questions
+            for cluster in clusters:
+                if cluster["all_answered"]:
+                    continue
+                if cluster["cluster_name"] in asked_topics:
+                    continue
 
-            templates = self.CLUSTER_TEMPLATES.get(cluster["cluster_name"], [])
-            if templates:
-                undefined = [e for e in cluster["elements"] if e["status"] == "undefined"]
-                question = random.choice(templates)
-                score = self._score_candidate(
-                    targets=undefined,
-                    is_cluster=True,
-                    conversation_history=conversation_history,
-                )
-                candidates.append({
-                    "question": question,
-                    "targets": [e["name"] for e in undefined],
-                    "cluster": cluster["cluster_name"],
-                    "score": score,
-                    "source": "template",
-                })
+                templates = self.CLUSTER_TEMPLATES.get(cluster["cluster_name"], [])
+                if templates:
+                    undefined = [e for e in cluster["elements"] if e["status"] == "undefined"]
+                    question = random.choice(templates)
+                    score = self._score_candidate(
+                        targets=undefined,
+                        is_cluster=True,
+                        conversation_history=conversation_history,
+                    )
+                    candidates.append({
+                        "question": question,
+                        "targets": [e["name"] for e in undefined],
+                        "cluster": cluster["cluster_name"],
+                        "score": score,
+                        "source": "template",
+                    })
 
-        # ───── Strategy 3: Single element template questions ───
-        for elem in unknown_elements[:5]:
-            if elem["name"] in asked_topics:
-                continue
-            templates = self.QUESTION_TEMPLATES.get(elem["name"], [])
-            if not templates and self._trained_templates:
-                for cat_templates in self._trained_templates.values():
-                    if elem["name"] in cat_templates:
-                        templates = cat_templates[elem["name"]]
-                        break
-            if not templates:
-                desc = elem.get("description", elem["name"].replace("_", " "))
-                templates = [
-                    f"Tell me about {desc.lower()}. What are you thinking?",
-                ]
-            if templates:
-                question = random.choice(templates)
-                score = self._score_candidate(
-                    targets=[elem],
-                    is_cluster=False,
-                    conversation_history=conversation_history,
-                )
-                candidates.append({
-                    "question": question,
-                    "targets": [elem["name"]],
-                    "cluster": None,
-                    "score": score,
-                    "source": "template",
-                })
+            # Single element template questions
+            for elem in unknown_elements[:5]:
+                if elem["name"] in asked_topics:
+                    continue
+                templates = self.QUESTION_TEMPLATES.get(elem["name"], [])
+                if not templates and self._trained_templates:
+                    for cat_templates in self._trained_templates.values():
+                        if elem["name"] in cat_templates:
+                            templates = cat_templates[elem["name"]]
+                            break
+                if not templates:
+                    desc = elem.get("description", elem["name"].replace("_", " "))
+                    templates = [
+                        f"Tell me about {desc.lower()}. What are you thinking?",
+                    ]
+                if templates:
+                    question = random.choice(templates)
+                    score = self._score_candidate(
+                        targets=[elem],
+                        is_cluster=False,
+                        conversation_history=conversation_history,
+                    )
+                    candidates.append({
+                        "question": question,
+                        "targets": [elem["name"]],
+                        "cluster": None,
+                        "score": score,
+                        "source": "template",
+                    })
 
         # Deduplicate and sort by score
         seen_targets = set()
@@ -550,5 +733,5 @@ class RLQuestionGenerator:
 
     @property
     def has_llm(self) -> bool:
-        """Check if the LLM is loaded and ready."""
-        return self._llm_model is not None
+        """Check if any LLM (API or local) is available for question generation."""
+        return self._api_client is not None or self._llm_model is not None

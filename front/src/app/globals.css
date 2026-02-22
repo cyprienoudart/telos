@@ -976,6 +976,73 @@ button {
   to { transform: rotate(360deg); }
 }
 
+/* Setup progress (startup steps before Claude connects) */
+.bs-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 16px;
+  animation: bsFadeIn 0.2s ease;
+}
+
+.bs-setup-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #484f58;
+  font-family: var(--font);
+  transition: color 0.2s;
+}
+
+.bs-setup-step--active {
+  color: #c9d1d9;
+}
+
+.bs-setup-step--done {
+  color: #8b949e;
+}
+
+.bs-setup-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  font-size: 12px;
+  color: #3fb950;
+  flex-shrink: 0;
+}
+
+.bs-setup-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #30363d;
+  flex-shrink: 0;
+  margin: 0 5px;
+}
+
+.bs-setup-label {
+  font-weight: 500;
+}
+
+.bs-spinner--sm {
+  width: 14px;
+  height: 14px;
+  border-width: 1.5px;
+  margin: 0 1px;
+}
+
+.bs-setup-timer {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 400;
+  color: #484f58;
+  font-variant-numeric: tabular-nums;
+  font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+}
+
 /* Phase indicators (planning, splitting PRDs, etc.) */
 .bs-phase {
   display: flex;
@@ -1194,6 +1261,410 @@ button {
   max-height: 300px;
   overflow-y: auto;
   margin: 0;
+}
+
+/* ========================================
+   BUILD COST TRACKER — Live progress bar
+   ======================================== */
+
+.bct {
+  flex-shrink: 0;
+  padding: 12px 20px;
+  background: #161b22;
+  border-bottom: 1px solid #21262d;
+}
+
+.bct__progress-track {
+  height: 4px;
+  background: #21262d;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.bct__progress-fill {
+  height: 100%;
+  background: #58a6ff;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+  min-width: 2px;
+}
+
+.bct__progress-fill--done {
+  background: #3fb950;
+}
+
+.bct__stats {
+  display: flex;
+  gap: 24px;
+}
+
+.bct__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bct__stat-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #484f58;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: var(--font);
+}
+
+.bct__stat-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #c9d1d9;
+  font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+}
+
+.bct__stat-value--cost {
+  color: #58a6ff;
+}
+
+.bct__stat-value--muted {
+  color: #8b949e;
+  font-weight: 400;
+}
+
+/* ========================================
+   PRD PROGRESS PANEL
+   ======================================== */
+
+.prd-panel {
+  flex-shrink: 0;
+  padding: 10px 20px;
+  background: #161b22;
+  border-bottom: 1px solid #21262d;
+}
+
+.prd-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.prd-panel__label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-family: var(--font);
+}
+
+.prd-panel__summary {
+  font-size: 12px;
+  font-weight: 600;
+  color: #c9d1d9;
+  font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+}
+
+.prd-panel__bar-track {
+  height: 4px;
+  background: #21262d;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.prd-panel__bar-fill {
+  height: 100%;
+  background: #58a6ff;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+  min-width: 2px;
+}
+
+.prd-panel__bar-fill--done {
+  background: #3fb950;
+}
+
+.prd-panel__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.prd-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.prd-item--done .prd-item__title {
+  color: #3fb950;
+}
+
+.prd-item__check {
+  width: 14px;
+  font-size: 12px;
+  color: #3fb950;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.prd-item__title {
+  font-size: 12px;
+  font-weight: 500;
+  color: #c9d1d9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
+  font-family: var(--font);
+}
+
+.prd-item__bar-track {
+  width: 80px;
+  height: 3px;
+  background: #21262d;
+  border-radius: 2px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.prd-item__bar-fill {
+  height: 100%;
+  background: #58a6ff;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.prd-item__bar-fill--done {
+  background: #3fb950;
+}
+
+.prd-item__count {
+  font-size: 11px;
+  color: #8b949e;
+  font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  flex-shrink: 0;
+  min-width: 32px;
+  text-align: right;
+}
+
+/* ========================================
+   COST ESTIMATE — Confirmation card
+   ======================================== */
+
+.cost-estimate-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.cost-estimate {
+  max-width: 600px;
+  width: 100%;
+  padding: 32px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  animation: fadeInUp 0.3s ease;
+}
+
+.cost-estimate__header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 28px;
+}
+
+.cost-estimate__title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+
+.cost-estimate__subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.cost-estimate--loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.cost-estimate__model-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.cost-estimate__model-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 8px;
+  background: var(--bg-input);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: var(--font);
+}
+
+.cost-estimate__model-btn:hover {
+  border-color: var(--border-focus);
+  background: var(--bg-hover);
+}
+
+.cost-estimate__model-btn--active {
+  border-color: var(--accent);
+  background: var(--bg);
+  box-shadow: var(--shadow-sm);
+}
+
+.cost-estimate__model-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cost-estimate__model-desc {
+  font-size: 11px;
+  color: var(--text-hint);
+}
+
+.cost-estimate__range {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.cost-estimate__range-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 18px 12px;
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  border: 1px solid var(--border-light);
+}
+
+.cost-estimate__range-item--typical {
+  background: var(--bg-active);
+  border-color: var(--border);
+}
+
+.cost-estimate__range-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-hint);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.cost-estimate__range-value {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cost-estimate__range-item--typical .cost-estimate__range-value {
+  font-size: 26px;
+}
+
+.cost-estimate__breakdown {
+  margin-bottom: 28px;
+}
+
+.cost-estimate__breakdown-title {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-hint);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+
+.cost-estimate__phase {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.cost-estimate__phase:last-child {
+  border-bottom: none;
+}
+
+.cost-estimate__phase-name {
+  flex: 1;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.cost-estimate__phase-model {
+  font-size: 13px;
+  color: var(--text-hint);
+  padding: 2px 8px;
+  background: var(--bg-input);
+  border-radius: 6px;
+}
+
+.cost-estimate__phase-cost {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 56px;
+  text-align: right;
+}
+
+.cost-estimate__actions {
+  display: flex;
+  gap: 12px;
+}
+
+.cost-estimate__btn {
+  flex: 1;
+  padding: 14px 24px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.cost-estimate__btn--confirm {
+  background: var(--accent);
+  color: var(--text-inverse);
+}
+
+.cost-estimate__btn--confirm:hover {
+  background: var(--accent-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+.cost-estimate__btn--cancel {
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.cost-estimate__btn--cancel:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 /* ========================================

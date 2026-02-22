@@ -44,6 +44,60 @@ function extractFilePath(input: Record<string, unknown>): string | null {
 
 // ── Sub-components ──────────────────────────────────────────────────────
 
+// Setup steps — shown as a vertical progress list during startup
+const SETUP_STEPS = ["import", "config", "connect"] as const;
+const SETUP_LABELS: Record<string, string> = {
+    import: "Loading agent modules",
+    config: "Configuring environment",
+    connect: "Connecting to Claude",
+};
+
+function ElapsedTimer() {
+    const [elapsed, setElapsed] = useState(0);
+    useEffect(() => {
+        const t = setInterval(() => setElapsed((e) => e + 1), 1000);
+        return () => clearInterval(t);
+    }, []);
+    return <span className="bs-setup-timer">{elapsed}s</span>;
+}
+
+function SetupProgress({ completedSteps }: { completedSteps: string[] }) {
+    return (
+        <div className="bs-setup">
+            {SETUP_STEPS.map((step) => {
+                const idx = SETUP_STEPS.indexOf(step);
+                const lastCompletedIdx = completedSteps.length - 1;
+                const done = idx < lastCompletedIdx;
+                const isActive = idx === lastCompletedIdx;
+                const isPending = idx > lastCompletedIdx;
+
+                return (
+                    <div key={step} className={`bs-setup-step ${done ? "bs-setup-step--done" : ""} ${isActive ? "bs-setup-step--active" : ""}`}>
+                        {done ? (
+                            <span className="bs-setup-check">&#10003;</span>
+                        ) : isActive ? (
+                            <div className="bs-spinner bs-spinner--sm" />
+                        ) : (
+                            <span className="bs-setup-dot" />
+                        )}
+                        <span className="bs-setup-label">{SETUP_LABELS[step] ?? step}</span>
+                        {isActive && <ElapsedTimer />}
+                    </div>
+                );
+            })}
+
+            {/* Show waiting message after all setup steps complete */}
+            {completedSteps.length > SETUP_STEPS.length && (
+                <div className="bs-setup-step bs-setup-step--active">
+                    <div className="bs-spinner bs-spinner--sm" />
+                    <span className="bs-setup-label">Waiting for first response</span>
+                    <ElapsedTimer />
+                </div>
+            )}
+        </div>
+    );
+}
+
 function PhaseIndicator({ label, message }: { label: string; message: string }) {
     return (
         <div className="bs-phase">
@@ -145,7 +199,7 @@ interface BuildStreamProps {
 
 interface ParsedBlock {
     key: string;
-    type: "text" | "tool" | "iteration_header" | "iteration_footer" | "phase";
+    type: "text" | "tool" | "iteration_header" | "iteration_footer" | "phase" | "setup_step";
     text?: string;
     toolName?: string;
     toolInput?: Record<string, unknown>;
@@ -157,6 +211,8 @@ interface ParsedBlock {
     reason?: string;
     phaseLabel?: string;
     phaseMessage?: string;
+    stepId?: string;
+    stepMessage?: string;
 }
 
 export default function BuildStream({ trajectory, phase }: BuildStreamProps) {
@@ -165,6 +221,9 @@ export default function BuildStream({ trajectory, phase }: BuildStreamProps) {
 
     // Parse trajectory events into renderable blocks
     const blocks = parseTrajectory(trajectory);
+
+    // Debug: log trajectory and parsed blocks
+    console.log("[BuildStream] trajectory.length:", trajectory.length, "blocks:", blocks.length, "types:", blocks.map(b => b.type));
 
     // Auto-scroll when new content arrives
     useEffect(() => {
@@ -181,12 +240,44 @@ export default function BuildStream({ trajectory, phase }: BuildStreamProps) {
         setAutoScroll(atBottom);
     }, []);
 
-    if (blocks.length === 0 && phase === "building") {
+    // Collect setup steps for the progress indicator
+    const setupSteps = blocks
+        .filter((b) => b.type === "setup_step")
+        .map((b) => b.stepId!);
+    const activePhase = blocks.filter((b) => b.type === "phase").at(-1);
+    const hasStreamContent = blocks.some(
+        (b) => b.type !== "setup_step" && b.type !== "phase",
+    );
+
+    // Show startup progress view until Claude actually starts streaming
+    if (!hasStreamContent && phase === "building") {
         return (
             <div className="bs-container">
-                <div className="bs-empty">
-                    <div className="bs-spinner" />
-                    <span>Preparing build...</span>
+                <div className="bs-header">
+                    <span className="bs-header-title">Build Log</span>
+                    <span className="bs-live-dot" />
+                </div>
+                <div className="bs-log">
+                    {setupSteps.length === 0 ? (
+                        <div className="bs-empty">
+                            <div className="bs-spinner" />
+                            <span>Starting build...</span>
+                        </div>
+                    ) : (
+                        <>
+                            <SetupProgress completedSteps={setupSteps} />
+                            {activePhase && (
+                                <div className="bs-phase">
+                                    <div className="bs-spinner" />
+                                    <div>
+                                        <span className="bs-phase-label">{activePhase.phaseLabel}</span>
+                                        <span className="bs-phase-message">{activePhase.phaseMessage}</span>
+                                    </div>
+                                    <ElapsedTimer />
+                                </div>
+                            )}
+                        </>
+                    )}
                 </div>
             </div>
         );
@@ -251,6 +342,9 @@ export default function BuildStream({ trajectory, phase }: BuildStreamProps) {
                                     result={block.toolResult}
                                 />
                             );
+                        case "setup_step":
+                            // Setup steps rendered via SetupProgress above, skip inline
+                            return null;
                         default:
                             return null;
                     }
@@ -271,7 +365,14 @@ function parseTrajectory(events: TrajectoryEvent[]): ParsedBlock[] {
         const evt = events[i];
         const evtType = evt.type as string;
 
-        if (evtType === "phase") {
+        if (evtType === "setup_step") {
+            blocks.push({
+                key: `setup-${i}`,
+                type: "setup_step",
+                stepId: evt.step as string,
+                stepMessage: evt.message as string,
+            });
+        } else if (evtType === "phase") {
             blocks.push({
                 key: `phase-${i}`,
                 type: "phase",
