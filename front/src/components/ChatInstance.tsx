@@ -84,7 +84,7 @@ export default function ChatInstance() {
             )}
 
             {/* Messages */}
-            <div className={`messages-area ${voiceModeActive ? "messages-area--compact" : ""} ${(activeChat.phase === "planning" || activeChat.phase === "building" || activeChat.phase === "done") ? "messages-area--with-build" : ""}`}>
+            <div className={`messages-area ${voiceModeActive ? "messages-area--compact" : ""} ${(activeChat.phase === "building" || activeChat.phase === "done") ? "messages-area--with-build" : ""}`}>
                 {activeChat.messages.map((msg) => (
                     <div
                         key={msg.id}
@@ -127,8 +127,8 @@ export default function ChatInstance() {
                 <PrdProgressPanel progress={activeChat.prdProgress} />
             )}
 
-            {/* Build stream — shown during planning, building, and done */}
-            {(activeChat.phase === "planning" || activeChat.phase === "building" || activeChat.phase === "done") && (
+            {/* Build stream — shown during building and done */}
+            {(activeChat.phase === "building" || activeChat.phase === "done") && (
                 <BuildStream
                     trajectory={activeChat.trajectory}
                     phase={activeChat.phase === "done" ? "done" : "building"}
