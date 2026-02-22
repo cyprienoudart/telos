@@ -1,0 +1,101 @@
+## Twenty CRM — self-hosted Docker stack
+## Runs on port 3020 to avoid conflicts with other services (e.g. Harbor Space)
+##
+## Usage:
+##   docker compose up -d
+##   docker compose down
+##
+## First run: visit http://localhost:3020 to create workspace + generate API key
+## New workspaces are auto-seeded with 5 sample people + 5 sample companies.
+
+services:
+  twenty-db:
+    image: postgres:16
+    container_name: twenty-db
+    restart: unless-stopped
+    volumes:
+      - twenty-db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: default
+      POSTGRES_USER: ${PG_DATABASE_USER:-postgres}
+      POSTGRES_PASSWORD: ${PG_DATABASE_PASSWORD:-twenty_dev_password}
+    networks:
+      - twenty-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_DATABASE_USER:-postgres} -h localhost -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  twenty-redis:
+    image: redis:7-alpine
+    container_name: twenty-redis
+    restart: unless-stopped
+    command: ["--maxmemory-policy", "noeviction"]
+    networks:
+      - twenty-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  twenty-server:
+    image: twentycrm/twenty:${TAG:-latest}
+    container_name: twenty-server
+    restart: unless-stopped
+    ports:
+      - "${TWENTY_PORT:-3020}:3000"
+    volumes:
+      - twenty-server-data:/app/packages/twenty-server/.local-storage
+    environment:
+      NODE_PORT: 3000
+      SERVER_URL: ${SERVER_URL:-http://localhost:3020}
+      PG_DATABASE_URL: postgres://${PG_DATABASE_USER:-postgres}:${PG_DATABASE_PASSWORD:-twenty_dev_password}@twenty-db:5432/default
+      REDIS_URL: redis://twenty-redis:6379
+      APP_SECRET: ${APP_SECRET:-change-me-to-a-random-secret-string-32chars}
+      STORAGE_TYPE: local
+      SIGN_IN_PREFILLED: ${SIGN_IN_PREFILLED:-true}
+    depends_on:
+      twenty-db:
+        condition: service_healthy
+      twenty-redis:
+        condition: service_healthy
+    networks:
+      - twenty-net
+    healthcheck:
+      test: curl --fail http://localhost:3000/healthz
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  twenty-worker:
+    image: twentycrm/twenty:${TAG:-latest}
+    container_name: twenty-worker
+    restart: unless-stopped
+    command: ["yarn", "worker:prod"]
+    volumes:
+      - twenty-server-data:/app/packages/twenty-server/.local-storage
+    environment:
+      PG_DATABASE_URL: postgres://${PG_DATABASE_USER:-postgres}:${PG_DATABASE_PASSWORD:-twenty_dev_password}@twenty-db:5432/default
+      SERVER_URL: ${SERVER_URL:-http://localhost:3020}
+      REDIS_URL: redis://twenty-redis:6379
+      APP_SECRET: ${APP_SECRET:-change-me-to-a-random-secret-string-32chars}
+      STORAGE_TYPE: local
+      DISABLE_DB_MIGRATIONS: "true"
+      DISABLE_CRON_JOBS_REGISTRATION: "true"
+    depends_on:
+      twenty-db:
+        condition: service_healthy
+      twenty-server:
+        condition: service_healthy
+    networks:
+      - twenty-net
+
+volumes:
+  twenty-db-data:
+  twenty-server-data:
+
+networks:
+  twenty-net:
+    name: twenty-net

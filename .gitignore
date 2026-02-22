@@ -1,2 +1,17 @@
 CLAUDE.md
-/docs
+.env
+.DS_Store
+docs/
+
+# ── Python ────────────────────────────────────────────────────────────────────
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.venv/
+**/.pytest_cache/
+**/*.egg-info/
+**/dist/
+**/build/
+**/.mypy_cache/
+**/.ruff_cache/

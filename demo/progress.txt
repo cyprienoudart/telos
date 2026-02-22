@@ -1,0 +1,92 @@
+# Progress Log
+
+## Iteration 1 - 2026-02-22
+- Task: Verify OPENROUTER_API_KEY, create assets directory, generate IWD hero banner, confirm file exists
+- PRD: prds/01-image-generation.md (checkboxes 1, 2, 3, 6)
+- Result: approved
+- Details: Hero image generated at demo/site/assets/iwd-hero.png (2,070,049 bytes). image_gen.py tool natively handles API key check (EnvironmentError if missing) and directory creation (mkdir parents=True). Visual inspection confirmed purple/gold IWD-themed imagery.
+
+## Iteration 2 - 2026-02-22
+- Task: Generate IWD social media image, confirm file exists
+- PRD: prds/01-image-generation.md (checkboxes 4, 7)
+- Result: approved
+- Details: Social image generated at demo/site/assets/iwd-social.png (997,333 bytes). 1:1 square format with purple/gold palette, confetti, abstract florals. Visual consistency with hero image confirmed.
+
+## Iteration 3 - 2026-02-22
+- Task: Generate IWD email header, confirm file exists, verify PRD 01 Definition of Done
+- PRD: prds/01-image-generation.md (checkboxes 5, 8 — PRD 01 COMPLETE)
+- Result: approved
+- Details: Email header generated at demo/site/assets/iwd-email-header.png (1,230,497 bytes). Wide horizontal format with purple gradient, gold accent line, watercolor florals. All three images confirmed present with non-zero sizes and visually consistent purple/gold palette. PRD 01 fully complete.
+
+## Iteration 4 - 2026-02-22
+- Task: All PRD 02 landing page updates (checkboxes 1-9)
+- PRD: prds/02-landing-page-update.md (all checkboxes — PRD 02 COMPLETE)
+- Result: approved
+- Details: Updated demo/site/index.html with: (1) IWD banner strip as first body element with purple gradient + gold text, (2) hero image updated to iwd-hero.png, (3) new section#iwd-campaign with social image, campaign copy, and CTA button, (4) all relative image paths, (5) all existing sections preserved. CSS additions match site's design language.
+
+## Iteration 5 - 2026-02-22
+- Task: CRM contact lookup — query Won opportunities, extract women contacts
+- PRD: prds/03-crm-contact-lookup.md (all checkboxes — PRD 03 COMPLETE)
+- Result: approved
+- Details: Queried Twenty CRM via GraphQL (REST returned 403). Found 4 Won opportunities matching target women clients. Wrote recipients.json with: Sarah Johnson (Apex Technologies), Priya Patel (Granite Capital), Olivia Chen (Cascade Financial), Amara Okafor (Bloom & Grow Retail). All fields populated.
+
+
+## Iteration 1 — 2026-02-22 00:38:34 UTC
+- Status: timeout
+- Details: Claude process timed out after 900s
+
+## Iteration 6 - 2026-02-22
+- Task: PRD 04 checkbox 1 — verify recipients.json is readable and valid JSON
+- PRD: prds/04-email-rendering.md (checkbox 1)
+- Result: approved
+- Details: Verified recipients.json is valid JSON with 4 contacts (Sarah Johnson, Priya Patel, Olivia Chen, Amara Okafor), each with name/email/company/deal_name fields. Confirmed send_email tool exits with clear error for missing batch files. Also reconciled PRD 03 checkboxes (were approved in iteration 5 but not checked off due to timeout).
+
+## Iteration 7 - 2026-02-22
+- Task: PRD 04 checkbox 2 — verify iwd-email-header.png exists
+- PRD: prds/04-email-rendering.md (checkbox 2)
+- Result: approved
+- Details: Confirmed iwd-email-header.png exists at demo/site/assets/ with 1,230,497 bytes, valid PNG 1376x768 RGB. Reviewer noted that send_email tool silently falls back if image missing (doesn't error), so pre-flight check should be done before invoking the tool.
+
+## Iteration 8 - 2026-02-22
+- Task: PRD 04 checkbox 3 — render personalized email for Sarah Johnson
+- PRD: prds/04-email-rendering.md (checkbox 3)
+- Result: approved
+- Details: Generated sarah.johnson@apextech.io.html (1.6MB) with "Dear Sarah," greeting, references to Apex Technologies and Enterprise Deal, IWD empowerment content, correct subject line, embedded header image as base64 data URI.
+
+## Iteration 9 - 2026-02-22
+- Task: PRD 04 checkbox 4 — render personalized email for Priya Patel
+- PRD: prds/04-email-rendering.md (checkbox 4)
+- Result: approved
+- Details: Generated priya.patel@granitecap.com.html (1.6MB) with "Dear Priya," greeting, references to Granite Capital and Portfolio Platform, IWD content, correct subject, embedded header. Body copy confirmed distinct from Sarah Johnson's email.
+
+## Iteration 10 - 2026-02-22
+- Task: PRD 04 checkbox 5 — render personalized email for Olivia Chen
+- PRD: prds/04-email-rendering.md (checkbox 5)
+- Result: approved
+- Details: Generated olivia.chen@cascadefin.com.html (1.6MB) with "Dear Olivia," greeting, references to Cascade Financial and Trading Dashboard, IWD empowerment content. Body copy confirmed distinct from both Sarah and Priya emails.
+
+## Iteration 2 — 2026-02-22 00:53:34 UTC
+- Status: timeout
+- Details: Claude process timed out after 900s
+
+## Iteration 11 - 2026-02-22
+- Task: PRD 04 checkbox 6 — render personalized email for Amara Okafor
+- PRD: prds/04-email-rendering.md (checkbox 6)
+- Result: approved
+- Details: Generated amara.okafor@bloomgrow.shop.html (1,643,406 bytes) with "Dear Amara," greeting, references to Bloom & Grow Retail and Loyalty Program, IWD empowerment content. Body copy confirmed distinct from Sarah, Priya, and Olivia emails.
+
+## Iteration 12 - 2026-02-22
+- Task: PRD 04 checkbox 7 — verify all emails reference company/deal with distinct copy
+- PRD: prds/04-email-rendering.md (checkbox 7)
+- Result: approved
+- Details: All four emails confirmed to reference each recipient's company and deal name. Body copy verified as genuinely distinct across all four (not just name-swapped templates).
+
+## Iteration 13 - 2026-02-22
+- Task: PRD 04 checkboxes 8 & 9 — verify subject lines and header images
+- PRD: prds/04-email-rendering.md (checkboxes 8, 9 — PRD 04 COMPLETE)
+- Result: approved
+- Details: All four emails confirmed to have subject line "Celebrating You This International Women's Day!" in both title tag and h1 heading. All four emails contain identical base64-embedded IWD header image matching source PNG (1,640,664 char payload each). PRD 04 fully complete.
+
+## Iteration 3 — 2026-02-22 00:59:32 UTC
+- Status: approved
+- Details: All four email HTML files in /Users/valprok/Documents/telos/demo/emails/ contain the IWD header image embedded as a base64 PNG data URI in an img tag. Verified: (1) sarah.johnson@apextech.io.html, (2) priya.patel@granitecap.com.html, (3) olivia.chen@cascadefin.com.html, (4) amara.okafor@bloomgrow.shop.html. Each file contains exactly one img tag with src="data:image/png;base64,..." containing 1,640,664 characters of base64 data. The embedded data is identical across all four files and is a byte-for-byte match of the source file /Users/valprok/Documents/telos/demo/site/assets/iwd-email-header.png. The image appears at the top of the email template with class="header-image", consistent with the send_email tool's --image argument being used during generation.
