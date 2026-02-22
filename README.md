@@ -1,4 +1,4 @@
-<<<<<<< Updated upstream
+
 # telos
 Hackeurope project
 Devpost: https://devpost.com/software/telos-w9emdy
@@ -264,4 +264,3 @@ Built with ❤️ at the hackathon.
 ## License
 
 MIT
->>>>>>> Stashed changes
